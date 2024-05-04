@@ -12,7 +12,7 @@
  *
  ******************************************************************************
  *
- * Automatically generated from STM32CubeMX/db/mcu/STM32U5A5ZJTxQ.xml
+ * Automatically generated from STM32CubeMX/db/mcu/STM32U575ZITxQ.xml
  */
 
 #include "PeripheralPins.h"
@@ -668,12 +668,8 @@ MBED_WEAK const PinMap PinMap_OSPI_SSEL[] = {
 //*** USBDEVICE ***
 
 MBED_WEAK const PinMap PinMap_USB_HS[] = {
-#if (MBED_CONF_TARGET_USB_SPEED == USE_USB_HS_IN_FS)
-//  {PA_8,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG1_HS)}, // USB_OTG_HS_SOF
-    {PA_9,      USB_HS, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, GPIO_AF_NONE)}, // USB_OTG_HS_VBUS // Connected to USB_FS_VBUS
-    {PA_10,     USB_HS, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_PULLUP, GPIO_AF10_OTG1_HS)}, // USB_OTG_HS_ID // Connected to USB_FS_ID
-    {PA_11,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF_NONE)}, // USB_OTG_HS_DM // Connected to USB_FS_DM
-    {PA_12,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF_NONE)}, // USB_OTG_HS_DP // Connected to USB_FS_DP
-#endif /* MBED_CONF_TARGET_USB_SPEED */
+    {PA_11,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_USB_HS)}, // USB_OTG_HS_DM // Connected to USB_FS_DM
+    {PA_12,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_USB_HS)}, // USB_OTG_HS_DP // Connected to USB_FS_DP
+    {PC_2,      USB_HS, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, GPIO_AF_NONE)}, // Connected to VBUS_SENSE
     {NC, NC, 0}
 };

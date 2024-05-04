@@ -4841,6 +4841,15 @@
         "detect_code": [
             "886"
         ],
+        "device_has_add": [
+            "USBDEVICE"
+        ],
+        "config": {
+            "usb_speed": {
+                "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS or USE_USB_NO_OTG",
+                "value": "USE_USB_OTG_FS"
+            }
+        },
         "overrides": {
             // As shipped, this nucleo board connects VREFP to VDD_MCU, and connects VDD_MCU to 3.3V.
             // Jumper JP4 can be used to switch VDD_MCU to 1.8V in which case you should override this setting to 1.8.
@@ -4890,8 +4899,15 @@
         ],
         "device_has_add": [
             "QSPI",
-            "OSPI"
+            "OSPI",
+            "USBDEVICE"
         ],
+        "config": {
+            "usb_speed": {
+                "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS or USE_USB_NO_OTG",
+                "value": "USE_USB_OTG_FS"
+            }
+        },
         "overrides": {
             "network-default-interface-type": "WIFI"
         },
@@ -4924,6 +4940,15 @@
             "ARDUINO_UNO"
         ],
         "device_name": "STM32U545RETx",
+        "device_has_add": [
+            "USBDEVICE"
+        ],
+        "config": {
+            "usb_speed": {
+                "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS or USE_USB_NO_OTG",
+                "value": "USE_USB_NO_OTG"
+            }
+        },
         "overrides": {
             // As shipped, this nucleo board connects VREFP to VDD_MCU, and connects VDD_MCU to 3.3V.
             // Jumper JP5 can be used to switch VDD_MCU to 1.8V in which case you should override this setting to 1.8.
@@ -4955,6 +4980,25 @@
             "ARDUINO_UNO"
         ],
         "device_name": "STM32U5A5ZJTx",
+        "device_has_add": [
+            "USBDEVICE"
+        ],
+        "config": {
+            "clock_source": {
+                "help": "Mask value : USE_PLL_HSE_EXTC (need HW patch) | USE_PLL_HSE_XTAL (need HW patch) | USE_PLL_HSI | USE_PLL_MSI",
+                "value": "USE_PLL_HSE_XTAL",
+                "macro_name": "CLOCK_SOURCE"
+            },
+            "hse_value": {
+                "help": "HSE on NUCLEO-U5A5ZJ-Q is 16MHz for driving the USB HS peripheral",
+                "value": "16000000",
+                "macro_name": "HSE_VALUE"
+            },
+            "usb_speed": {
+                "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS or USE_USB_NO_OTG",
+                "value": "USE_USB_OTG_HS"
+            }
+        },
         "overrides": {
             // As shipped, this nucleo board connects VREFP to VDD_MCU, and connects VDD_MCU to 3.3V.
             // Jumper JP4 can be used to switch VDD_MCU to 1.8V in which case you should override this setting to 1.8.

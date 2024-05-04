@@ -26,7 +26,7 @@
   * APB1CLK (MHz)       | 160
   * APB2CLK (MHz)       | 160
   * APB3CLK (MHz)       | 160
-  * USB capable         | TODO
+  * USB capable         | Yes
   *-----------------------------------------------------------------------------
 **/
 
@@ -179,14 +179,18 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
     HAL_PWREx_EnableVddA();
     HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSI
-                                       | RCC_OSCILLATORTYPE_MSI;
+                                       | RCC_OSCILLATORTYPE_MSI | RCC_OSCILLATORTYPE_MSIK;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
     RCC_OscInitStruct.MSIState = RCC_MSI_ON;
     RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
     RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_0;
+    RCC_OscInitStruct.MSIKClockRange = RCC_MSIKRANGE_0;
+    RCC_OscInitStruct.MSIKState = RCC_MSIK_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
     RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV4;
@@ -218,6 +222,25 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
         return 0; // FAIL
     }
+
+#if DEVICE_USBDEVICE
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+    PeriphClkInit.IclkClockSelection = RCC_CLK48CLKSOURCE_MSIK;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+        return 0; // FAIL
+    }
+
+    if(__HAL_RCC_PWR_IS_CLK_DISABLED())
+    {
+      __HAL_RCC_PWR_CLK_ENABLE();
+      HAL_PWREx_EnableVddUSB();
+      __HAL_RCC_PWR_CLK_DISABLE();
+    }
+    else
+    {
+      HAL_PWREx_EnableVddUSB();
+    }
+#endif /* DEVICE_USBDEVICE */
 
     /** Enable MSI Auto calibration
      */

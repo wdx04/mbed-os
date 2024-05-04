@@ -94,13 +94,16 @@ typedef enum {
 #endif	
 } OSPIName;
 
-#if defined(USB_OTG_FS_BASE) || defined(USB_DRD_BASE)
+#if defined(USB_OTG_FS_BASE) || defined(USB_DRD_BASE) || defined(USB_OTG_HS_BASE)
 typedef enum {
 #if defined(USB_OTG_FS_BASE)
     USB_FS = (int)USB_OTG_FS_BASE
 #endif
 #if defined(USB_DRD_BASE)
     USB_FS = (int)USB_DRD_BASE
+#endif
+#if defined(USB_OTG_HS_BASE)
+    USB_HS = (int)USB_OTG_HS_BASE
 #endif
 } USBName;
 #endif

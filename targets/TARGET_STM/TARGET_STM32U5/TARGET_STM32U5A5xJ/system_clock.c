@@ -26,7 +26,7 @@
   * APB1CLK (MHz)       | 160
   * APB2CLK (MHz)       | 160
   * APB3CLK (MHz)       | 160
-  * USB capable         | TODO
+  * USB capable         | Yes
   *-----------------------------------------------------------------------------
 **/
 
@@ -98,7 +98,102 @@ MBED_WEAK void SetSysClock(void)
 /******************************************************************************/
 MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 {
-    return 0;
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+
+    __HAL_RCC_PWR_CLK_ENABLE();
+    HAL_PWREx_EnableVddA();
+    HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSI
+                                       | RCC_OSCILLATORTYPE_MSI | RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+    RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_0;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV1;
+    RCC_OscInitStruct.PLL.PLLM = 1;
+    RCC_OscInitStruct.PLL.PLLN = 20;
+    RCC_OscInitStruct.PLL.PLLP = 2;
+    RCC_OscInitStruct.PLL.PLLQ = 2;
+    RCC_OscInitStruct.PLL.PLLR = 2;
+    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLLVCIRANGE_1;
+    RCC_OscInitStruct.PLL.PLLFRACN = 0;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+        return 0; // FAIL
+    }
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2
+                                  | RCC_CLOCKTYPE_PCLK3;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK) {
+        return 0; // FAIL
+    }
+
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RNG;
+    PeriphClkInit.RngClockSelection = RCC_RNGCLKSOURCE_HSI48;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+        return 0; // FAIL
+    }
+
+#if DEVICE_USBDEVICE
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USBPHY;
+    PeriphClkInit.UsbPhyClockSelection = RCC_USBPHYCLKSOURCE_HSE;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+        return 0; // FAIL
+    }
+
+  /** Set the OTG PHY reference clock selection to 16MHz
+  */
+    HAL_SYSCFG_SetOTGPHYReferenceClockSelection(SYSCFG_OTG_HS_PHY_CLK_SELECT_1);
+
+    /* Peripheral clock enable */
+    __HAL_RCC_USB_OTG_HS_CLK_ENABLE();
+    __HAL_RCC_USBPHYC_CLK_ENABLE();
+
+    /* Enable VDDUSB */
+    if(__HAL_RCC_PWR_IS_CLK_DISABLED())
+    {
+      __HAL_RCC_PWR_CLK_ENABLE();
+      HAL_PWREx_EnableVddUSB();
+
+      /*configure VOSR register of USB*/
+      HAL_PWREx_EnableUSBHSTranceiverSupply();
+      __HAL_RCC_PWR_CLK_DISABLE();
+    }
+    else
+    {
+      HAL_PWREx_EnableVddUSB();
+
+      /*configure VOSR register of USB*/
+      HAL_PWREx_EnableUSBHSTranceiverSupply();
+    }
+
+    /*Configuring the SYSCFG registers OTG_HS PHY*/
+    /*OTG_HS PHY enable*/
+      HAL_SYSCFG_EnableOTGPHY(SYSCFG_OTG_HS_PHY_ENABLE);
+#endif /* DEVICE_USBDEVICE */
+
+    /** Enable ICACHE
+     */
+    HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY);
+    HAL_ICACHE_Enable();
+
+    return 1; // OK
 }
 #endif /* ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) */
 
