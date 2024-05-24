@@ -22,7 +22,7 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
 {
     /* Check if all pins do in fact belong to the same SPI module. */
     SPIName spi_mosi = (SPIName)pinmap_peripheral(mosi, PinMap_SPI_MOSI);
-    SPIName spi_miso = (SPIName)pinmap_peripheral(miso, PinMap_SPI_MISO);
+    SPIName spi_miso = miso == NC ? spi_mosi: (SPIName)pinmap_peripheral(miso, PinMap_SPI_MISO);
     SPIName spi_sclk = (SPIName)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
     SPIName spi_ssel = (SPIName)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
 
@@ -38,7 +38,10 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
     /* Configure GPIOs for SPI usage. */
     gpio_set_function(mosi, GPIO_FUNC_SPI);
     gpio_set_function(sclk, GPIO_FUNC_SPI);
-    gpio_set_function(miso, GPIO_FUNC_SPI);
+    if(miso != NC)
+    {
+        gpio_set_function(miso, GPIO_FUNC_SPI);
+    }
 
     /* Initialize SPI at 1 MHz bitrate */
     pico_sdk_spi_init(obj->dev, SPI_MASTER_DEFAULT_BITRATE);
@@ -70,6 +73,11 @@ void spi_format(spi_t *obj, int bits, int mode, int slave)
     spi_set_slave(obj->dev, slave != 0);
 }
 
+void spi_free(spi_t *obj)
+{
+    spi_deinit(obj->dev);
+}
+
 void spi_frequency(spi_t *obj, int hz)
 {
     spi_set_baudrate(obj->dev, hz);
@@ -86,9 +94,16 @@ int spi_master_write(spi_t *obj, int value)
 int spi_master_block_write(spi_t *obj, const char *tx_buffer, int tx_length, char *rx_buffer, int rx_length, char write_fill)
 {
     /* The pico-sdk API does not support different length SPI buffers. */
-    MBED_ASSERT(tx_length == rx_length);
+    MBED_ASSERT(tx_length == rx_length || rx_length == 0);
     /* Perform the SPI transfer. */
-    return spi_write_read_blocking(obj->dev, (const uint8_t *)tx_buffer, (uint8_t *)rx_buffer, (size_t)tx_length);
+    if(rx_length == 0)
+    {
+        return spi_write_blocking(obj->dev, (const uint8_t *)tx_buffer, (size_t)tx_length);
+    }
+    else
+    {
+        return spi_write_read_blocking(obj->dev, (const uint8_t *)tx_buffer, (uint8_t *)rx_buffer, (size_t)tx_length);
+    }
 }
 
 const PinMap *spi_master_mosi_pinmap()

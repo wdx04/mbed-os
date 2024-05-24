@@ -688,7 +688,7 @@ DMA_HandleTypeDef *stm_init_dma_link(const DMALinkInfo *dmaLink, uint32_t direct
 
         switch(memDataAlignment) {
             case 4:
-                dmaHandle->Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
+                dmaHandle->Init.DestDataWidth = DMA_DEST_DATAWIDTH_WORD;
                 break;
             case 2:
                 dmaHandle->Init.DestDataWidth = DMA_DEST_DATAWIDTH_HALFWORD;
@@ -706,7 +706,7 @@ DMA_HandleTypeDef *stm_init_dma_link(const DMALinkInfo *dmaLink, uint32_t direct
 
         switch(periphDataAlignment) {
             case 4:
-                dmaHandle->Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
+                dmaHandle->Init.DestDataWidth = DMA_DEST_DATAWIDTH_WORD;
                 break;
             case 2:
                 dmaHandle->Init.DestDataWidth = DMA_DEST_DATAWIDTH_HALFWORD;

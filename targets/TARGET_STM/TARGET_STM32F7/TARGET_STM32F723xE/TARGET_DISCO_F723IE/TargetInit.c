@@ -23,14 +23,14 @@
   
 #define PSRAM_MEMORY_WIDTH    FMC_NORSRAM_MEM_BUS_WIDTH_16
 
-#define PSRAM_BURSTACCESS     FMC_BURST_ACCESS_MODE_DISABLE
-/* #define PSRAM_BURSTACCESS  FMC_BURST_ACCESS_MODE_ENABLE*/
+// #define PSRAM_BURSTACCESS     FMC_BURST_ACCESS_MODE_DISABLE
+#define PSRAM_BURSTACCESS  FMC_BURST_ACCESS_MODE_ENABLE
   
-#define PSRAM_WRITEBURST      FMC_WRITE_BURST_DISABLE
-/* #define PSRAM_WRITEBURST   FMC_WRITE_BURST_ENABLE */
+// #define PSRAM_WRITEBURST      FMC_WRITE_BURST_DISABLE
+#define PSRAM_WRITEBURST   FMC_WRITE_BURST_ENABLE
  
 #define CONTINUOUSCLOCK_FEATURE  FMC_CONTINUOUS_CLOCK_SYNC_ONLY 
-/* #define CONTINUOUSCLOCK_FEATURE   FMC_CONTINUOUS_CLOCK_SYNC_ASYNC */ 
+// #define CONTINUOUSCLOCK_FEATURE   FMC_CONTINUOUS_CLOCK_SYNC_ASYNC
 
 /**
   * @brief  Initializes PSRAM MSP.
@@ -97,11 +97,11 @@ uint8_t BSP_PSRAM_Init(void)
   /* Timing configuration derived from system clock (up to 216Mhz)
      for 108Mhz as PSRAM clock frequency */
   Timing.AddressSetupTime      = 9;
-  Timing.AddressHoldTime       = 2;
-  Timing.DataSetupTime         = 6;
+  Timing.AddressHoldTime       = 0;
+  Timing.DataSetupTime         = 5;
   Timing.BusTurnAroundDuration = 1;
   Timing.CLKDivision           = 2;
-  Timing.DataLatency           = 2;
+  Timing.DataLatency           = 0;
   Timing.AccessMode            = FMC_ACCESS_MODE_A;
   
   psramHandle.Init.NSBank             = FMC_NORSRAM_BANK1;
@@ -116,7 +116,7 @@ uint8_t BSP_PSRAM_Init(void)
   psramHandle.Init.ExtendedMode       = FMC_EXTENDED_MODE_DISABLE;
   psramHandle.Init.AsynchronousWait   = FMC_ASYNCHRONOUS_WAIT_DISABLE;
   psramHandle.Init.WriteBurst         = PSRAM_WRITEBURST;
-  psramHandle.Init.WriteFifo          = FMC_WRITE_FIFO_DISABLE;
+  psramHandle.Init.WriteFifo          = FMC_WRITE_FIFO_ENABLE;
   psramHandle.Init.PageSize           = FMC_PAGE_SIZE_NONE;  
   psramHandle.Init.ContinuousClock    = CONTINUOUSCLOCK_FEATURE;
   
@@ -166,7 +166,7 @@ static void MPU_ConfigPSRAM(void)
      Normal memory, Shareable, write-back */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.BaseAddress = 0x60000000;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_1MB;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
   MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
   MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;

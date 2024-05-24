@@ -6,6 +6,8 @@ add_library(mbed-b-u585i-iot02a INTERFACE)
 target_sources(mbed-b-u585i-iot02a
     INTERFACE
         PeripheralPins.c
+        TargetInit.c
+        aps6408.c
 )
 
 target_include_directories(mbed-b-u585i-iot02a
