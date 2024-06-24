@@ -6,6 +6,7 @@ add_library(mbed-disco-f429zi INTERFACE)
 target_sources(mbed-disco-f429zi
     INTERFACE
         PeripheralPins.c
+        TargetInit.c
 )
 
 target_include_directories(mbed-disco-f429zi
