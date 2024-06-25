@@ -19,54 +19,14 @@
 
 #include "spi_api.h"
 #include "cmsis.h"
-#include "pinmap.h"
+#include "PeripheralPinMaps.h"
 #include "mbed_error.h"
-
-static const PinMap PinMap_SPI_SCLK[] = {
-    {P0_7 , SPI_1, 2},
-    {P0_15, SPI_0, 2},
-    {P1_20, SPI_0, 3},
-    {P1_31, SPI_1, 2},
-    {NC   , NC   , 0}
-};
-
-static const PinMap PinMap_SPI_MOSI[] = {
-    {P0_9 , SPI_1, 2},
-    {P0_13, SPI_1, 2},
-    {P0_18, SPI_0, 2},
-    {P1_24, SPI_0, 3},
-    {NC   , NC   , 0}
-};
-
-static const PinMap PinMap_SPI_MISO[] = {
-    {P0_8 , SPI_1, 2},
-    {P0_12, SPI_1, 2},
-    {P0_17, SPI_0, 2},
-    {P1_23, SPI_0, 3},
-    {NC   , NC   , 0}
-};
-
-static const PinMap PinMap_SPI_SSEL[] = {
-    {P0_6 , SPI_1, 2},
-    {P0_11, SPI_1, 2},
-    {P0_16, SPI_0, 2},
-    {P1_21, SPI_0, 3},
-    {NC   , NC   , 0}
-};
 
 static inline int ssp_disable(spi_t *obj);
 static inline int ssp_enable(spi_t *obj);
 
-void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel) {
-    // determine the SPI to use
-    SPIName spi_mosi = (SPIName)pinmap_peripheral(mosi, PinMap_SPI_MOSI);
-    SPIName spi_miso = (SPIName)pinmap_peripheral(miso, PinMap_SPI_MISO);
-    SPIName spi_sclk = (SPIName)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
-    SPIName spi_ssel = (SPIName)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
-    SPIName spi_data = (SPIName)pinmap_merge(spi_mosi, spi_miso);
-    SPIName spi_cntl = (SPIName)pinmap_merge(spi_sclk, spi_ssel);
-    obj->spi = (LPC_SSP_TypeDef*)pinmap_merge(spi_data, spi_cntl);
-    MBED_ASSERT((int)obj->spi != NC);
+void spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap) {
+    obj->spi = (LPC_SSP_TypeDef*)pinmap->peripheral;
     
     // enable power and clocking
     switch ((int)obj->spi) {
@@ -75,12 +35,49 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
     }
 
     // pin out the spi pins
-    pinmap_pinout(mosi, PinMap_SPI_MOSI);
-    pinmap_pinout(miso, PinMap_SPI_MISO);
-    pinmap_pinout(sclk, PinMap_SPI_SCLK);
-    if (ssel != NC) {
-        pinmap_pinout(ssel, PinMap_SPI_SSEL);
+    pin_function(pinmap->mosi_pin, pinmap->mosi_function);
+    pin_mode(pinmap->mosi_pin, PullNone);
+    pin_function(pinmap->miso_pin, pinmap->miso_function);
+    pin_mode(pinmap->miso_pin, PullNone);
+    pin_function(pinmap->sclk_pin, pinmap->sclk_function);
+    pin_mode(pinmap->sclk_pin, PullNone);
+
+    if (pinmap->ssel_pin != NC) {
+        pin_function(pinmap->ssel_pin, pinmap->ssel_function);
+        pin_mode(pinmap->ssel_pin, PullNone);
     }
+}
+
+SPIName spi_get_peripheral_name(PinName mosi, PinName miso, PinName sclk)
+{
+    SPIName spi_mosi = (SPIName)pinmap_peripheral(mosi, PinMap_SPI_MOSI);
+    SPIName spi_miso = (SPIName)pinmap_peripheral(miso, PinMap_SPI_MISO);
+    SPIName spi_sclk = (SPIName)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
+    SPIName spi_data = (SPIName)pinmap_merge(spi_mosi, spi_miso);
+    SPIName spi_periph = (SPIName)pinmap_merge(spi_sclk, spi_data);
+    return spi_periph;
+}
+
+void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel) {
+    spi_pinmap_t pinmap;
+    pinmap.mosi_pin = mosi;
+    pinmap.miso_pin = miso;
+    pinmap.sclk_pin = sclk;
+    pinmap.ssel_pin = ssel;
+
+    // determine the SPI to use
+    SPIName spi_mosi_miso_sclk_periph = spi_get_peripheral_name(mosi, miso, sclk);
+    SPIName spi_ssel_periph = (SPIName)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
+    pinmap.peripheral = pinmap_merge(spi_mosi_miso_sclk_periph, spi_ssel_periph);
+    MBED_ASSERT(pinmap.peripheral != NC);
+
+    // Get pin functions
+    pinmap.mosi_function = pinmap_find_function(mosi, PinMap_SPI_MOSI);
+    pinmap.miso_function = pinmap_find_function(miso, PinMap_SPI_MISO);
+    pinmap.sclk_function = pinmap_find_function(sclk, PinMap_SPI_SCLK);
+    pinmap.ssel_function = pinmap_find_function(ssel, PinMap_SPI_SSEL);
+
+    spi_init_direct(obj, &pinmap);
 }
 
 void spi_free(spi_t *obj) {}
@@ -89,6 +86,7 @@ void spi_format(spi_t *obj, int bits, int mode, int slave) {
     ssp_disable(obj);
     MBED_ASSERT(((bits >= 4) && (bits <= 16)) && (mode >= 0 && mode <= 3));
     
+    obj->bits_per_word = bits;
     int polarity = (mode & 0x2) ? 1 : 0;
     int phase = (mode & 0x1) ? 1 : 0;
     
@@ -195,11 +193,39 @@ int spi_master_block_write(spi_t *obj, const char *tx_buffer, int tx_length,
                            char *rx_buffer, int rx_length, char write_fill) {
     int total = (tx_length > rx_length) ? tx_length : rx_length;
 
-    for (int i = 0; i < total; i++) {
-        char out = (i < tx_length) ? tx_buffer[i] : write_fill;
-        char in = spi_master_write(obj, out);
-        if (i < rx_length) {
-            rx_buffer[i] = in;
+    if(obj->bits_per_word > 8) {
+        // 2 bytes per write/read operation
+        MBED_ASSERT(tx_length % 2 == 0);
+        MBED_ASSERT(rx_length % 2 == 0);
+
+        // Extend write fill value to 16 bits
+        const uint16_t write_fill_u16 = (((uint16_t)write_fill) << 8) | write_fill;
+
+        // Access input and output arrays as 16-bit words.
+        // This might do unaligned access, but that's OK for integers on Cortex-M3
+        uint16_t const * const tx_buffer_u16 = (uint16_t const *)tx_buffer;
+        uint16_t * const rx_buffer_u16 = (uint16_t *)rx_buffer;
+
+        const int tx_length_u16 = tx_length / 2;
+        const int rx_length_u16 = rx_length / 2;
+
+        for (int i = 0; i < total / 2; i++) {
+            uint16_t out = (i < tx_length_u16) ? tx_buffer_u16[i] : write_fill_u16;
+            uint16_t in = spi_master_write(obj, out);
+            if (i < rx_length_u16) {
+                rx_buffer_u16[i] = in;
+                printf("rx_buffer_u16[%d] <= 0x%hx\n", i, in);
+            }
+        }
+    }
+    else {
+        // 1 byte per read/write operation
+        for (int i = 0; i < total; i++) {
+            uint16_t out = (i < tx_length) ? tx_buffer[i] : write_fill;
+            uint16_t in = spi_master_write(obj, out);
+            if (i < rx_length) {
+                rx_buffer[i] = in;
+            }
         }
     }
 

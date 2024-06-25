@@ -63,7 +63,8 @@ public:
 
     /** Create a PwmOut connected to the specified pin
      *
-     *  @param pinmap reference to structure which holds static pinmap.
+     * @param pinmap reference to structure which holds static pinmap.
+     *   This reference is stored in the PwmOut, so the pinmap needs to live as long as this object does.
      */
     PwmOut(const PinMap &pinmap);
     PwmOut(const PinMap &&) = delete; // prevent passing of temporary objects
@@ -199,6 +200,14 @@ protected:
     /** Unlock deep sleep in case it is locked */
     void unlock_deep_sleep();
 
+    // Functions which call the underlying HAL init function.  The direct one calls the static
+    // pinmap version (pwmout_init_direct()) and the normal one calls the PinName-accepting one (pwmout_init()).
+    // A pointer to one of these two functions is stored in the _init_func member.
+    // It's done this way so that references to pwmout_init(), and therefore to the pinmap tables,
+    // can be removed by the linker if only the static pinmap version is used.
+    static void _call_pwmout_init_direct(PwmOut *thisPtr);
+    static void _call_pwmout_init(PwmOut *thisPtr);
+
     /** Initialize this instance */
     void init();
 
@@ -206,7 +215,13 @@ protected:
     void deinit();
 
     pwmout_t _pwm;
-    PinName _pin;
+
+    const PinName _pin; // Pin, NC if using static pinmap
+    PinMap const *const _pinmap;  // Static pinmap, nullptr if not used
+
+    /* Pointer to HAL init function */
+    void (*_init_func)(PwmOut *);
+
     bool _deep_sleep_locked;
     bool _initialized;
     float _duty_cycle;

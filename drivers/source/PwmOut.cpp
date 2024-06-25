@@ -28,6 +28,8 @@ namespace mbed {
 
 PwmOut::PwmOut(PinName pin) :
     _pin(pin),
+    _pinmap(nullptr),
+    _init_func(_call_pwmout_init),
     _deep_sleep_locked(false),
     _initialized(false),
     _duty_cycle(0),
@@ -36,11 +38,16 @@ PwmOut::PwmOut(PinName pin) :
     PwmOut::init();
 }
 
-PwmOut::PwmOut(const PinMap &pinmap) : _deep_sleep_locked(false)
+PwmOut::PwmOut(const PinMap &pinmap) :
+    _pin(NC),
+    _pinmap(&pinmap),
+    _init_func(_call_pwmout_init_direct),
+    _deep_sleep_locked(false),
+    _initialized(false),
+    _duty_cycle(0),
+    _period_us(0)
 {
-    core_util_critical_section_enter();
-    pwmout_init_direct(&_pwm, &pinmap);
-    core_util_critical_section_exit();
+    PwmOut::init();
 }
 
 PwmOut::~PwmOut()
@@ -142,8 +149,8 @@ void PwmOut::resume()
     core_util_critical_section_enter();
     if (!_initialized) {
         PwmOut::init();
-        PwmOut::write(_duty_cycle);
         PwmOut::period_us(_period_us);
+        PwmOut::write(_duty_cycle);
     }
     core_util_critical_section_exit();
 }
@@ -164,12 +171,25 @@ void PwmOut::unlock_deep_sleep()
     }
 }
 
+void PwmOut::_call_pwmout_init_direct(PwmOut *thisPtr)
+{
+    pwmout_init_direct(&thisPtr->_pwm, thisPtr->_pinmap);
+}
+
+void PwmOut::_call_pwmout_init(PwmOut *thisPtr)
+{
+    pwmout_init(&thisPtr->_pwm, thisPtr->_pin);
+}
+
 void PwmOut::init()
 {
     core_util_critical_section_enter();
 
     if (!_initialized) {
-        pwmout_init(&_pwm, _pin);
+
+        // Call either pwmout_init() or pwmout_init_direct(), depending on whether we have a PinName or a static pinmap
+        _init_func(this);
+
         lock_deep_sleep();
         _initialized = true;
     }

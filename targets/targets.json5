@@ -221,6 +221,116 @@
             "9991"
         ]
     },
+
+// Analog Devices targets ----------------------------------------------------------------------------------------------
+    "EV_COG_AD4050LZ": {
+        "inherits": [
+            "Target"
+        ],
+        "core": "Cortex-M4F",
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "macros": [
+            "__ADUCM4050__",
+            "EV_COG_AD4050LZ"
+        ],
+        "extra_labels": [
+            "Analog_Devices",
+            "ADUCM4X50",
+            "ADUCM4050",
+            "EV_COG_AD4050LZ",
+            "FLASH_CMSIS_ALGO"
+        ],
+        "device_has": [
+            "FLASH",
+            "USTICKER",
+            "RTC",
+            "SERIAL",
+            "TRNG",
+            "SLEEP",
+            "INTERRUPTIN",
+            "SPI",
+            "I2C",
+            "ANALOGIN",
+            "MPU"
+        ],
+        "device_name": "ADuCM4050",
+        "detect_code": [
+            "0603"
+        ],
+        "release_versions": [
+            "5"
+        ],
+        "bootloader_supported": true,
+        "supported_application_profiles" : ["full", "bare-metal"],
+        "supported_c_libs": {
+            "arm": [
+                "std",
+                "small"
+            ],
+            "gcc_arm": [
+                "std",
+                "small"
+            ]
+        },
+        "image_url": "https://www.analog.com/en/_/media/analog/en/evaluation-board-images/images/ev-cog-ad4050lzangle-web.gif?rev=40854bbeb052442f8c1e3af0ed0cc9aa&sc_lang=en&h=500&thn=1&hash=1CC040DB3294C38F0A712BD1A3D1951D"
+    },
+    "EV_COG_AD3029LZ": {
+        "inherits": [
+            "Target"
+        ],
+        "core": "Cortex-M3",
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "macros": [
+            "__ADUCM3029__",
+            "EV_COG_AD3029LZ"
+        ],
+        "extra_labels": [
+            "Analog_Devices",
+            "ADUCM302X",
+            "ADUCM3029",
+            "EV_COG_AD3029LZ",
+            "FLASH_CMSIS_ALGO"
+        ],
+        "device_has": [
+            "FLASH",
+            "USTICKER",
+            "RTC",
+            "SERIAL",
+            "TRNG",
+            "SLEEP",
+            "INTERRUPTIN",
+            "SPI",
+            "I2C",
+            "ANALOGIN",
+            "MPU"
+        ],
+        "device_name": "ADuCM3029",
+        "detect_code": [
+            "0602"
+        ],
+        "release_versions": [
+            "5"
+        ],
+        "bootloader_supported": true,
+        "supported_application_profiles" : ["full", "bare-metal"],
+        "supported_c_libs": {
+            "arm": [
+                "std",
+                "small"
+            ],
+            "gcc_arm": [
+                "std",
+                "small"
+            ]
+        },
+        "image_url": "https://www.analog.com/en/_/media/analog/en/evaluation-board-images/images/ev-cog-ad3029lzangle-web.gif?rev=dcc918a6e9b64a60a3ce0fc397a9a88d&sc_lang=en&h=500&thn=1&hash=ED3986B5366C771376C5F062488FE056"
+    },
+
+// NXP LPC1xxx Targets  ------------------------------------------------------------------------------------------------
     "LPCTarget": {
         "inherits": [
             "Target"
@@ -285,24 +395,22 @@
         "device_name": "LPC1114FN28/102",
         "detect_code": [
             "1114"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/cache/platforms/LPC1114_1_hXXAnmW.jpg.250x250_q85.jpg"
     },
-    "LPC1768": {
+    "MCU_LPC1768": {
         "inherits": [
             "LPCTarget"
         ],
+        "public": false,
         "core": "Cortex-M3",
         "extra_labels": [
             "NXP",
             "LPC176X",
-            "MBED_LPC1768",
             "NXP_EMAC"
         ],
         "supported_toolchains": [
             "GCC_ARM"
-        ],
-        "detect_code": [
-            "1010"
         ],
         "device_has": [
             "RTC",
@@ -330,9 +438,6 @@
             "WATCHDOG",
             "RESET_REASON"
         ],
-        "components_add": [
-            "LOCALFILESYSTEM"
-        ],
         "release_versions": [
             "5"
         ],
@@ -346,7 +451,6 @@
         },
         "overrides": {
             "network-default-interface-type": "ETHERNET",
-            "semihosting-enabled": true // needed for LOCALFILESYSTEM
         },
         "supported_c_libs": {
             "arm": [
@@ -359,33 +463,31 @@
         "supported_application_profiles": [
             "full", "bare-metal"
         ],
-        "is_mcu_family_target": true,
+        "is_mcu_family_target": true
+    },
+    "LPC1768": {
+        "inherits": [
+            "MCU_LPC1768"
+        ],
+        "core": "Cortex-M3",
+        "extra_labels_add": [
+            "MBED_LPC1768",
+        ],
+        "detect_code": [
+            "1010"
+        ],
+        "components_add": [
+            "LOCALFILESYSTEM"
+        ],
+        "overrides": {
+            "default-adc-vref": 3.3 // Per "mbed-005.1" schematic, Vref is 3.3V
+        },
         "image_url": "https://os.mbed.com/media/cache/platforms/LPC1768.jpg.250x250_q85.jpg"
     },
     "ARCH_PRO": {
         "supported_form_factors": [
             "ARDUINO"
         ],
-        "core": "Cortex-M3",
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-         "supported_application_profiles": [
-            "full", "bare-metal"
-        ],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ],
-            "iar": [
-                "std"
-            ]
-        },
         "extra_labels": [
             "NXP",
             "LPC176X",
@@ -395,42 +497,18 @@
             "TARGET_LPC1768"
         ],
         "inherits": [
-            "LPCTarget"
+            "MCU_LPC1768"
         ],
-        "device_has": [
-            "ANALOGIN",
-            "ANALOGOUT",
-            "CAN",
-            "DEBUG_AWARENESS",
-            "EMAC",
-            "I2C",
-            "I2CSLAVE",
-            "INTERRUPTIN",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "SERIAL",
-            "SERIAL_FC",
-            "SLEEP",
-            "SPI",
-            "SPISLAVE",
-            "FLASH",
-            "MPU",
-            "USBDEVICE",
-            "USTICKER",
-            "WATCHDOG",
-            "RESET_REASON"
-        ],
-        "device_name": "LPC1768",
-        "bootloader_supported": true,
-        "overrides": {
-            "network-default-interface-type": "ETHERNET"
-        },
         "detect_code": [
             "9004"
-        ]
+        ],
+        "overrides": {
+            "default-adc-vref": 3.3 // Per schematic, Vref is 3.3V
+        },
+        "image_url": "https://files.seeedstudio.com/wiki/Arch_Pro/img/Arch_pro.jpg"
     },
+
+    // Freescale (now NXP) Kinetis Targets -----------------------------------------------------------------------------
     "KL25Z": {
         "supported_form_factors": [
             "ARDUINO"
@@ -482,7 +560,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/uploads/chris/frd_small.jpg"
     },
     "KL46Z": {
         "supported_form_factors": [
@@ -538,7 +617,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/BOARD-FRDM-KL46Z-PRODUCT-SHOT.png"
     },
     "MCU_K22F512": {
         "core": "Cortex-M4F",
@@ -619,7 +699,8 @@
         ],
         "detect_code": [
             "0231"
-        ]
+        ],
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/FRDM-K22F-ANGLE.jpg"
     },
     "KL43Z": {
         "supported_form_factors": [
@@ -682,7 +763,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/FRDM-KL43Z-BLOCK-DIAGRAM.jpg"
     },
     "KW41Z": {
         "supported_form_factors": [
@@ -739,15 +821,10 @@
         "bootloader_supported": true,
         "overrides": {
             "network-default-interface-type": "MESH"
-        }
+        },
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/FRDM-KW41Z_OG.jpg"
     },
-    "K64F": {
-        "supported_form_factors": [
-            "ARDUINO_UNO"
-        ],
-        "components_add": [
-            "SD",
-        ],
+    "MCU_K64F": {
         "core": "Cortex-M4F",
         "supported_toolchains": [
             "GCC_ARM"
@@ -756,13 +833,10 @@
             "Freescale",
             "MCUXpresso_MCUS",
             "KSDK2_MCUS",
-            "FRDM",
             "KPSDK_MCUS",
             "KPSDK_CODE",
-            "MCU_K64F",
             "Freescale_EMAC"
         ],
-        "is_disk_virtual": true,
         "macros_add": [
             "CPU_MK64FN1M0VMD12",
             "FSL_RTOS_MBED",
@@ -771,9 +845,6 @@
         ],
         "inherits": [
             "PSA_V7_M"
-        ],
-        "detect_code": [
-            "0240"
         ],
         "device_has_add": [
             "USTICKER",
@@ -827,191 +898,51 @@
         "supported_application_profiles": [
             "full", "bare-metal"
         ],
-        "is_mcu_family_target": true
+        "is_mcu_family_target": true,
+        "public": false
+    },
+    "K64F": { // AKA FRDM-K64F
+        "supported_form_factors": [
+            "ARDUINO_UNO"
+        ],
+        "components_add": [
+            "SD",
+        ],
+        "extra_labels_add": [
+            "FRDM"
+        ],
+        "is_disk_virtual": true,
+        "inherits": [
+            "MCU_K64F"
+        ],
+        "detect_code": [
+            "0240"
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/407/MFG_FRDM-K64F.JPG"
     },
     "SDT64B": {
         "inherits": [
-            "K64F"
+            "MCU_K64F"
         ],
         "extra_labels_add": [
             "K64F"
         ],
-        "extra_labels_remove": [
-            "FRDM"
-        ],
-        "components_remove": [
-            "SD"
-        ],
         "supported_form_factors": [],
         "detect_code": [
             "3105"
-        ]
-    },
-    "EV_COG_AD4050LZ": {
-        "inherits": [
-            "Target"
         ],
-        "core": "Cortex-M4F",
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "macros": [
-            "__ADUCM4050__",
-            "EV_COG_AD4050LZ"
-        ],
-        "extra_labels": [
-            "Analog_Devices",
-            "ADUCM4X50",
-            "ADUCM4050",
-            "EV_COG_AD4050LZ",
-            "FLASH_CMSIS_ALGO"
-        ],
-        "device_has": [
-            "FLASH",
-            "USTICKER",
-            "RTC",
-            "SERIAL",
-            "TRNG",
-            "SLEEP",
-            "INTERRUPTIN",
-            "SPI",
-            "I2C",
-            "ANALOGIN",
-            "MPU"
-        ],
-        "device_name": "ADuCM4050",
-        "detect_code": [
-            "0603"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "bootloader_supported": true,
-        "supported_application_profiles" : ["full", "bare-metal"],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        }
-    },
-    "EV_COG_AD3029LZ": {
-        "inherits": [
-            "Target"
-        ],
-        "core": "Cortex-M3",
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "macros": [
-            "__ADUCM3029__",
-            "EV_COG_AD3029LZ"
-        ],
-        "extra_labels": [
-            "Analog_Devices",
-            "ADUCM302X",
-            "ADUCM3029",
-            "EV_COG_AD3029LZ",
-            "FLASH_CMSIS_ALGO"
-        ],
-        "device_has": [
-            "FLASH",
-            "USTICKER",
-            "RTC",
-            "SERIAL",
-            "TRNG",
-            "SLEEP",
-            "INTERRUPTIN",
-            "SPI",
-            "I2C",
-            "ANALOGIN",
-            "MPU"
-        ],
-        "device_name": "ADuCM3029",
-        "detect_code": [
-            "0602"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "bootloader_supported": true,
-        "supported_application_profiles" : ["full", "bare-metal"],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        }
+        "image_url": "https://os.mbed.com/media/cache/platforms/SDT64B_size.png.250x250_q85.png"
     },
     "HEXIWEAR": {
         "inherits": [
-            "Target"
-        ],
-        "core": "Cortex-M4F",
-        "extra_labels": [
-            "Freescale",
-            "MCUXpresso_MCUS",
-            "KSDK2_MCUS",
             "MCU_K64F"
         ],
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "supported_application_profiles": [
-            "full",
-            "bare-metal"
-        ],
-        "macros": [
-            "CPU_MK64FN1M0VMD12",
-            "FSL_RTOS_MBED",
-            "TARGET_K64F",
-            "MBED_TICKLESS"
-        ],
-        "is_disk_virtual": true,
-        "default_toolchain": "ARM",
         "detect_code": [
             "0214"
         ],
-        "device_has": [
-            "USTICKER",
-            "LPTICKER",
-            "RTC",
-            "ANALOGIN",
-            "ANALOGOUT",
-            "I2C",
-            "I2CSLAVE",
-            "INTERRUPTIN",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "RESET_REASON",
-            "SERIAL",
-            "SERIAL_ASYNCH",
-            "SERIAL_FC",
-            "SLEEP",
-            "SPI",
-            "SPI_ASYNCH",
-            "SPISLAVE",
-            "TRNG",
-            "FLASH",
-            "WATCHDOG"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "device_name": "MK64FN1M0xxx12",
-        "bootloader_supported": true
+        "image_url": "https://os.mbed.com/media/cache/platforms/Hexiwear_Platform_Image_19Ja2aX_pNSWsjb.png.250x250_q85.png",
     },
-    "K66F": {
+    "K66F": { // AKA FRDM-K66F
         "supported_form_factors": [
             "ARDUINO"
         ],
@@ -1088,9 +1019,10 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/FRDM-K66F-BD.jpg"
     },
-    "K82F": {
+    "K82F": { // AKA FRDM-K82F
         "supported_form_factors": [
             "ARDUINO"
         ],
@@ -1158,8 +1090,11 @@
         "supported_application_profiles": [
             "full", "bare-metal"
         ],
-        "is_mcu_family_target": true
+        "is_mcu_family_target": true,
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/117498-CS_FRDM-K82-Board-Top_Mbed.jpg"
     },
+
+    // STM32 Top-Level Target ------------------------------------------------------------------------------------------
     "MCU_STM32": {
         "inherits": [
             "Target"
@@ -1258,6 +1193,8 @@
             "RESET_REASON"
         ]
     },
+
+    // STM32F0 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32F0": {
         "inherits": [
             "MCU_STM32"
@@ -1279,7 +1216,7 @@
                 "value": "RCC_LSEDRIVE_LOW"
             },
             "i2c_timing_value_algo": {
-                "help": "If value was set to true I2C timing algorithm is enabled. Enabling may leads to performance issue. Keeping this false and changing system clock will trigger assert.)",
+                "help": "If set to true, I2C timing algorithm is enabled. Enabling may lead to performance issues. Keeping this false and changing system clock will trigger assert.)",
                 "value": false
             }
         },
@@ -1337,7 +1274,8 @@
         "detect_code": [
             "0755"
         ],
-        "device_name": "STM32F070RBTx"
+        "device_name": "STM32F070RBTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF261500.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F072xB": {
         "inherits": [
@@ -1365,7 +1303,8 @@
         "detect_code": [
             "0730"
         ],
-        "device_name": "STM32F072RBTx"
+        "device_name": "STM32F072RBTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF261500.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F091xC": {
         "inherits": [
@@ -1393,8 +1332,11 @@
         "detect_code": [
             "0750"
         ],
-        "device_name": "STM32F091RCTx"
+        "device_name": "STM32F091RCTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF261500.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
+
+    // STM32F1 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32F1": {
         "inherits": [
             "MCU_STM32"
@@ -1419,7 +1361,8 @@
         ],
         "device_has_remove": [
             "LPTICKER"
-        ]
+        ],
+        "is_mcu_family_target": true
     },
     "MCU_STM32F103x8": {
         "inherits": [
@@ -1455,7 +1398,8 @@
         "detect_code": [
             "0700"
         ],
-        "device_name": "STM32F103RB"
+        "device_name": "STM32F103RB",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF259875.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F103xC": {
         "inherits": [
@@ -1517,6 +1461,7 @@
             "MPU"
         ]
     },
+    // STM32F2 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32F2": {
         "inherits": [
             "MCU_STM32"
@@ -1585,8 +1530,11 @@
         "device_name": "STM32F207ZGTx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
+
+    // STM32F3 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32F3": {
         "inherits": [
             "MCU_STM32"
@@ -1658,7 +1606,8 @@
         "detect_code": [
             "0775"
         ],
-        "device_name": "STM32F303K8Tx"
+        "device_name": "STM32F303K8Tx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262544.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F303xC": {
         "inherits": [
@@ -1703,7 +1652,8 @@
         "detect_code": [
             "0745"
         ],
-        "device_name": "STM32F303RETx"
+        "device_name": "STM32F303RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_F303ZE": {
         "inherits": [
@@ -1718,7 +1668,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32F303ZETx"
+        "device_name": "STM32F303ZETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F334x8": {
         "inherits": [
@@ -1733,6 +1684,8 @@
             "STM32F334x8"
         ]
     },
+
+    // STM32F4 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32F4": {
         "inherits": [
             "MCU_STM32"
@@ -1781,7 +1734,8 @@
         "detect_code": [
             "0720"
         ],
-        "device_name": "STM32F401RETx"
+        "device_name": "STM32F401RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260000.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F407xE": {
         "inherits": [
@@ -1827,7 +1781,8 @@
         },
         "detect_code": [
             "9011"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/1881/MFG_102110014.jpg"
     },
     "MCU_STM32F411xE": {
         "inherits": [
@@ -1851,9 +1806,10 @@
         "detect_code": [
             "0740"
         ],
-        "device_name": "STM32F411RETx"
+        "device_name": "STM32F411RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
-    "MTS_DRAGONFLY_F411RE": {
+    "MTS_DRAGONFLY_F411RE": { // AKA MTQ-MNA1-B01/MTQ-MNA1-B02
         "inherits": [
             "MCU_STM32F411xE"
         ],
@@ -1876,7 +1832,8 @@
         ],
         "components_add": [
             "TELIT_HE910"
-        ]
+        ],
+        "image_url": "https://static-data2.manualslib.com/product-images/de1/2702201/multitech-multiconnect-dragonfly-mtq-mna1-b02.jpg"
     },
     "MTS_MDOT_F411RE": {
         "inherits": [
@@ -1895,7 +1852,8 @@
         "device_name": "STM32F411RETx",
         "detect_code": [
             "0320"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/1290/MTDOT-868-X1P-SMA-1.jpg"
     },
     "BLACKPILL_F411CE": {
         "inherits": [
@@ -1914,7 +1872,8 @@
         "detect_code": [
             "0740"
         ],
-        "device_name": "STM32F411CEYx"
+        "device_name": "STM32F411CEYx",
+        "image_url": "https://user-images.githubusercontent.com/1301112/69389644-eb5fb080-0ccc-11ea-8002-67d3db851250.png"
     },
     "MCU_STM32F412xE": {
         "inherits": [
@@ -1961,7 +1920,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32F412ZGTx"
+        "device_name": "STM32F412ZGTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     // Also known as MXChip EMW3166
     "WIO_EMW3166": {
@@ -1979,7 +1939,8 @@
         },
         "detect_code": [
             "0451"
-        ]
+        ],
+        "image_url": "https://cdn.mxchip.com/mxchip_official_website/img/EMW3166-P-%E7%99%BD-%E6%AD%A3.jpg"
     },
     "MCU_STM32F413xH": {
         "inherits": [
@@ -2008,36 +1969,6 @@
             "TRNG"
         ]
     },
-    "MTS_DRAGONFLY_F413RH": {
-        "inherits": [
-            "MCU_STM32F413xH"
-        ],
-        "supported_form_factors": [
-            "ARDUINO_UNO"
-        ],
-        "config": {
-            "hse_value": {
-                "help": "HSE via 26MHz xtal",
-                "value": "26000000",
-                "macro_name": "HSE_VALUE"
-            }
-        },
-        "overrides": {
-            "tickless-from-us-ticker": true,
-            "lse_available": 0
-        },
-        "detect_code": [
-            "0316"
-        ],
-        "device_has_remove": [
-            "SERIAL_FC"
-        ],
-        "components_add": [
-            "SPIF",
-            "TELIT_HE910"
-        ],
-        "device_name": "STM32F413RHTx"
-    },
     "DISCO_F413ZH": {
         "inherits": [
             "MCU_STM32F413xH"
@@ -2058,7 +1989,8 @@
             "QSPI",
             "USBDEVICE"
         ],
-        "device_name": "STM32F413ZHTx"
+        "device_name": "STM32F413ZHTx",
+        "image_url": "https://www.mouser.com/images/marketingid/2017/img/128173244_STMicroelectronics_32F413HDISCOVERYDiscoveryKit.png?v=070223.0256"
     },
     "NUCLEO_F413ZH": {
         "inherits": [
@@ -2073,7 +2005,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32F413ZHTx"
+        "device_name": "STM32F413ZHTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F429xI": {
         "inherits": [
@@ -2126,7 +2059,8 @@
         "device_name": "STM32F429ZITx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "DISCO_F429ZI": {
         "inherits": [
@@ -2147,7 +2081,8 @@
         "device_name": "STM32F429ZITx",
         "detect_code": [
             "0795"
-        ]
+        ],
+        "image_url": "https://m.media-amazon.com/images/I/71M-Bd6yaJL._AC_UF894,1000_QL80_.jpg"
     },
     "MCU_STM32F439xI": {
         "inherits": [
@@ -2165,61 +2100,6 @@
             "ANALOGOUT",
             "CAN",
             "TRNG"
-        ]
-    },
-    // Note: It seems like Seeed no longer sells this board.
-    // That would make this target a candidate for removal.
-    "WIO_3G": {
-        "inherits": [
-            "MCU_STM32F439xI"
-        ],
-        "config": {
-            "clock_source_usb": {
-                "help": "As 48 Mhz clock is configured for USB, SYSCLK has to be reduced from 180 to 168 MHz (set 0 for the max SYSCLK value)",
-                "value": "1",
-                "macro_name": "CLOCK_SOURCE_USB"
-            }
-        },
-        "overrides": {
-            "clock_source": "USE_PLL_HSE_XTAL|USE_PLL_HSI",
-            "network-default-interface-type": "CELLULAR"
-        },
-        "detect_code": [
-            "9014"
-        ],
-        "components_add": [
-            "QUECTEL_UG96"
-        ],
-        "device_name": "STM32F439VITx"
-    },
-
-    // Note: It seems like Seeed no longer sells any WIO boards with BG96 cellular modules.
-    // That would make this target a candidate for removal.
-    "WIO_BG96": {
-        "inherits": [
-            "MCU_STM32F439xI"
-        ],
-        "config": {
-            "clock_source_usb": {
-                "help": "As 48 Mhz clock is configured for USB, SYSCLK has to be reduced from 180 to 168 MHz (set 0 for the max SYSCLK value)",
-                "value": "0",
-                "macro_name": "CLOCK_SOURCE_USB"
-            }
-        },
-        "overrides": {
-            "clock_source": "USE_PLL_HSE_XTAL|USE_PLL_HSI",
-            "network-default-interface-type": "CELLULAR"
-        },
-        "device_has_remove": [
-            "CAN"
-        ],
-        "detect_code": [
-            "9015"
-        ],
-        "device_name": "STM32F439VITx",
-        "components_add": [
-            "SD",
-            "QUECTEL_BG96"
         ]
     },
     "NUCLEO_F439ZI": {
@@ -2250,7 +2130,8 @@
         "device_name": "STM32F439ZITx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F446xE": {
         "inherits": [
@@ -2278,7 +2159,8 @@
         "detect_code": [
             "0777"
         ],
-        "device_name": "STM32F446RETx"
+        "device_name": "STM32F446RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_F446ZE": {
         "inherits": [
@@ -2299,7 +2181,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32F446ZETx"
+        "device_name": "STM32F446ZETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32F469xI": {
         "inherits": [
@@ -2341,7 +2224,8 @@
             "QSPI",
             "USBDEVICE"
         ],
-        "device_name": "STM32F469NIHx"
+        "device_name": "STM32F469NIHx",
+        "image_url": "https://static5.arrow.com/pdfs/2015/11/30/5/10/19/531/st_/manual/stm32f469i-disco_fig.1_1.jpg"
     },
     "SDP_K1": {
         "inherits": [
@@ -2375,8 +2259,11 @@
         "device_name": "STM32F469NIHx",
         "detect_code": [
             "0604"
-        ]
+        ],
+        "image_url": "https://www.analog.com/en/_/media/analog/en/evaluation-board-images/images/eval-sdp-ck1ztop-web.gif?rev=2b0d46c94afe490cb3543819752a0471&sc_lang=en&h=270&thn=1&hash=C1A2567A6E5A569665B40C5DCFE1B8C3"
     },
+
+    // STM32F7 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32F7": {
         "inherits": [
             "MCU_STM32"
@@ -2443,7 +2330,8 @@
         "detect_code": [
             "0812"
         ],
-        "device_name": "STM32F722ZETx"
+        "device_name": "STM32F722ZETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "DISCO_F723IE": {
         "inherits": [
@@ -2509,7 +2397,8 @@
             "QSPI",
             "USBDEVICE"
         ],
-        "device_name": "STM32F746NGHx"
+        "device_name": "STM32F746NGHx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF261641.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_F746ZG": {
         "inherits": [
@@ -2542,7 +2431,8 @@
         "device_name": "STM32F746ZGTx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_F756ZG": {
         "inherits": [
@@ -2576,7 +2466,8 @@
         "device_name": "STM32F756ZGTx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "UHURU_RAVEN": {
         "inherits": [
@@ -2601,7 +2492,8 @@
         "device_has_remove": [
             "SERIAL_FC"
         ],
-        "device_name": "STM32F767VITx"
+        "device_name": "STM32F767VITx",
+        "image_url": "https://uhuru.co.jp/wp-content/uploads/2019/02/20190222_pr_raven_02.jpg"
     },
     "NUCLEO_F767ZI": {
         "inherits": [
@@ -2638,7 +2530,8 @@
         "device_name": "STM32F767ZITx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "DISCO_F769NI": {
         "inherits": [
@@ -2679,8 +2572,11 @@
         "device_name": "STM32F769NIHx",
         "overrides": {
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://www.mouser.com/images/marketingid/2016/img/167234246_STMicro_32F769IDISCOVERYDiscoveryKit.png?v=070223.0222"
     },
+
+    // STM32G0 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32G0": {
         "inherits": [
             "MCU_STM32"
@@ -2730,9 +2626,6 @@
             "MCU_STM32G0"
         ],
         "public": false,
-        "overrides": {
-            "boot-stack-size": "0x400"
-        },
         "supported_application_profiles": [
             "bare-metal"
         ],
@@ -2744,7 +2637,8 @@
         ],
         "overrides": {
             "lpticker_delay_ticks": 1,
-            "lpticker_lptim": "0"
+            "lpticker_lptim": "0",
+            "boot-stack-size": "0x400"
         }
     },
     "MCU_STM32G031x8": {
@@ -2772,7 +2666,8 @@
         "detect_code": [
             "0852"
         ],
-        "device_name": "STM32G031K8Tx"
+        "device_name": "STM32G031K8Tx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267508.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32G041x8": {
         "inherits": [
@@ -2797,9 +2692,6 @@
             "MCU_STM32G0"
         ],
         "public": false,
-        "overrides": {
-            "boot-stack-size": "0x400"
-        },
         "supported_application_profiles": [
             "bare-metal"
         ],
@@ -2811,7 +2703,8 @@
         ],
         "overrides": {
             "lpticker_delay_ticks": 1,
-            "lpticker_lptim": "0"
+            "lpticker_lptim": "0",
+            "boot-stack-size": "0x400"
         }
     },
     "MCU_STM32G051x8": {
@@ -2901,7 +2794,8 @@
         "detect_code": [
             "0221"
         ],
-        "device_name": "STM32G071RBTx"
+        "device_name": "STM32G071RBTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF265386.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32G081xB": {
         "inherits": [
@@ -2959,7 +2853,8 @@
         "detect_code": [
             "0872"
         ],
-        "device_name": "STM32G0B1RETx"
+        "device_name": "STM32G0B1RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF265386.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32G0C1xE": {
         "inherits": [
@@ -2976,6 +2871,8 @@
             "ANALOGOUT"
         ]
     },
+
+    // STM32G4 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32G4": {
         "inherits": [
             "MCU_STM32"
@@ -3052,7 +2949,8 @@
         "overrides": {
             "hse_value": 24000000
         },
-        "device_name": "STM32G431RBTx"
+        "device_name": "STM32G431RBTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267029.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_G431KB": {
         "inherits": [
@@ -3065,7 +2963,8 @@
       "detect_code": [
         "0851"
       ],
-      "device_name": "STM32G431KBTx"
+      "device_name": "STM32G431KBTx",
+      "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267030.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32G441xB": {
         "inherits": [
@@ -3128,7 +3027,8 @@
         "detect_code": [
             "0841"
         ],
-        "device_name": "STM32G474RETx"
+        "device_name": "STM32G474RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267029.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32G483xE": {
         "inherits": [
@@ -3178,6 +3078,8 @@
             "STM32G4A1xx"
         ]
     },
+
+    // STM32H7 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32H7": {
         "inherits": [
             "MCU_STM32"
@@ -3276,7 +3178,7 @@
             "system_power_supply": "PWR_LDO_SUPPLY"
         }
     },
-    "WIO_H725AE": {
+    "WIO_H725AE": { // AKA "Seeed Wio Lite AI"
         "inherits": [
             "MCU_STM32H725xE"
         ],
@@ -3296,7 +3198,8 @@
             "lse_drive_load_level": "RCC_LSEDRIVE_MEDIUMLOW",
             "enable-overdrive-mode": 0
         },
-        "device_name": "STM32H725AEIx"
+        "device_name": "STM32H725AEIx",
+        "image_url": "https://www.mouser.com/images/seeedstudios/hd/102110607_SPL.jpg"
     },
     "MCU_STM32H735xG": {
         "inherits": [
@@ -3360,7 +3263,8 @@
         "detect_code": [
             "0836"
         ],
-        "device_name": "STM32H743ZITx"
+        "device_name": "STM32H743ZITx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_H723ZG": {
         "inherits": [
@@ -3373,7 +3277,7 @@
             "STM32H723ZG"
         ],
         "config": {
-            
+
             "d11_configuration": {
                 "help": "Value: PB_5 for the default board configuration, PA_7 in case of solder bridge update (SB33 on/ SB35 off)",
                 "value": "PB_5",
@@ -3399,7 +3303,8 @@
         "detect_code": [
             "0836"
         ],
-        "device_name": "STM32H723ZGTx"
+        "device_name": "STM32H723ZGTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32H745xI": {
         "inherits": [
@@ -3478,7 +3383,8 @@
         "overrides": {
             "network-default-interface-type": "ETHERNET"
         },
-        "device_name": "STM32H745ZITx"
+        "device_name": "STM32H745ZITx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_H745ZI_Q_CM4": {
         "inherits": [
@@ -3505,7 +3411,8 @@
         "overrides": {
             "network-default-interface-type": "ETHERNET"
         },
-        "device_name": "STM32H745ZITx"
+        "device_name": "STM32H745ZITx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF262651.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_H745ZI_Q" : {
         "inherits" : [
@@ -3569,12 +3476,14 @@
         "detect_code": [
             "0814"
         ],
-        "device_name": "STM32H747XIHx"
+        "device_name": "STM32H747XIHx",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/310/MFG_STM32H747I-DISCO.jpg"
     },
     "DISCO_H747I": {
         "inherits": [
             "DISCO_H747I_CM7"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/310/MFG_STM32H747I-DISCO.jpg"
     },
     "MCU_STM32H747xI_CM4": {
         "inherits": [
@@ -3613,7 +3522,8 @@
             "STMOD",
             "PMOD"
         ],
-        "device_name": "STM32H747XIHx"
+        "device_name": "STM32H747XIHx",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/310/MFG_STM32H747I-DISCO.jpg"
     },
     "PORTENTA_H7": {
         "public": false,
@@ -3660,7 +3570,8 @@
             // the LDO power comes from the SMPS).
             "enable-overdrive-mode": 1
         },
-        "device_name": "STM32H747XIHx"
+        "device_name": "STM32H747XIHx",
+        "image_url": "https://store.arduino.cc/cdn/shop/products/ABX00042_00.iso_1200x900.jpg?v=1675840144"
     },
     "PORTENTA_H7_M7": {
         "inherits": ["PORTENTA_H7"],
@@ -3765,7 +3676,8 @@
         "device_name": "STM32H7A3ZITxQ",
         "detect_code": [
             "0860"
-        ]
+        ],
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267690.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32H7B3xIQ": {
         "inherits": [
@@ -3790,6 +3702,8 @@
             "enable-overdrive-mode": 0
         }
     },
+
+    // STM32L0 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32L0": {
         "inherits": [
             "MCU_STM32"
@@ -3900,7 +3814,7 @@
             "TRNG"
         ]
     },
-    "DISCO_L072CZ_LRWAN1": {
+    "DISCO_L072CZ_LRWAN1": { // AKA B-L072Z-LRWAN1
         "inherits": [
             "MCU_STM32L072xZ"
         ],
@@ -3913,7 +3827,8 @@
         "detect_code": [
             "0833"
         ],
-        "device_name": "STM32L072CZTx"
+        "device_name": "STM32L072CZTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF264368.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32L073xZ": {
         "inherits": [
@@ -3941,7 +3856,8 @@
         "detect_code": [
             "0760"
         ],
-        "device_name": "STM32L073RZTx"
+        "device_name": "STM32L073RZTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32L082xZ": {
         "inherits": [
@@ -3959,6 +3875,8 @@
             "TRNG"
         ]
     },
+
+    // STM32L1 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32L1": {
         "inherits": [
             "MCU_STM32"
@@ -4044,15 +3962,19 @@
         "device_name": "STM32L151CCTx",
         "detect_code": [
             "0350"
-        ]
+        ],
+        "image_url": "https://multitech.com/wp-content/uploads/elementor/thumbs/MT_xDot_Kit_MTMDK-NX-XDOT_clear_hp1000px-qiietlpii6czroara761mb7hrzdtvfj6350luxui2o.png"
     },
-    "FF1705_L151CC": {
+    // As of 2024, L-Tek no longer sells the FF1705 as far as I can tell from their webshop.
+    // It was delisted sometime after 2021.
+    "FF1705_L151CC": { // AKA L-Tek FF1705
         "inherits": [
             "XDOT_L151CC"
         ],
         "detect_code": [
             "8080"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/cache/platforms/LTEK-xdot.jpg.250x250_q85.jpg"
     },
     "MCU_STM32L152xC": {
         "inherits": [
@@ -4066,7 +3988,7 @@
             "STM32L152xC"
         ]
     },
-    "MOTE_L152RC": {
+    "MOTE_L152RC": { // AKA SX1272LM1CEP or NAMote72 or Semtech LoRaMote
         "inherits": [
             "MCU_STM32L152xC"
         ],
@@ -4082,7 +4004,8 @@
         "device_has_remove": [
             "SERIAL_FC"
         ],
-        "device_name": "STM32L152RCTx"
+        "device_name": "STM32L152RCTx",
+        "image_url": "https://www.newark.com/productimages/large/en_US/14AC8252-40.jpg"
     },
     "MCU_STM32L152xE": {
         "inherits": [
@@ -4106,8 +4029,11 @@
         "detect_code": [
             "0710"
         ],
-        "device_name": "STM32L152RETx"
+        "device_name": "STM32L152RETx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
+
+    // STM32L4 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32L4": {
         "inherits": [
             "MCU_STM32"
@@ -4191,7 +4117,8 @@
         "detect_code": [
             "0770"
         ],
-        "device_name": "STM32L432KCUx"
+        "device_name": "STM32L432KCUx",
+        "image_url": "https://eu.mouser.com/images/marketingid/2019/img/168228755.png?v=021424.0917"
     },
     "MCU_STM32L433xC": {
         "inherits": [
@@ -4215,7 +4142,8 @@
         "detect_code": [
             "0779"
         ],
-        "device_name": "STM32L433RCTx"
+        "device_name": "STM32L433RCTx",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2508/MFG_NUCLEO-L433RC-P.jpg"
     },
     "MCU_STM32L443xC": {
         "inherits": [
@@ -4231,6 +4159,7 @@
             "STM32L443xx"
         ]
     },
+    // Note: Advantech WISE-DK1510 required as external debugger
     "ADV_WISE_1510": {
         "inherits": [
             "MCU_STM32L443xC"
@@ -4245,7 +4174,8 @@
         "device_name": "STM32L443RCTx",
         "detect_code": [
             "0458"
-        ]
+        ],
+        "image_url": "https://www.mouser.com/images/advantechcorporation/lrg/WISE-1510WMB-SDA1E_DSL.jpg"
     },
     "MCU_STM32L452xE": {
         "inherits": [
@@ -4270,7 +4200,8 @@
         "detect_code": [
             "0829"
         ],
-        "device_name": "STM32L452RETx"
+        "device_name": "STM32L452RETx",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2508/MFG_NUCLEO-L433RC-P.jpg"
     },
     "MCU_STM32L471xG": {
         "inherits": [
@@ -4298,7 +4229,8 @@
         "components_add": [
             "MULTITECH_DRAGONFLY_NANO_CELLULAR",
         ],
-        "device_name": "STM32L471QGIx"
+        "device_name": "STM32L471QGIx",
+        "image_url": "https://www.mouser.com/images/marketingid/2021/img/175572858.png?v=011524.1015"
     },
     "MCU_STM32L475xG": {
         "inherits": [
@@ -4342,7 +4274,8 @@
         "features": [
             "BLE"
         ],
-        "device_name": "STM32L475VGTx"
+        "device_name": "STM32L475VGTx",
+        "image_url": "https://www.mouser.com/images/stmicroelectronics/lrg/B_L475E_IOT01A1_SPL.jpg"
     },
     "MCU_STM32L476xG": {
         "inherits": [
@@ -4370,7 +4303,8 @@
         "detect_code": [
             "0765"
         ],
-        "device_name": "STM32L476RGTx"
+        "device_name": "STM32L476RGTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "DISCO_L476VG": {
         "inherits": [
@@ -4389,22 +4323,8 @@
             "QSPI",
             "USBDEVICE"
         ],
-        "device_name": "STM32L476VGTx"
-    },
-    "RHOMBIO_L476DMW1K": {
-        "inherits": [
-            "MCU_STM32L476xG"
-        ],
-        "components_add": [
-            "QSPIF"
-        ],
-        "detect_code": [
-            "1500"
-        ],
-        "device_has_add": [
-            "QSPI"
-        ],
-        "device_name": "STM32L476VGTx"
+        "device_name": "STM32L476VGTx",
+        "image_url": "https://static5.arrow.com/pdfs/2015/11/2/7/58/36/906/st_/manual/stm32l476g-disco_fig.1.jpg"
     },
     "MCU_STM32L486xG": {
         "inherits": [
@@ -4433,28 +4353,8 @@
         "detect_code": [
             "0827"
         ],
-        "device_name": "STM32L486RGTx"
-    },
-    // AKA Advantech WISE-1570
-    // This board is EOL from the manufacturer so it is a candidate for removal.
-    "ADV_WISE_1570": {
-        "inherits": [
-            "MCU_STM32L486xG"
-        ],
-        "overrides": {
-            "clock_source": "USE_PLL_HSE_XTAL"
-        },
-        "detect_code": [
-            "0460"
-        ],
-        "macros_add": [
-            "WISE_1570"
-        ],
         "device_name": "STM32L486RGTx",
-        "OUTPUT_EXT": "hex",
-        "components_add": [
-            "QUECTEL_BC95"
-        ]
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF260945.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32L496xG": {
         "inherits": [
@@ -4493,7 +4393,8 @@
             "USBDEVICE",
             "QSPI"
         ],
-        "device_name": "STM32L496AGIx"
+        "device_name": "STM32L496AGIx",
+        "image_url": "https://www.mouser.com/images/marketingid/2017/img/121062128_STmicro_32L496GDISCOVERYDiscoveryBoard.png?v=070223.0249"
     },
     "NUCLEO_L496ZG": {
         "inherits": [
@@ -4508,7 +4409,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32L496ZGTx"
+        "device_name": "STM32L496ZGTx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267690.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_L496ZG_P": {
         "inherits": [
@@ -4517,31 +4419,6 @@
         "detect_code": [
             "0828"
         ]
-    },
-
-    // Note: I have not been able to find any record of a board with this target ID ever being
-    // sold by Multitech.  It was added by this PR: https://github.com/ARMmbed/mbed-os/pull/15012
-    // If you cannot actually buy the board that this target is for, that would make it a candidate for removal.
-    // I have emailed multitech about it, we will see if they get back to me...
-    "MTS_DRAGONFLY_L496VG": {
-        "inherits": [
-            "MCU_STM32L496xG"
-        ],
-        "supported_form_factors": [
-            "ARDUINO_UNO"
-        ],
-        "components_add": [
-            "QSPIF",
-            "QUECTEL_EC2X"
-        ],
-        "device_has_add": [
-            "USBDEVICE",
-            "QSPI"
-        ],
-        "detect_code": [
-            "0313"
-        ],
-        "device_name": "STM32L496VGTx"
     },
     "MCU_STM32L4P5xG": {
         "inherits": [
@@ -4584,7 +4461,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32L4R5ZITx"
+        "device_name": "STM32L4R5ZITx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF267690.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "NUCLEO_L4R5ZI_P": {
         "inherits": [
@@ -4632,7 +4510,8 @@
             "QSPI",
             "OSPI",
             "USBDEVICE"
-        ]
+        ],
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF264782.en.feature-description-include-personalized-no-cpn-large.jpg"
     },
     "MCU_STM32L4S5xI": {
         "inherits": [
@@ -4677,8 +4556,11 @@
         "features": [
             "BLE"
         ],
-        "device_name": "STM32L4S5VITx"
+        "device_name": "STM32L4S5VITx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF270120.en.feature-description-include-personalized-no-cpn-large.jpg"
     },
+
+    // STM32L5 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32L5": {
         "inherits": [
             "MCU_STM32"
@@ -4749,7 +4631,8 @@
         "device_name": "STM32L552ZETxQ",
         "detect_code": [
             "0854"
-        ]
+        ],
+        "image_url": "https://cdn11.bigcommerce.com/s-3fd3md1ghs/images/stencil/500x659/products/30236/11949/NUCLEO-L552ZE-Q__51179.1642762880.jpg?c=2"
     },
     "MCU_STM32L562xE": {
         "inherits": [
@@ -4791,8 +4674,11 @@
         "device_name": "STM32L562QEIxQ",
         "detect_code": [
             "0854"
-        ]
+        ],
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF268050.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
+
+    // STM32U5 Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32U5": {
         "inherits": [
             "MCU_STM32"
@@ -4882,7 +4768,8 @@
             // As shipped, this nucleo board connects VREFP to VDD_MCU, and connects VDD_MCU to 3.3V.
             // Jumper JP4 can be used to switch VDD_MCU to 1.8V in which case you should override this setting to 1.8.
             "default-adc-vref": 3.3
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF271812.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32U575xG": {
         "inherits": [
@@ -4941,7 +4828,8 @@
         },
         "detect_code": [
             "887"
-        ]
+        ],
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF271412.en.feature-description-include-personalized-no-cpn-large.jpg"
     },
     "MCU_STM32U545xE": {
         "inherits": [
@@ -4981,7 +4869,8 @@
             // As shipped, this nucleo board connects VREFP to VDD_MCU, and connects VDD_MCU to 3.3V.
             // Jumper JP5 can be used to switch VDD_MCU to 1.8V in which case you should override this setting to 1.8.
             "default-adc-vref": 3.3
-        }
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF273877.en.feature-description-include-personalized-no-cpn-medium.jpg"
     },
     "MCU_STM32U5A5xJ": {
         "inherits": [
@@ -5031,8 +4920,11 @@
             // As shipped, this nucleo board connects VREFP to VDD_MCU, and connects VDD_MCU to 3.3V.
             // Jumper JP4 can be used to switch VDD_MCU to 1.8V in which case you should override this setting to 1.8.
             "default-adc-vref": 3.3
-        }
-    },        
+        },
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF271812.en.feature-description-include-personalized-no-cpn-medium.jpg"
+    },
+
+    // STM32WB Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32WB": {
         "inherits": [
             "MCU_STM32"
@@ -5107,7 +4999,8 @@
         "detect_code": [
             "0883"
         ],
-        "device_name": "STM32WB15CCUx"
+        "device_name": "STM32WB15CCUx",
+        "image_url": "https://www.mouser.com/images/stmicroelectronics/hd/NUCLEO-WB15CC_SPL.jpg"
     },
     "MCU_STM32WB55xG": {
         "inherits": [
@@ -5136,7 +5029,8 @@
         "device_has_add": [
             "USBDEVICE"
         ],
-        "device_name": "STM32WB55RGVx"
+        "device_name": "STM32WB55RGVx",
+        "image_url": "https://www.mouser.com/images/stmicroelectronics/hd/NUCLEO-WB15CC_SPL.jpg"
     },
     "MCU_STM32WB5MxG": {
         "inherits": [
@@ -5152,7 +5046,7 @@
             "MBEDTLS_CONFIG_HW_SUPPORT"
         ]
     },
-    "DISCO_WB5MMG": {
+    "DISCO_WB5MMG": { // AKA STM32WB5MM-DK
         "inherits": [
             "MCU_STM32WB5MxG"
         ],
@@ -5162,8 +5056,11 @@
         "detect_code": [
             "0884"
         ],
-        "device_name": "STM32WB55VGYx"
+        "device_name": "STM32WB55VGYx",
+        "image_url": "https://www.st.com/bin/ecommerce/api/image.PF271050.en.feature-description-include-personalized-no-cpn-large.jpg"
     },
+
+    // STM32WL Targets -------------------------------------------------------------------------------------------------
     "MCU_STM32WL": {
         "inherits": [
             "MCU_STM32"
@@ -5227,7 +5124,8 @@
         "detect_code": [
             "0866"
         ],
-        "device_name": "STM32WL55JCIx"
+        "device_name": "STM32WL55JCIx",
+        "image_url": "https://www.mouser.com/images/marketingid/2020/img/114771861.png?v=012324.0355"
     },
     "MCU_STM32WLE5xC": {
         "inherits": [
@@ -5245,7 +5143,9 @@
         "mbed_ram_start": "0x20000000",
         "mbed_ram_size": "0x10000"
     },
-    // Note: "MIMXRT105X" target is for the MIMXRT1051, MIMXRT1061=2, MIMXRT1061, and MIMXRT1062
+    // NXP i.MX RT Targets ---------------------------------------------------------------------------------------------
+
+    // Note: "MIMXRT105X" target is for the MIMXRT1051, MIMXRT1052, MIMXRT1061, and MIMXRT1062
     // See here for details: https://github.com/mbed-ce/mbed-os/wiki/MCU-Info-Page:-MIMXRT105x-and-106x
     "MIMXRT105X": {
         "core": "Cortex-M7FD",
@@ -5340,7 +5240,8 @@
             "network-default-interface-type": "ETHERNET"
         },
         "bootloader_supported": true,
-        "device_name": "MIMXRT1052DVL6A"
+        "device_name": "MIMXRT1052DVL6A",
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/IMX_RT1050-EVKB_TOP-LR.jpg"
     },
     "MIMXRT1060_EVK": {
         "inherits": [
@@ -5364,7 +5265,8 @@
         "overrides": {
             "network-default-interface-type": "ETHERNET"
         },
-        "device_name": "MIMXRT1062DVL6B"
+        "device_name": "MIMXRT1062DVL6B",
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/X-MIMXRT1060-EVK-BOARD-BOTTOM.jpg"
     },
     "TEENSY_40": {
         "inherits": [
@@ -5382,7 +5284,8 @@
         "device_has_remove": [
             "EMAC"
         ],
-        "device_name": "MIMXRT1062DVL6B"
+        "device_name": "MIMXRT1062DVL6B",
+        "image_url": "https://www.pjrc.com/store/teensy40_front.jpg"
     },
     "TEENSY_41": {
         "inherits": [
@@ -5398,7 +5301,8 @@
             "console-uart": false,
             "network-default-interface-type": "ETHERNET"
         },
-        "device_name": "MIMXRT1062DVL6B"
+        "device_name": "MIMXRT1062DVL6B",
+        "image_url": "https://www.pjrc.com/store/teensy41_4.jpg"
     },
     "MIMXRT1170_EVK": {
         "supported_form_factors": [
@@ -5462,9 +5366,12 @@
                 "std",
                 "small"
             ]
-        }
+        },
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/MIMXRT1170-EVKB-TOP-IMG.jpg"
     },
-    "LPC54114": {
+
+    // NXP LPC5xxxx Targets --------------------------------------------------------------------------------------------
+    "LPC54114": { // AKA LPCXpresso54114
         "supported_form_factors": [
             "ARDUINO"
         ],
@@ -5529,7 +5436,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/691/OM13089UL.JPG"
     },
     "MCU_LPC546XX": {
         "core": "Cortex-M4F",
@@ -5591,9 +5499,10 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "is_mcu_family_target": true
     },
-    "LPC546XX": {
+    "LPC546XX": { // AKA LPCXpresso54608
         "supported_form_factors": [
             "ARDUINO"
         ],
@@ -5611,7 +5520,8 @@
         ],
         "components_add": [
             "QSPIF"
-        ]
+        ],
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/LPCXpresso54608_back.png"
     },
     "FF_LPC546XX": {
         "inherits": [
@@ -5625,8 +5535,11 @@
         ],
         "release_versions": [
             "5"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/cache/platforms/t17_VBxJMp4.png.250x250_q85.png"
     },
+
+    // ARM MPS2 FPGA prototyping targets -------------------------------------------------------------------------------
     "ARM_MPS2_Target": {
         "inherits": [
             "Target"
@@ -5658,7 +5571,8 @@
                 "std",
                 "small"
             ]
-        }
+        },
+        "is_mcu_family_target": true
     },
     "ARM_MPS2_M0": {
         "inherits": [
@@ -5697,7 +5611,8 @@
             "5"
         ],
         "copy_method": "mps2",
-        "reset_method": "reboot.txt"
+        "reset_method": "reboot.txt",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2161/MFG_V2M-MPS2-0318C.jpg"
     },
     "ARM_MPS2_M0P": {
         "inherits": [
@@ -5734,7 +5649,8 @@
             "5"
         ],
         "copy_method": "mps2",
-        "reset_method": "reboot.txt"
+        "reset_method": "reboot.txt",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2161/MFG_V2M-MPS2-0318C.jpg"
     },
     "ARM_MPS2_M3": {
         "inherits": [
@@ -5772,7 +5688,8 @@
             "5"
         ],
         "copy_method": "mps2",
-        "reset_method": "reboot.txt"
+        "reset_method": "reboot.txt",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2161/MFG_V2M-MPS2-0318C.jpg"
     },
     "ARM_MPS2_M4": {
         "inherits": [
@@ -5810,7 +5727,8 @@
             "5"
         ],
         "copy_method": "mps2",
-        "reset_method": "reboot.txt"
+        "reset_method": "reboot.txt",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2161/MFG_V2M-MPS2-0318C.jpg"
     },
     "ARM_MPS2_M7": {
         "inherits": [
@@ -5848,7 +5766,8 @@
             "5"
         ],
         "copy_method": "mps2",
-        "reset_method": "reboot.txt"
+        "reset_method": "reboot.txt",
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2161/MFG_V2M-MPS2-0318C.jpg"
     },
     "ARM_IOTSS_Target": {
         "inherits": [
@@ -5871,7 +5790,7 @@
             "MPU"
         ]
     },
-    "ARM_CM3DS_MPS2": {
+    "ARM_CM3DS_MPS2": { // AKA Cortex-M3 Design Start (CM3DS) on MPS2 Board
         "inherits": [
             "ARM_IOTSS_Target"
         ],
@@ -5918,7 +5837,8 @@
         },
         "detect_code": [
             "5004"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2161/MFG_V2M-MPS2-0318C.jpg"
     },
     "ARM_MUSCA_B1": {
         "inherits": [
@@ -5973,7 +5893,8 @@
         "detect_code": [
             "5007"
         ],
-        "OUTPUT_EXT": "bin"
+        "OUTPUT_EXT": "bin",
+        "image_url": "https://www.psacertified.org/app/uploads/2019/01/musca-b1-600x0-c-default.jpg"
     },
     "ARM_MUSCA_S1": {
         "inherits": [
@@ -6031,8 +5952,11 @@
         "detect_code": [
             "5009"
         ],
-        "OUTPUT_EXT": "bin"
+        "OUTPUT_EXT": "bin",
+        "image_url": "https://os.mbed.com/media/cache/platforms/Musca-S1_Rev_B_Board-1_transpant.png.250x250_q85.png"
     },
+
+    // Renesas RZ Targets ----------------------------------------------------------------------------------------------
     "RZ_A1XX": {
         "inherits": [
             "Target"
@@ -6085,7 +6009,7 @@
         },
         "is_mcu_family_target": true
     },
-    "RZ_A1H": {
+    "RZ_A1H": { // AKA GR-PEACH
         "inherits": [
             "RZ_A1XX"
         ],
@@ -6121,7 +6045,8 @@
         ],
         "detect_code": [
             "5500"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/cache/platforms/GR-PEACH_C_trans.png.250x250_q85.png"
     },
     "GR_LYCHEE": {
         "inherits": [
@@ -6164,7 +6089,8 @@
         },
         "detect_code": [
             "5501"
-        ]
+        ],
+        "image_url": "https://www.cnx-software.com/wp-content/uploads/2017/06/GR-LYCHEE.jpg"
     },
     "RZ_A2XX": {
         "inherits": ["Target"],
@@ -6224,10 +6150,12 @@
         },
         "detect_code": [
             "5502"
-        ]
-
+        ],
+        "image_url": "https://www.renesas.com/sites/default/files/media/images/gr-mango-top.png"
     },
-    "MAX32620FTHR": {
+
+    // Maxim (now Analog Devices) Targets ------------------------------------------------------------------------------
+    "MCU_MAX32620": {
         "inherits": [
             "Target"
         ],
@@ -6261,9 +6189,7 @@
             "SPI",
             "USTICKER"
         ],
-        "detect_code": [
-            "0418"
-        ],
+        "device_name": "MAX32620",
         "supported_application_profiles" : ["full", "bare-metal"],
         "supported_c_libs": {
             "arm": [
@@ -6277,59 +6203,27 @@
             "iar": [
                 "std"
             ]
-        }
+        },
+        "public": false,
+        "is_mcu_family_target": true
+    },
+    "MAX32620FTHR": {
+        "inherits": [
+            "MCU_MAX32620"
+        ],
+        "detect_code": [
+            "0418"
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/895/MFG_MAX32620FTHR.jpg"
     },
     "SDT32620B": {
         "inherits": [
-            "Target"
-        ],
-        "core": "Cortex-M4F",
-        "macros": [
-            "__SYSTEM_HFX=96000000",
-            "TARGET=MAX32620",
-            "TARGET_REV=0x4332",
-            "OPEN_DRAIN_LEDS"
+            "MCU_MAX32620"
         ],
         "detect_code": [
             "3101"
         ],
-        "extra_labels": [
-            "Maxim",
-            "MAX32620C"
-        ],
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "device_has": [
-            "ANALOGIN",
-            "FLASH",
-            "I2C",
-            "INTERRUPTIN",
-            "LPTICKER",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "SERIAL",
-            "SERIAL_FC",
-            "SLEEP",
-            "SPI",
-            "USTICKER"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "supported_application_profiles" : ["full", "bare-metal"],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        }
+        "image_url": "https://os.mbed.com/media/cache/platforms/SDT32620B_size.png.250x250_q85.png"
     },
     "MAX32625_BASE": {
         "inherits": [
@@ -6391,7 +6285,8 @@
         ],
         "detect_code": [
             "0415"
-        ]
+        ],
+        "image_url": "https://www.analog.com/en/_/media/analog/en/evaluation-board-maxim-images/max32625mbed.png?rev=cce27b18ca564ddbb28163b4612b7592&h=500&hash=5F057314B14CBC46F7A8EEC655632DCE"
     },
     "SDT32625B": {
         "inherits": [
@@ -6402,7 +6297,8 @@
         ],
         "detect_code": [
             "3102"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/cache/platforms/SDT32625B_size_ZxsNDPt.png.250x250_q85.png"
     },
     "MAX32625PICO": {
         "inherits": [
@@ -6414,7 +6310,8 @@
         "bootloader_supported": true,
         "detect_code": [
             "0444"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2592/MAX32625PICO%23.jpg"
     },
     "MAX32630FTHR": {
         "inherits": [
@@ -6472,7 +6369,8 @@
             "iar": [
                 "std"
             ]
-        }
+        },
+        "image_url": "https://www.analog.com/en/_/media/analog/en/evaluation-board-maxim-images/max32630fthr.png?rev=38a579856b25448c9369e8f1931bef09&h=270&hash=55F09D9FF86FDDA9FDAE27520485245E"
     },
     "MAX32660": {
         "inherits": [
@@ -6550,7 +6448,8 @@
         },
         "detect_code": [
             "0421"
-        ]
+        ],
+        "image_url": "https://www.analog.com/en/_/media/analog/en/evaluation-board-maxim-images/max32660evsys.png?rev=1b007b133cb349f692e1695e7e55de01&h=270&hash=81B37460C25087CDD9A37B6B87FCB0A5"
     },
     "MAX32670": {
         "inherits": [
@@ -6632,8 +6531,11 @@
         ],
         "detect_code": [
             "0424"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/uploads/sadik_maxim/max32670evkit_daplink_fw_update.png"
     },
+
+    // SiLabs EFM32 Targets---------------------------------------------------------------------------------------------
     "EFM32": {
         "inherits": [
             "Target"
@@ -6649,52 +6551,12 @@
         ],
         "public": false
     },
-    "EFM32GG990F1024": {
+    "MCU_EFM32_GECKO": { // Family target for EFM32 Gecko MCUs
         "inherits": [
-            "EFM32"
+            "Target"
         ],
-        "extra_labels_add": [
-            "EFM32GG",
-            "1024K",
-            "SL_AES"
-        ],
-        "core": "Cortex-M3",
-        "macros_add": [
-            "EFM32GG990F1024"
-        ],
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "device_name": "EFM32GG990F1024",
-        "public": false,
-        "bootloader_supported": true,
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        },
-        "supported_application_profiles": [
-            "full", "bare-metal"
-        ]
-    },
-    "EFM32GG_STK3700": {
-        "inherits": [
-            "EFM32GG990F1024"
-        ],
-        "progen": {
-            "target": "efm32gg-stk"
-        },
         "device_has": [
             "ANALOGIN",
-            "ANALOGOUT",
             "I2C",
             "I2CSLAVE",
             "I2C_ASYNCH",
@@ -6713,12 +6575,11 @@
             "SPISLAVE",
             "SPI_ASYNCH",
             "USTICKER",
+            "TRNG",
             "FLASH",
-            "ITM",
             "MPU",
             "WATCHDOG"
         ],
-        "forced_reset_timeout": 2,
         "config": {
             "hf_clock_src": {
                 "help": "Value: HFXO for external crystal, HFRCO for internal RC oscillator",
@@ -6742,14 +6603,71 @@
             },
             "hfrco_clock_freq": {
                 "help": "Value: Frequency in hertz, must correspond to setting of hfrco_band_select",
-                "value": "21000000",
+                "value": "32000000",
                 "macro_name": "HFRCO_FREQUENCY"
-            },
+            }
+        },
+        "bootloader_supported": true,
+        "supported_c_libs": {
+            "arm": [
+                "std",
+                "small"
+            ],
+            "gcc_arm": [
+                "std",
+                "small"
+            ]
+        },
+        "supported_application_profiles": [
+            "full", "bare-metal"
+        ],
+        "public": false,
+        "is_mcu_family_target": true
+    },
+    "EFM32GG990F1024": {
+        "inherits": [
+            "MCU_EFM32_GECKO"
+        ],
+        "extra_labels_add": [
+            "EFM32GG",
+            "1024K",
+            "SL_AES"
+        ],
+        "device_has_add": [
+            "ANALOGOUT"
+        ],
+        "config": {
             "hfrco_band_select": {
                 "help": "Value: One of _CMU_HFRCOCTRL_BAND_28MHZ, _CMU_HFRCOCTRL_BAND_21MHZ, _CMU_HFRCOCTRL_BAND_14MHZ, _CMU_HFRCOCTRL_BAND_11MHZ, _CMU_HFRCOCTRL_BAND_7MHZ, _CMU_HFRCOCTRL_BAND_1MHZ. Be sure to set hfrco_clock_freq accordingly!",
                 "value": "_CMU_HFRCOCTRL_BAND_21MHZ",
                 "macro_name": "HFRCO_FREQUENCY_ENUM"
-            },
+            }
+        },
+        "core": "Cortex-M3",
+        "macros_add": [
+            "EFM32GG990F1024"
+        ],
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "release_versions": [
+            "5"
+        ],
+        "device_name": "EFM32GG990F1024",
+        "public": false,
+        "supported_application_profiles": [
+            "full", "bare-metal"
+        ]
+    },
+    "EFM32GG_STK3700": { // AKA EFM32 Giant Gecko
+        "inherits": [
+            "EFM32GG990F1024"
+        ],
+        "progen": {
+            "target": "efm32gg-stk"
+        },
+        "forced_reset_timeout": 2,
+        "config": {
             "board_controller_enable": {
                 "help": "Pin to pull high for enabling the USB serial port",
                 "value": "PF7",
@@ -6758,11 +6676,15 @@
         },
         "detect_code": [
             "2015"
-        ]
+        ],
+        "overrides": {
+            "hfrco_clock_freq": "21000000"
+        },
+        "image_url": "https://www.silabs.com/content/dam/siliconlabs/images/products/microcontrollers/32-bit_mcus/giant_gecko/giant-gecko-starter-kit.jpg"
     },
     "EFR32MG12P332F1024GL125": {
         "inherits": [
-            "EFM32"
+            "MCU_EFM32_GECKO"
         ],
         "extra_labels_add": [
             "EFR32MG12",
@@ -6771,6 +6693,17 @@
             "SL_RAIL",
             "SL_CRYPTO"
         ],
+        "device_has_add": [
+            "802_15_4_PHY",
+            "CRC"
+        ],
+        "config": {
+            "hfrco_band_select": {
+                "help": "Value: One of cmuHFRCOFreq_1M0Hz, cmuHFRCOFreq_2M0Hz, cmuHFRCOFreq_4M0Hz, cmuHFRCOFreq_7M0Hz, cmuHFRCOFreq_13M0Hz, cmuHFRCOFreq_16M0Hz, cmuHFRCOFreq_19M0Hz, cmuHFRCOFreq_26M0Hz, cmuHFRCOFreq_32M0Hz, cmuHFRCOFreq_38M0Hz. Be sure to set hfrco_clock_freq accordingly!",
+                "value": "cmuHFRCOFreq_32M0Hz",
+                "macro_name": "HFRCO_FREQUENCY_ENUM"
+            }
+        },
         "core": "Cortex-M4F",
         "macros_add": [
             "EFR32MG12P332F1024GL125"
@@ -6783,102 +6716,46 @@
         ],
         "device_name": "EFR32MG12P332F1024GL125",
         "public": false,
-        "bootloader_supported": true,
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        },
         "supported_application_profiles": [
             "full", "bare-metal"
         ]
     },
-    "TB_SENSE_12": {
+    "TB_SENSE_12": { // AKA Thunderboard Sense 2
         "inherits": [
             "EFR32MG12P332F1024GL125"
         ],
-        "device_name": "EFR32MG12P332F1024GL125",
-        "device_has": [
-            "802_15_4_PHY",
-            "ANALOGIN",
-            "CRC",
-            "I2C",
-            "I2CSLAVE",
-            "I2C_ASYNCH",
-            "INTERRUPTIN",
-            "LPTICKER",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "RESET_REASON",
-            "RTC",
-            "SERIAL",
-            "SERIAL_ASYNCH",
-            "SLEEP",
-            "SPI",
-            "SPISLAVE",
-            "SPI_ASYNCH",
-            "USTICKER",
-            "TRNG",
-            "FLASH",
-            "MPU",
-            "WATCHDOG"
-        ],
         "forced_reset_timeout": 5,
-        "config": {
-            "hf_clock_src": {
-                "help": "Value: HFXO for external crystal, HFRCO for internal RC oscillator",
-                "value": "HFXO",
-                "macro_name": "CORE_CLOCK_SOURCE"
-            },
-            "hfxo_clock_freq": {
-                "help": "Value: External crystal frequency in hertz",
-                "value": "38400000",
-                "macro_name": "HFXO_FREQUENCY"
-            },
-            "lf_clock_src": {
-                "help": "Value: LFXO for external crystal, LFRCO for internal RC oscillator, ULFRCO for internal 1KHz RC oscillator",
-                "value": "LFXO",
-                "macro_name": "LOW_ENERGY_CLOCK_SOURCE"
-            },
-            "lfxo_clock_freq": {
-                "help": "Value: External crystal frequency in hertz",
-                "value": "32768",
-                "macro_name": "LFXO_FREQUENCY"
-            },
-            "hfrco_clock_freq": {
-                "help": "Value: Frequency in hertz, must correspond to setting of hfrco_band_select",
-                "value": "32000000",
-                "macro_name": "HFRCO_FREQUENCY"
-            },
-            "hfrco_band_select": {
-                "help": "Value: One of cmuHFRCOFreq_1M0Hz, cmuHFRCOFreq_2M0Hz, cmuHFRCOFreq_4M0Hz, cmuHFRCOFreq_7M0Hz, cmuHFRCOFreq_13M0Hz, cmuHFRCOFreq_16M0Hz, cmuHFRCOFreq_19M0Hz, cmuHFRCOFreq_26M0Hz, cmuHFRCOFreq_32M0Hz, cmuHFRCOFreq_38M0Hz. Be sure to set hfrco_clock_freq accordingly!",
-                "value": "cmuHFRCOFreq_32M0Hz",
-                "macro_name": "HFRCO_FREQUENCY_ENUM"
-            }
-        },
         "overrides": {
-            "network-default-interface-type": "MESH"
+            "network-default-interface-type": "MESH",
+            "hfxo_clock_freq": "38400000",
         },
         "detect_code": [
             "2041"
-        ]
+        ],
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2145/MFG_SLTB004A.jpg"
     },
     "EFM32GG11B820F2048GL192": {
         "inherits": [
-            "EFM32"
+            "MCU_EFM32_GECKO"
         ],
         "extra_labels_add": [
             "EFM32GG11",
             "2048K",
             "SL_CRYPTO"
         ],
+        "device_has_add": [
+            "CAN",
+            "CRC",
+            "EMAC",
+            "ITM"
+        ],
+        "config": {
+            "hfrco_band_select": {
+                "help": "Value: One of cmuHFRCOFreq_1M0Hz, cmuHFRCOFreq_2M0Hz, cmuHFRCOFreq_4M0Hz, cmuHFRCOFreq_7M0Hz, cmuHFRCOFreq_13M0Hz, cmuHFRCOFreq_16M0Hz, cmuHFRCOFreq_19M0Hz, cmuHFRCOFreq_26M0Hz, cmuHFRCOFreq_32M0Hz, cmuHFRCOFreq_38M0Hz. Be sure to set hfrco_clock_freq accordingly!",
+                "value": "cmuHFRCOFreq_32M0Hz",
+                "macro_name": "HFRCO_FREQUENCY_ENUM"
+            }
+        },
         "core": "Cortex-M4F",
         "macros_add": [
             "EFM32GG11B820F2048GL192"
@@ -6891,17 +6768,6 @@
         ],
         "device_name": "EFM32GG11B820F2048GL192",
         "public": false,
-        "bootloader_supported": true,
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        },
         "supported_application_profiles": [
             "full", "bare-metal"
         ]
@@ -6910,69 +6776,8 @@
         "inherits": [
             "EFM32GG11B820F2048GL192"
         ],
-        "device_name": "EFM32GG11B820F2048GL192",
-        "device_has": [
-            "ANALOGIN",
-            "CAN",
-            "CRC",
-            "EMAC",
-            "I2C",
-            "I2CSLAVE",
-            "I2C_ASYNCH",
-            "INTERRUPTIN",
-            "ITM",
-            "LPTICKER",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "QSPI",
-            "RESET_REASON",
-            "RTC",
-            "SERIAL",
-            "SERIAL_ASYNCH",
-            "SLEEP",
-            "SPI",
-            "SPISLAVE",
-            "SPI_ASYNCH",
-            "USTICKER",
-            "TRNG",
-            "FLASH",
-            "MPU",
-            "WATCHDOG"
-        ],
         "forced_reset_timeout": 5,
         "config": {
-            "hf_clock_src": {
-                "help": "Value: HFXO for external crystal, HFRCO for internal RC oscillator",
-                "value": "HFXO",
-                "macro_name": "CORE_CLOCK_SOURCE"
-            },
-            "hfxo_clock_freq": {
-                "help": "Value: External crystal frequency in hertz",
-                "value": "50000000",
-                "macro_name": "HFXO_FREQUENCY"
-            },
-            "lf_clock_src": {
-                "help": "Value: LFXO for external crystal, LFRCO for internal RC oscillator, ULFRCO for internal 1KHz RC oscillator",
-                "value": "LFXO",
-                "macro_name": "LOW_ENERGY_CLOCK_SOURCE"
-            },
-            "lfxo_clock_freq": {
-                "help": "Value: External crystal frequency in hertz",
-                "value": "32768",
-                "macro_name": "LFXO_FREQUENCY"
-            },
-            "hfrco_clock_freq": {
-                "help": "Value: Frequency in hertz, must correspond to setting of hfrco_band_select",
-                "value": "32000000",
-                "macro_name": "HFRCO_FREQUENCY"
-            },
-            "hfrco_band_select": {
-                "help": "Value: One of cmuHFRCOFreq_1M0Hz, cmuHFRCOFreq_2M0Hz, cmuHFRCOFreq_4M0Hz, cmuHFRCOFreq_7M0Hz, cmuHFRCOFreq_13M0Hz, cmuHFRCOFreq_16M0Hz, cmuHFRCOFreq_19M0Hz, cmuHFRCOFreq_26M0Hz, cmuHFRCOFreq_32M0Hz, cmuHFRCOFreq_38M0Hz. Be sure to set hfrco_clock_freq accordingly!",
-                "value": "cmuHFRCOFreq_32M0Hz",
-                "macro_name": "HFRCO_FREQUENCY_ENUM"
-            },
             "board_controller_enable": {
                 "help": "Pin to pull high for enabling the USB serial port",
                 "value": "PE1",
@@ -6985,12 +6790,16 @@
             }
         },
         "overrides": {
-            "network-default-interface-type": "ETHERNET"
+            "network-default-interface-type": "ETHERNET",
+            "hfxo_clock_freq": "50000000"
         },
         "detect_code": [
             "2042"
-        ]
+        ],
+        "image_url": "https://www.silabs.com/content/dam/siliconlabs/images/products/microcontrollers/32-bit_mcus/giant-gecko-gg11/efr32gg11-starter-kit.jpg"
     },
+
+    // Nordic NRF52832 Targets------------------------------------------------------------------------------------------
     "MCU_NRF52832": {
         "inherits": [
             "Target"
@@ -7065,7 +6874,6 @@
                 "value": 32
             }
         },
-        "OUTPUT_EXT": "hex",
         "is_disk_virtual": true,
         "supported_toolchains": [
             "GCC_ARM"
@@ -7086,7 +6894,8 @@
                 "std",
                 "small"
             ]
-        }
+        },
+        "is_mcu_family_target": true
     },
     "NRF52_DK": {
         "supported_form_factors": [
@@ -7122,7 +6931,8 @@
         ],
         "detect_code": [
             "1101"
-        ]
+        ],
+        "image_url": "https://www.nordicsemi.com/-/media/Images/Products/DevKits/nRF52-Series/nRF52-DK/nRF52-DK-render_prod-page.png?h=551&iar=0&mw=350&w=350&hash=DB87685680509C17DF15906A7DC9A289"
     },
     "SDT52832B": {
         "inherits": [
@@ -7134,8 +6944,37 @@
         "detect_code": [
             "3104"
         ],
-        "device_name": "nRF52832_xxAA"
+        "device_name": "nRF52832_xxAA",
+        "image_url": "https://os.mbed.com/media/cache/platforms/SDT52832B_size.png.250x250_q85.png"
     },
+    "ARDUINO_NICLA_SENSE_ME": {
+        "inherits": ["MCU_NRF52832"],
+        "components_add": [
+            "SPIF"
+        ],
+        "device_name": "nRF52832_xxAA",
+        "macros_add": [
+            "CONFIG_GPIO_AS_PINRESET",
+            "CONFIG_NFCT_PINS_AS_GPIOS",
+            "NRF52_PAN_12",
+            "NRF52_PAN_15",
+            "NRF52_PAN_20",
+            "NRF52_PAN_30",
+            "NRF52_PAN_31",
+            "NRF52_PAN_36",
+            "NRF52_PAN_51",
+            "NRF52_PAN_53",
+            "NRF52_PAN_54",
+            "NRF52_PAN_55",
+            "NRF52_PAN_58",
+            "NRF52_PAN_62",
+            "NRF52_PAN_63",
+            "NRF52_PAN_64"
+        ],
+        "image_url": "https://store-usa.arduino.cc/cdn/shop/products/ABX00050_03.front_1000x750.jpg?v=1631089821"
+    },
+
+    // Nordic NRF52840 Targets------------------------------------------------------------------------------------------
     "MCU_NRF52840": {
         "inherits": [
             "Target"
@@ -7277,7 +7116,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://www.nordicsemi.com/-/media/Images/Products/DevKits/nRF52-Series/nRF52840-DK/nRF52840-DK/nRF52840-DK-prod-page.png?h=750&iar=0&mw=350&w=350&hash=3DB140F6AE70CAE159FD911D8E6E9109"
     },
     "ARDUINO_NANO33BLE": {
         "inherits": [
@@ -7301,7 +7141,8 @@
             "console-usb": true,
             "console-uart": false
         },
-        "OUTPUT_EXT": "bin"
+        "OUTPUT_EXT": "bin",
+        "image_url": "https://m.media-amazon.com/images/I/61bGcUKwSzL.jpg"
     },
     "ARDUINO_NANO33BLE_SWD": {
         "inherits": [
@@ -7320,6 +7161,54 @@
             "MBED_APP_SIZE=0xf0000"
         ]
     },
+    "EP_AGORA": { // AKA Embedded Planet Agora (w/ dev kit for flashing and debugging) https://www.embeddedplanet.com/agora/
+        "inherits": [
+            "MCU_NRF52840"
+        ],
+        "supported_form_factors": [],
+        "macros_add": [
+            "CONFIG_GPIO_AS_PINRESET"
+        ],
+        "detect_code": [
+            "2600"
+        ],
+        "config": {
+            "enable-objects-extensions": {
+                "help": "Enable inclusion of objects_extensions.h",
+                "value": false
+            }
+        },
+        "components_add": [
+            "TELIT_ME910"
+        ],
+        "image_url": "https://www.embeddedplanet.com/wp-content/uploads/2019/02/EPM2M-AG-CELL-page.jpg"
+    },
+    "EP_ATLAS": { // AKA Embedded Planet Atlas board. https://www.embeddedplanet.com/chronos/#atlas
+        "inherits": ["MCU_NRF52840"],
+        "device_name": "nRF52840_xxAA",
+        "supported_form_factors": [],
+        "config": {
+            "modem_is_on_board": {
+                "help": "Value: Tells the build system that the modem is on-board as oppose to a plug-in shield/module.",
+                "value": 1,
+                "macro_name": "MODEM_ON_BOARD"
+            },
+            "modem_data_connection_type": {
+                "help": "Value: Defines how an on-board modem is wired up to the MCU, e.g., data connection can be a UART or USB and so forth.",
+                "value": 1,
+                "macro_name": "MODEM_ON_BOARD_UART"
+            }
+        },
+        "components_add": ["SPIF", "TELIT_ME310"],
+        "components_remove": ["QSPIF"],
+        "release_versions": ["5"],
+        "macros_add": [
+            "CONFIG_GPIO_AS_PINRESET"
+        ],
+        "image_url": "https://www.embeddedplanet.com/wp-content/uploads/2021/04/Atlas_4-768x719.png"
+    },
+
+    // Nuvoton Targets -------------------------------------------------------------------------------------------------
     "NUMAKER_PFM_NUC472": {
         "core": "Cortex-M4F",
         "default_toolchain": "ARM",
@@ -7432,7 +7321,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/uploads/MACRUM/img_9240.jpg"
     },
     "NUMAKER_PFM_M453": {
         "core": "Cortex-M4F",
@@ -7552,7 +7442,8 @@
         },
         "detect_code": [
             "1303"
-        ]
+        ],
+        "image_url": "https://os.mbed.com/media/cache/platforms/Nu-mbed_M453_board_square.jpg.250x250_q85.jpg"
     },
     "NUMAKER_PFM_NANO130": {
         "core": "Cortex-M0",
@@ -7665,7 +7556,8 @@
         },
         "detect_code": [
             "1306"
-        ]
+        ],
+        "image_url": "https://www.nuvoton.com/export/sites/nuvoton/images/Microcontrollers/NuMaker-PFM-M487KM.png_576589920.png"
     },
     "MCU_M460": {
         "core": "Cortex-M4F",
@@ -7852,7 +7744,8 @@
             "hbi-mfp-reg-list": "0x40000534, 0x4000057C, 0x40000590, 0x40000594",
             "hbi-mfp-reg-msk-list": "0xFFFFFF00, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF",
             "hbi-mfp-reg-val-list": "0x10101000, 0x10101010, 0x10100000, 0x10101010"
-        }
+        },
+        "image_url": "https://os.mbed.com/media/cache/platforms/NuMaker-IoT-M467_V1.1_F.png.250x250_q85.png"
     },
     "MCU_M480": {
         "core": "Cortex-M4F",
@@ -8014,7 +7907,8 @@
             "usb-uart-rx": "PB_12",
             "spim-ccm-enable": 1,
             "network-default-interface-type": "ETHERNET"
-        }
+        },
+        "image_url": "https://os.mbed.com/media/cache/platforms/NuMaker-PFM-M487.png.250x250_q85.png"
     },
     "NUMAKER_IOT_M487": {
         "inherits": [
@@ -8035,181 +7929,8 @@
             "usb-uart-rx": "PB_12",
             "spim-ccm-enable": 1,
             "network-default-interface-type": "WIFI"
-        }
-    },
-    "TMPM46B": {
-        "inherits": [
-            "Target"
-        ],
-        "core": "Cortex-M4F",
-        "is_disk_virtual": true,
-        "extra_labels": [
-            "TOSHIBA"
-        ],
-        "macros": [
-            "__TMPM46B__"
-        ],
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "device_has": [
-            "USTICKER",
-            "ANALOGIN",
-            "INTERRUPTIN",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "RESET_REASON",
-            "RTC",
-            "SERIAL",
-            "SERIAL_FC",
-            "SPI",
-            "SPISLAVE",
-            "SPI_ASYNCH",
-            "I2C",
-            "I2CSLAVE",
-            "I2C_ASYNCH",
-            "TRNG",
-            "FLASH",
-            "SLEEP"
-        ],
-        "device_name": "TMPM46BF10FG",
-        "detect_code": [
-            "7013"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "bootloader_supported": true,
-        "supported_application_profiles" : ["full", "bare-metal"],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        }
-    },
-    "ARM_FM": {
-        "inherits": [
-            "Target"
-        ],
-        "public": false,
-        "extra_labels": [
-            "ARM_FM"
-        ]
-    },
-    "FVP_MPS2": {
-        "inherits": [
-            "ARM_FM"
-        ],
-        "features_add": [
-            "PSA"
-        ],
-        "extra_labels_add": [
-            "MBED_PSA_SRV"
-        ],
-        "public": false,
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "OUTPUT_EXT": "elf",
-        "device_has": [
-            "AACI",
-            "ANALOGIN",
-            "CLCD",
-            "EMAC",
-            "FLASH",
-            "I2C",
-            "INTERRUPTIN",
-            "LPTICKER",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "SERIAL",
-            "SLEEP",
-            "SPI",
-            "SPISLAVE",
-            "TSC",
-            "TRNG",
-            "USTICKER"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "overrides": {
-            "network-default-interface-type": "ETHERNET"
         },
-        "supported_application_profiles" : ["full", "bare-metal"],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        },
-        "is_mcu_family_target": true
-    },
-    "FVP_MPS2_M0": {
-        "inherits": [
-            "FVP_MPS2"
-        ],
-        "core": "Cortex-M0",
-        "macros_add": [
-            "CMSDK_CM0"
-        ]
-    },
-    "FVP_MPS2_M0P": {
-        "inherits": [
-            "FVP_MPS2"
-        ],
-        "core": "Cortex-M0+",
-        "macros_add": [
-            "CMSDK_CM0plus"
-        ]
-    },
-    "FVP_MPS2_M3": {
-        "inherits": [
-            "FVP_MPS2"
-        ],
-        "core": "Cortex-M3",
-        "macros_add": [
-            "CMSDK_CM3"
-        ],
-        "device_has_add": [
-            "MPU"
-        ]
-    },
-    "FVP_MPS2_M4": {
-        "inherits": [
-            "FVP_MPS2"
-        ],
-        "core": "Cortex-M4F",
-        "macros_add": [
-            "CMSDK_CM4"
-        ],
-        "device_has_add": [
-            "MPU"
-        ]
-    },
-    "FVP_MPS2_M7": {
-        "inherits": [
-            "FVP_MPS2"
-        ],
-        "core": "Cortex-M7FD",
-        "macros_add": [
-            "CMSDK_CM7"
-        ],
-        "device_has_add": [
-            "MPU"
-        ]
+        "image_url": "https://direct.nuvoton.com/989/numaker-iot-m487.jpg"
     },
     "MCU_M2354": {
         "inherits": [
@@ -8325,7 +8046,7 @@
         "forced_reset_timeout": 5,
         "is_mcu_family_target": true
     },
-    "NU_M2354": {
+    "NU_M2354": { // AKA NUMAKER-M2354
         "inherits": [
             "MCU_M2354"
         ],
@@ -8357,7 +8078,8 @@
             "ARMCLANG",
             "GNUARM"
         ],
-        "tfm_delivery_dir": "TARGET_NUVOTON/TARGET_M2354/TARGET_TFM/TARGET_NU_M2354/COMPONENT_TFM_S_FW"
+        "tfm_delivery_dir": "TARGET_NUVOTON/TARGET_M2354/TARGET_TFM/TARGET_NU_M2354/COMPONENT_TFM_S_FW",
+        "image_url": "https://direct.nuvoton.com/1085-large_default/numaker-m2354.jpg"
     },
     "MCU_M251": {
         "core": "Cortex-M23",
@@ -8493,7 +8215,7 @@
         ],
         "is_mcu_family_target": true
     },
-    "NUMAKER_IOT_M252": {
+    "NUMAKER_IOT_M252": { // AKA NuMaker-LoRaD-M252
         "inherits": [
             "MCU_M251"
         ],
@@ -8509,54 +8231,65 @@
             "usb-uart": "UART_0",
             "usb-uart-tx": "PB_13",
             "usb-uart-rx": "PB_12"
-        }
+        },
+        "image_url": "https://os.mbed.com/media/cache/platforms/NuMaker-LoRaD-M252_V1.0_dAwfIUu.jpg.250x250_q85.jpg"
     },
-    "TMPM4G9": {
+
+    // ARM Fast Model (FM) Fixed Virtual Platforms (FVPs) --------------------------------------------------------------
+    // Unlike the MPS2 targets, which are real targets that can be run on an FPGA, Fast Models are entirely
+    // software based.  They simulate an ARM core, the associated peripherals, and hardware connected to the MCU.
+
+    "ARM_FM": {
         "inherits": [
             "Target"
         ],
-        "core": "Cortex-M4F",
-        "is_disk_virtual": true,
+        "public": false,
         "extra_labels": [
-            "TOSHIBA"
+            "ARM_FM"
         ],
-        "macros": [
-            "__TMPM4G9__"
+        "is_mcu_target_family": true
+    },
+    "FVP_MPS2": {
+        "inherits": [
+            "ARM_FM"
         ],
+        "features_add": [
+            "PSA"
+        ],
+        "extra_labels_add": [
+            "MBED_PSA_SRV"
+        ],
+        "public": false,
         "supported_toolchains": [
             "GCC_ARM"
         ],
+        "OUTPUT_EXT": "elf",
         "device_has": [
+            "AACI",
             "ANALOGIN",
-            "ANALOGOUT",
+            "CLCD",
+            "EMAC",
+            "FLASH",
+            "I2C",
             "INTERRUPTIN",
+            "LPTICKER",
             "PORTIN",
             "PORTINOUT",
             "PORTOUT",
-            "PWMOUT",
-            "RESET_REASON",
             "SERIAL",
-            "SERIAL_FC",
+            "SLEEP",
             "SPI",
             "SPISLAVE",
-            "SPI_ASYNCH",
-            "I2C",
-            "I2CSLAVE",
-            "I2C_ASYNCH",
-            "RTC",
-            "FLASH",
-            "SLEEP",
-            "USTICKER",
-            "MPU"
-        ],
-        "device_name": "TMPM4G9F15FG",
-        "detect_code": [
-            "7015"
+            "TSC",
+            "TRNG",
+            "USTICKER"
         ],
         "release_versions": [
             "5"
         ],
-        "bootloader_supported": true,
+        "overrides": {
+            "network-default-interface-type": "ETHERNET"
+        },
         "supported_application_profiles" : ["full", "bare-metal"],
         "supported_c_libs": {
             "arm": [
@@ -8567,8 +8300,65 @@
                 "std",
                 "small"
             ]
-        }
+        },
+        "is_mcu_family_target": true
     },
+    "FVP_MPS2_M0": {
+        "inherits": [
+            "FVP_MPS2"
+        ],
+        "core": "Cortex-M0",
+        "macros_add": [
+            "CMSDK_CM0"
+        ]
+    },
+    "FVP_MPS2_M0P": {
+        "inherits": [
+            "FVP_MPS2"
+        ],
+        "core": "Cortex-M0+",
+        "macros_add": [
+            "CMSDK_CM0plus"
+        ]
+    },
+    "FVP_MPS2_M3": {
+        "inherits": [
+            "FVP_MPS2"
+        ],
+        "core": "Cortex-M3",
+        "macros_add": [
+            "CMSDK_CM3"
+        ],
+        "device_has_add": [
+            "MPU"
+        ]
+    },
+    "FVP_MPS2_M4": {
+        "inherits": [
+            "FVP_MPS2"
+        ],
+        "core": "Cortex-M4F",
+        "macros_add": [
+            "CMSDK_CM4"
+        ],
+        "device_has_add": [
+            "MPU"
+        ]
+    },
+    "FVP_MPS2_M7": {
+        "inherits": [
+            "FVP_MPS2"
+        ],
+        "core": "Cortex-M7FD",
+        "macros_add": [
+            "CMSDK_CM7"
+        ],
+        "device_has_add": [
+            "MPU"
+        ]
+    },
+
+    // Cypress (now Infineon) PSOC6 Targets ----------------------------------------------------------------------------
     "MCU_PSOC6": {
         "inherits": [
             "Target"
@@ -8710,7 +8500,8 @@
         ],
         "overrides": {
             "network-default-interface-type": "WIFI"
-        }
+        },
+        "image_url": "https://www.mouser.com/images/cypresssemiconductor/lrg/CY8CPROTO-062-4343W_t.jpg"
     },
     "CY8CKIT_062S2_43012": {
         "inherits": [
@@ -8747,7 +8538,8 @@
         ],
         "overrides": {
             "network-default-interface-type": "WIFI"
-        }
+        },
+        "image_url": "https://iotexpert.com/wp-content/uploads/2021/02/Screen-Shot-2021-02-24-at-6.55.57-AM-1024x713.jpg"
     },
     "CY8CPROTO_062S3_4343W": {
         "inherits": [
@@ -8782,9 +8574,10 @@
         ],
         "overrides": {
             "network-default-interface-type": "WIFI"
-        }
+        },
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/4218/MFG_CY8CPROTO-062S3-4343W.jpg"
     },
-    "CY8CKIT_062_WIFI_BT": {
+    "CY8CKIT_062_WIFI_BT": { // AKA PSoC 6 WiFi-BT Pioneer Kit
         "inherits": [
             "MCU_PSOC6_M4"
         ],
@@ -8826,9 +8619,10 @@
         "overrides": {
             "network-default-interface-type": "WIFI"
         },
-        "program_cycle_s": 10
+        "program_cycle_s": 10,
+        "image_url": "https://os.mbed.com/media/cache/platforms/P6_WiFi_Pionner_Kit.PNG.250x250_q85.png"
     },
-    "CY8CKIT_062_BLE": {
+    "CY8CKIT_062_BLE": { // AKA PSoC 6 BLE Pioneer Kit
         "inherits": [
             "MCU_PSOC6_M4"
         ],
@@ -8857,9 +8651,10 @@
                 512
             ]
         ],
-        "bootloader_supported": false
+        "bootloader_supported": false,
+        "image_url": "https://os.mbed.com/media/cache/platforms/SS2_3797_with_out_USB_cable.jpg.250x250_q85.jpg"
     },
-    "CYW9P62S1_43438EVB_01": {
+    "CYW9P62S1_43438EVB_01": { // AKA CYW9P62S1-43438EVB-01 PSoC 62S1 Wi-Fi BT Pioneer Kit
         "inherits": [
             "MCU_PSOC6_M4"
         ],
@@ -8901,9 +8696,12 @@
         "overrides": {
             "network-default-interface-type": "WIFI"
         },
-        "program_cycle_s": 10
+        "program_cycle_s": 10,
+
+        // This is not a great picture but it's the best I could find...
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/424/MFG_CY8CKIT-062S2-43012.jpg"
     },
-    "CYW9P62S1_43012EVB_01": {
+    "CYW9P62S1_43012EVB_01": { // AKA CYW9P62S1-43012EVB-01 PSoC 62S1 Wi-Fi BT Pioneer Kit
         "inherits": [
             "MCU_PSOC6_M4"
         ],
@@ -8940,9 +8738,10 @@
         ],
         "overrides": {
             "network-default-interface-type": "WIFI"
-        }
+        },
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/4905/CYW9P62S1-43012EVB-01.jpg"
     },
-    "CY8CKIT064B0S2_4343W": {
+    "CY8CKIT064B0S2_4343W": { // AKA CY8CKIT-064B0S2-4343W PSoC 64 Secure Boot Wi-Fi BT Pioneer Kit
         "inherits": [
             "MCU_PSOC6_M4"
         ],
@@ -8992,9 +8791,11 @@
         "overrides": {
             "network-default-interface-type": "WIFI"
         },
-        "program_cycle_s": 10
+        "program_cycle_s": 10,
+        "device_name": "CYB0644ABZI-S2D44",
+        "image_url": "https://os.mbed.com/media/cache/platforms/SSP_8683_Ywwh0ix.jpg.250x250_q85.jpg"
     },
-    "CYTFM_064B0S2_4343W": {
+    "CYTFM_064B0S2_4343W": { // Same as
         "inherits": [
             "MCU_PSOC6_M4"
         ],
@@ -9059,213 +8860,9 @@
             "GNUARM"
         ],
         "tfm_delivery_dir": "TARGET_Cypress/TARGET_PSOC6/TARGET_CYTFM_064B0S2_4343W/COMPONENT_TFM_S_FW",
-        "TFM_OUTPUT_EXT": "hex"
-    },
-    // Also known as CYSBSYSKIT-DEV-01 Rapid IoT Connect Developer Kit
-    // However, as of 2024, I cannot find this board anywhere for sale, so it may be a candidate for removal.
-    "CYSBSYSKIT_01": {
-        "inherits": [
-            "MCU_PSOC6_M4"
-        ],
-        "components_add": [
-            "SCL",
-            "43012",
-            "CYW43XXX"
-        ],
-        "device_has_remove": [
-            "ANALOGOUT"
-        ],
-        "components_remove": [
-            "CM0P_SLEEP"
-        ],
-        "extra_labels_add": [
-            "PSOC6_02",
-            "MXCRYPTO_02"
-        ],
-        "macros_add": [
-            "CY8C624AFNI_S2D43"
-        ],
-        "macros_remove": [
-            "MBED_TICKLESS"
-        ],
-        "detect_code": [
-            "1912"
-        ],
-        "device_name": "CY8C624AFNI-S2D43",
-        "mbed_ram_start": "0x08080000",
-        "mbed_ram_size": "0x0007F800",
-        "mbed_rom_start": "0x10180000",
-        "mbed_rom_size": "0x80000",
-        "bootloader_supported": true,
-        "sectors": [
-            [
-                270008320,
-                512
-            ]
-        ],
-        "forced_reset_timeout": 5,
-        "post_binary_hook": {
-            "function": "PSOC6Code.complete"
-        },
-        "overrides": {
-            "network-default-interface-type": "WIFI",
-            "deep-sleep-latency": 0
-        },
-        "config": {
-            "np_cloud_disable": {
-                "help": "Value: Tells the np to connect to cloud or not",
-                "value": false
-            },
-            "np_wifi_enable": {
-                "help": "Value: Tells the np to connect to wifi with its network credentials or wait till cp provides network credentials to it",
-                "value": false
-            }
-        }
-    },
-    "GD32_Target": {
-        "inherits": [
-            "Target"
-        ],
-        "public": false,
-        "extra_labels_add": [
-            "GigaDevice"
-        ],
-        "supported_toolchains": [
-            "GCC_ARM"
-        ],
-        "device_has_add": [
-            "USTICKER",
-            "ANALOGIN",
-            "INTERRUPTIN",
-            "PORTIN",
-            "PORTINOUT",
-            "PORTOUT",
-            "PWMOUT",
-            "SERIAL"
-        ],
-        "supported_c_libs": {
-            "arm": [
-                "std",
-                "small"
-            ],
-            "gcc_arm": [
-                "std",
-                "small"
-            ]
-        },
-        "supported_application_profiles": [
-            "full", "bare-metal"
-        ]
-    },
-    "GD32_F307VG": {
-        "inherits": [
-            "GD32_Target"
-        ],
-        "supported_form_factors": [
-            "ARDUINO"
-        ],
-        "core": "Cortex-M4F",
-        "extra_labels_add": [
-            "GD32F30X",
-            "GD32F307VG",
-            "GD_EMAC"
-        ],
-        "device_has_add": [
-            "RTC",
-            "I2C",
-            "CAN",
-            "I2CSLAVE",
-            "ANALOGOUT",
-            "SPI",
-            "SPISLAVE",
-            "SERIAL_ASYNCH",
-            "SERIAL_FC",
-            "EMAC",
-            "FLASH",
-            "SLEEP",
-            "MPU"
-        ],
-        "detect_code": [
-            "1701"
-        ],
-        "macros_add": [
-            "GD32F30X_CL"
-        ],
-        "release_versions": [
-            "5"
-        ],
-        "overrides": {
-            "network-default-interface-type": "ETHERNET"
-        }
-    },
-    "GD32_F450ZI": {
-        "inherits": [
-            "GD32_Target"
-        ],
-        "supported_form_factors": [
-            "ARDUINO"
-        ],
-        "core": "Cortex-M4F",
-        "extra_labels_add": [
-            "GD32F4XX",
-            "GD32F450ZI",
-            "GD_EMAC",
-            "MBED_PSA_SRV"
-        ],
-        "features_add": [
-            "PSA"
-        ],
-        "device_has_add": [
-            "RTC",
-            "I2C",
-            "CAN",
-            "I2CSLAVE",
-            "ANALOGOUT",
-            "SPI",
-            "SPISLAVE",
-            "SERIAL_ASYNCH",
-            "SERIAL_FC",
-            "EMAC",
-            "FLASH",
-            "SLEEP",
-            "MPU",
-            "TRNG"
-        ],
-        "device_name": "GD32F450ZI",
-        "detect_code": [
-            "1702"
-        ],
-        "macros_add": [
-            "GD32F450"
-        ],
-        "bootloader_supported": true,
-        "release_versions": [
-            "5"
-        ],
-        "overrides": {
-            "network-default-interface-type": "ETHERNET"
-        }
-    },
-    "EP_AGORA": { // AKA Embedded Planet Agora (w/ dev kit for flashing and debugging) https://www.embeddedplanet.com/agora/
-        "inherits": [
-            "MCU_NRF52840"
-        ],
-        "supported_form_factors": [],
-        "macros_add": [
-            "CONFIG_GPIO_AS_PINRESET"
-        ],
-        "detect_code": [
-            "2600"
-        ],
-        "config": {
-            "enable-objects-extensions": {
-                "help": "Enable inclusion of objects_extensions.h",
-                "value": false
-            }
-        },
-        "components_add": [
-            "TELIT_ME910"
-        ]
+        "TFM_OUTPUT_EXT": "hex",
+        "device_name": "CYB0644ABZI-S2D44",
+        "image_url": "https://os.mbed.com/media/cache/platforms/SSP_8683_Ywwh0ix.jpg.250x250_q85.jpg"
     },
     "MCU_M261": {
         "core": "Cortex-M23",
@@ -9398,7 +8995,8 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "is_mcu_family_target": true
     },
     "NUMAKER_IOT_M263A": {
         "inherits": [
@@ -9412,66 +9010,146 @@
             "usb-uart": "UART_0",
             "usb-uart-tx": "PB_13",
             "usb-uart-rx": "PB_12"
-        }
+        },
+        "image_url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/3720/MFG_NuMaker-IoT-M263A_V2%28F%29.jpg"
     },
-    "S5JS100": {
+
+    // GigaDevices Targets ---------------------------------------------------------------------------------------------
+    "GD32_Target": {
         "inherits": [
             "Target"
         ],
-        "core": "Cortex-M7",
+        "public": false,
+        "extra_labels_add": [
+            "GigaDevice"
+        ],
         "supported_toolchains": [
             "GCC_ARM"
         ],
-        "default_toolchain": "GCC_ARM",
-        "extra_labels": [
-            "Samsung",
-            "SIDK_S5JS100"
-        ],
-        "macros": [
-            "CMSDK_CM7",
-            "MBED_MPU_CUSTOM",
-            "CMSIS_NVIC_VIRTUAL",
-            "MBEDTLS_CONFIG_HW_SUPPORT"
-        ],
-        "device_has": [
-            "INTERRUPTIN",
+        "device_has_add": [
             "USTICKER",
-            "SERIAL",
+            "ANALOGIN",
+            "INTERRUPTIN",
+            "PORTIN",
+            "PORTINOUT",
+            "PORTOUT",
+            "PWMOUT",
+            "SERIAL"
+        ],
+        "supported_c_libs": {
+            "arm": [
+                "std",
+                "small"
+            ],
+            "gcc_arm": [
+                "std",
+                "small"
+            ]
+        },
+        "supported_application_profiles": [
+            "full", "bare-metal"
+        ]
+    },
+
+    // As of Jun 2024, I cannot find the GD32 boards for sale anywhere.  Even people on the forums are wondering:
+    // https://os.mbed.com/questions/87215/GigaDevice-Board-GD32-F307VG-any-idea-wh/
+    // https://os.mbed.com/questions/86201/Purchase-this-board/
+    // But apparently it may still be available in Chinese language only shops.
+    "GD32_F307VG": {
+        "inherits": [
+            "GD32_Target"
+        ],
+        "supported_form_factors": [
+            "ARDUINO"
+        ],
+        "core": "Cortex-M4F",
+        "extra_labels_add": [
+            "GD32F30X",
+            "GD32F307VG",
+            "GD_EMAC"
+        ],
+        "device_has_add": [
+            "RTC",
+            "I2C",
+            "CAN",
+            "I2CSLAVE",
+            "ANALOGOUT",
+            "SPI",
+            "SPISLAVE",
+            "SERIAL_ASYNCH",
+            "SERIAL_FC",
+            "EMAC",
+            "FLASH",
             "SLEEP",
-            "TRNG"
+            "MPU"
+        ],
+        "detect_code": [
+            "1701"
+        ],
+        "macros_add": [
+            "GD32F30X_CL"
         ],
         "release_versions": [
             "5"
         ],
-        "detect_code": [
-            "3701"
-        ]
-    },
-    "EP_ATLAS": { // AKA Embedded Planet Atlas board. https://www.embeddedplanet.com/chronos/#atlas
-        "inherits": ["MCU_NRF52840"],
-        "device_name": "nRF52840_xxAA",
-        "supported_form_factors": [],
-        "config": {
-            "modem_is_on_board": {
-                "help": "Value: Tells the build system that the modem is on-board as oppose to a plug-in shield/module.",
-                "value": 1,
-                "macro_name": "MODEM_ON_BOARD"
-            },
-            "modem_data_connection_type": {
-                "help": "Value: Defines how an on-board modem is wired up to the MCU, e.g., data connection can be a UART or USB and so forth.",
-                "value": 1,
-                "macro_name": "MODEM_ON_BOARD_UART"
-            }
+        "overrides": {
+            "network-default-interface-type": "ETHERNET"
         },
-        "components_add": ["SPIF", "TELIT_ME310"],
-        "components_remove": ["QSPIF"],
-        "release_versions": ["5"],
-        "macros_add": [
-            "CONFIG_GPIO_AS_PINRESET"
-        ],
-        "image_url": "https://www.embeddedplanet.com/wp-content/uploads/2021/04/Atlas_4-768x719.png"
+        "image_url": "https://os.mbed.com/media/uploads/Ray_Chen/307-1.png"
     },
-    "S1SBP6A": {
+    "GD32_F450ZI": {
+        "inherits": [
+            "GD32_Target"
+        ],
+        "supported_form_factors": [
+            "ARDUINO"
+        ],
+        "core": "Cortex-M4F",
+        "extra_labels_add": [
+            "GD32F4XX",
+            "GD32F450ZI",
+            "GD_EMAC",
+            "MBED_PSA_SRV"
+        ],
+        "features_add": [
+            "PSA"
+        ],
+        "device_has_add": [
+            "RTC",
+            "I2C",
+            "CAN",
+            "I2CSLAVE",
+            "ANALOGOUT",
+            "SPI",
+            "SPISLAVE",
+            "SERIAL_ASYNCH",
+            "SERIAL_FC",
+            "EMAC",
+            "FLASH",
+            "SLEEP",
+            "MPU",
+            "TRNG"
+        ],
+        "device_name": "GD32F450ZI",
+        "detect_code": [
+            "1702"
+        ],
+        "macros_add": [
+            "GD32F450"
+        ],
+        "bootloader_supported": true,
+        "release_versions": [
+            "5"
+        ],
+        "overrides": {
+            "network-default-interface-type": "ETHERNET"
+        },
+        "image_url": "https://os.mbed.com/media/cache/platforms/2-1_W6zHQ3F.jpg.250x250_q85.jpg"
+    },
+
+    // Samsung Targets -------------------------------------------------------------------------------------------------
+
+    "S1SBP6A": { // AKA Samsung Bio-Processor S1SBP6A
         "inherits": ["Target"],
         "core": "Cortex-M4F",
         "supported_toolchains": [
@@ -9508,8 +9186,12 @@
         },
         "supported_application_profiles": [
             "full", "bare-metal"
-        ]
+        ],
+        "device_name": "S1SBP6A",
+        "image_url": "https://os.mbed.com/media/uploads/heuisam/pinout2.jpg"
     },
+
+    // Ambiq Micro Targets ---------------------------------------------------------------------------------------------
     "FAMILY_Apollo3": {
         "inherits": ["Target"],
         "core": "Cortex-M4F",
@@ -9560,39 +9242,156 @@
         "device_name": "AMA3B1KK-KBR",
         "is_mcu_family_target": true
     },
-    "SFE_ARTEMIS": {
-        "inherits": ["AMA3B1KK"]
+    "SFE_ARTEMIS": { // AKA SparkFun RedBoard Artemis
+        "inherits": ["AMA3B1KK"],
+        "image_url": "https://cdn.sparkfun.com/r/455-455/assets/parts/1/4/0/1/9/15444-SparkFun_RedBoard_Artemis-01.jpg"
     },
-    "SFE_ARTEMIS_ATP": {
-        "inherits": ["AMA3B1KK"]
+    "SFE_ARTEMIS_ATP": { // AKA SparkFun RedBoard Artemis ATP
+        "inherits": ["AMA3B1KK"],
+        "image_url": "https://cdn.sparkfun.com/r/455-455/assets/parts/1/4/0/1/7/15442-SparkFun_RedBoard_Artemis_ATP-05.jpg"
     },
-    "SFE_ARTEMIS_DK": {
+    "SFE_ARTEMIS_DK": { // AKA SparkFun Artemis Development Kit
         "inherits": ["AMA3B1KK"],
         "components_add": ["lis2dh12", "hm01b0"],
         "image_url": "https://cdn.sparkfun.com/assets/parts/1/5/7/4/6/16828-SparkFun_Artemis_Development_Kit-01.jpg"
     },
     "SFE_ARTEMIS_MODULE": {
-        "inherits": ["AMA3B1KK"]
-    },
-    "SFE_ARTEMIS_NANO": {
-        "inherits": ["AMA3B1KK"]
-    },
-    "SFE_ARTEMIS_THING_PLUS": {
-        "inherits": ["AMA3B1KK"]
-    },
-    "SFE_EDGE": {
         "inherits": ["AMA3B1KK"],
-        "components_add": ["lis2dh12", "hm01b0"]
+        "image_url": "https://cdn.sparkfun.com/r/455-455/assets/parts/1/4/0/7/4/15484-SparkFun_Artemis_Module_-_Low_Power_Machine_Learning_BLE_Cortex-M4F-01b.jpg"
     },
-    "SFE_EDGE2": {
+    "SFE_ARTEMIS_NANO": { // AKA SparkFun RedBoard Artemis Nano
         "inherits": ["AMA3B1KK"],
-        "components_add": ["lis2dh12", "hm01b0"]
+        "image_url": "https://cdn.sparkfun.com/r/455-455/assets/parts/1/4/0/1/8/15443-SparkFun_RedBoard_Artemis_Nano-05.jpg"
     },
-    "__build_tools_metadata__": {
-        "version": "1",
-        "public": false
+    "SFE_ARTEMIS_THING_PLUS": { // AKA SparkFun Thing Plus - Artemis
+        "inherits": ["AMA3B1KK"]
     },
-    "TMPM4KN": {
+    // Toshiba Targets -------------------------------------------------------------------------------------------------
+    "TMPM46B": { // AKA AdBun-M46B
+        "inherits": [
+            "Target"
+        ],
+        "core": "Cortex-M4F",
+        "is_disk_virtual": true,
+        "extra_labels": [
+            "TOSHIBA"
+        ],
+        "macros": [
+            "__TMPM46B__"
+        ],
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "device_has": [
+            "USTICKER",
+            "ANALOGIN",
+            "INTERRUPTIN",
+            "PORTIN",
+            "PORTINOUT",
+            "PORTOUT",
+            "PWMOUT",
+            "RESET_REASON",
+            "RTC",
+            "SERIAL",
+            "SERIAL_FC",
+            "SPI",
+            "SPISLAVE",
+            "SPI_ASYNCH",
+            "I2C",
+            "I2CSLAVE",
+            "I2C_ASYNCH",
+            "TRNG",
+            "FLASH",
+            "SLEEP"
+        ],
+        "device_name": "TMPM46BF10FG",
+        "detect_code": [
+            "7013"
+        ],
+        "release_versions": [
+            "5"
+        ],
+        "bootloader_supported": true,
+        "supported_application_profiles" : ["full", "bare-metal"],
+        "supported_c_libs": {
+            "arm": [
+                "std",
+                "small"
+            ],
+            "gcc_arm": [
+                "std",
+                "small"
+            ]
+        },
+        "image_url": "https://www.chip1stop.com/img/product/SSST/0109140533_5a544d9d16351.JPG"
+    },
+    "TMPM4G9": { // AKA AdBun-M4G9
+        "inherits": [
+            "Target"
+        ],
+        "core": "Cortex-M4F",
+        "is_disk_virtual": true,
+        "extra_labels": [
+            "TOSHIBA"
+        ],
+        "macros": [
+            "__TMPM4G9__"
+        ],
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "device_has": [
+            "ANALOGIN",
+            "ANALOGOUT",
+            "INTERRUPTIN",
+            "PORTIN",
+            "PORTINOUT",
+            "PORTOUT",
+            "PWMOUT",
+            "RESET_REASON",
+            "SERIAL",
+            "SERIAL_FC",
+            "SPI",
+            "SPISLAVE",
+            "SPI_ASYNCH",
+            "I2C",
+            "I2CSLAVE",
+            "I2C_ASYNCH",
+            "RTC",
+            "FLASH",
+            "SLEEP",
+            "USTICKER",
+            "MPU"
+        ],
+        "device_name": "TMPM4G9F15FG",
+        "detect_code": [
+            "7015"
+        ],
+        "release_versions": [
+            "5"
+        ],
+        "bootloader_supported": true,
+        "supported_application_profiles" : ["full", "bare-metal"],
+        "supported_c_libs": {
+            "arm": [
+                "std",
+                "small"
+            ],
+            "gcc_arm": [
+                "std",
+                "small"
+            ]
+        },
+        "image_url": "https://os.mbed.com/media/cache/platforms/AdBun-TMPM4G9_Wm9FG1c.png.250x250_q85.jpg"
+    },
+    // As of Jun 2024, this board can still apparently be purchased by sending an email (!!)
+    // to these guys: https://www.esp.jp/tose/sub1.html
+    // Manual (Japanese): https://www.esp.jp/tose/SBK-M4KN-KIT.pdf
+    // I managed to find the schematics for this one on the Japanese version of the
+    // manufacturer's site:
+    // https://www.esp.jp/tos/sch/SBK-M4KN.pdf
+    // https://www.esp.jp/tos/sch/KES-P2.pdf
+    "TMPM4KN": { // AKA TMPM-M4KN-SBK from ESP Co.
         "inherits": ["Target"],
         "core": "Cortex-M4F",
         "is_disk_virtual": true,
@@ -9600,23 +9399,23 @@
         "macros": ["__TMPM4KN__"],
         "supported_toolchains": ["GCC_ARM"],
         "device_has": [
-        "ANALOGIN",
-        "INTERRUPTIN",
-        "CRC",
-        "I2C",
-        "I2CSLAVE",
-        "PORTIN",
-        "PORTINOUT",
-        "PORTOUT",
-        "PWMOUT",
-        "RESET_REASON",
-        "SERIAL",
-        "SLEEP",
-        "SPI",
-        "SPISLAVE",
-        "USTICKER",
-        "MPU",
-        "FLASH"
+            "ANALOGIN",
+            "INTERRUPTIN",
+            "CRC",
+            "I2C",
+            "I2CSLAVE",
+            "PORTIN",
+            "PORTINOUT",
+            "PORTOUT",
+            "PWMOUT",
+            "RESET_REASON",
+            "SERIAL",
+            "SLEEP",
+            "SPI",
+            "SPISLAVE",
+            "USTICKER",
+            "MPU",
+            "FLASH"
         ],
         "device_name": "TMPM4KNFYAFG",
         "detect_code": ["7020"],
@@ -9630,9 +9429,10 @@
             "gcc_arm": [
                 "std"
             ]
-        }
+        },
+        "image_url": "https://os.mbed.com/media/cache/platforms/M4KN_mbed_tw2kBoh.png.250x250_q85.png"
     },
-    "TMPM4NR": {
+    "TMPM4NR": { // AKA AdBun-M4NR
         "inherits": [
             "Target"
         ],
@@ -9646,7 +9446,7 @@
         ],
         "supported_toolchains": [
             "GCC_ARM"
-    ],
+        ],
         "device_has": [
             "ANALOGIN",
             "ANALOGOUT",
@@ -9687,10 +9487,10 @@
                 "std",
                 "small"
             ]
-        }
-
+        },
+        "image_url": "https://wiki.segger.com/images/thumb/8/8a/tmpm4nr.jpg/300px-tmpm4nr.jpg"
     },
-    "TMPM4GR": {
+    "TMPM4GR": { // AKA AdBun-M4GR
         "inherits": [
             "Target"
         ],
@@ -9704,7 +9504,7 @@
         ],
         "supported_toolchains": [
             "GCC_ARM"
-    ],
+        ],
         "device_has": [
             "ANALOGIN",
             "ANALOGOUT",
@@ -9745,7 +9545,8 @@
                 "std",
                 "small"
             ]
-        }
+        },
+        "image_url": "https://wiki.segger.com/images/thumb/6/68/tmpm4gr.jpg/402px-tmpm4gr.jpg"
     },
     "RP2040": {
         "public": false,
@@ -9778,7 +9579,8 @@
             "RESET_REASON",
             "RTC"
         ],
-        "is_mcu_family_target": true,
+        "device_name": "RP2040",
+        "is_mcu_family_target": true
     },
     "RASPBERRY_PI_PICO": {
         "inherits": ["RP2040"],
@@ -9799,7 +9601,8 @@
             // voltages higher than the I/O voltage are illegal for the analog pins
             // (so the ADC can never read 100%).
             "default-adc-vref": 3.3
-        }
+        },
+        "image_url": "https://cdn11.bigcommerce.com/s-2fbyfnm8ev/images/stencil/1280x1280/products/1212/4275/Pico3__75642.1611086462.jpg?c=2"
     },
     "RASPBERRY_PI_PICO_SWD": {
         "inherits": ["RASPBERRY_PI_PICO"],
