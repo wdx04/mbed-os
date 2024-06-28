@@ -143,7 +143,25 @@ void flexspi_update_lut_ram(void)
 {
     flexspi_config_t config = {};
 
+    /* To store custom's LUT table in local. */
+    uint32_t tempLUT[CUSTOM_LUT_LENGTH] = {0x00U};
+
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    bool DCacheEnableFlag = false;
+    /* Disable D cache. */
+    if (SCB_CCR_DC_Msk == (SCB_CCR_DC_Msk & SCB->CCR))
+    {
+        SCB_DisableDCache();
+        DCacheEnableFlag = true;
+    }
+#endif /* __DCACHE_PRESENT */
+
+    /* Copy LUT information from flash region into RAM region, because LUT update maybe corrupt read sequence(LUT[0])
+     * and load wrong LUT table from FLASH region. */
+    memcpy(tempLUT, customLUT, sizeof(tempLUT));
+
     /*Get FLEXSPI default settings and configure the flexspi. */
+    flexspi_memset(&config, 0, sizeof(config));
     FLEXSPI_GetDefaultConfig(&config);
 
     /*Set AHB buffer size for reading data through AHB bus. */
@@ -152,22 +170,12 @@ void flexspi_update_lut_ram(void)
     config.ahbConfig.enableReadAddressOpt = true;
     config.ahbConfig.enableAHBCachable    = true;
     config.rxSampleClock                  = kFLEXSPI_ReadSampleClkLoopbackFromDqsPad;
-    // config.enableDoze                     = false; // matches boot rom setting
-    // config.seqTimeoutCycle                = 0xee6c; // matches boot rom setting
-
-    /* Wait for bus idle.  It seems to be important to hold off on calling
-     * FLEXSPI_Init() until after the bus is idle; I was getting random crashes
-     * until I added this. */
-    while (!FLEXSPI_GetBusIdleStatus(FLEXSPI)) {
-    }
-
-    FLEXSPI_Init(FLEXSPI, &config);
 
     /* Configure flash settings according to serial flash feature. */
     FLEXSPI_SetFlashConfig(FLEXSPI, &deviceconfig, kFLEXSPI_PortA1);
 
     /* Update LUT table. */
-    FLEXSPI_UpdateLUT(FLEXSPI, 0, customLUT, CUSTOM_LUT_LENGTH);
+    FLEXSPI_UpdateLUT(FLEXSPI, 0, tempLUT, CUSTOM_LUT_LENGTH);
 
     /* Do software reset. */
     FLEXSPI_SoftwareReset(FLEXSPI);
@@ -180,6 +188,14 @@ void flexspi_update_lut_ram(void)
     // Just in case any bad data got into the I-cache while we were reconfiguring
     // the flash, wipe it.
     SCB_InvalidateICache();
+
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    if (DCacheEnableFlag)
+    {
+        /* Enable D cache. */
+        SCB_EnableDCache();
+    }
+#endif /* __DCACHE_PRESENT */
 }
 
 status_t flexspi_nor_write_enable_ram(uint32_t baseAddr)

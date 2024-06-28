@@ -148,7 +148,7 @@ void mbed_sdk_init()
 
     // Switch to using an application-owned flexspi config instead of what the bootloader sets up
 #if DEVICE_FLASH
-    // mimxrt_flash_setup();
+    mimxrt_flash_setup();
 #endif
 
     // Initialize us ticker before LPM, because LPM uses it for timing
