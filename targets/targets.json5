@@ -5145,6 +5145,98 @@
     },
     // NXP i.MX RT Targets ---------------------------------------------------------------------------------------------
 
+    "MIMXRT102X": {
+        "core": "Cortex-M7FD",
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "supported_application_profiles": [
+            "full",
+            "bare-metal"
+        ],
+        "public": false,
+        "extra_labels": [
+            "NXP",
+            "MCUXpresso_MCUS",
+            "IMX",
+            "NXP_EMAC",
+            "USB",
+            "MIMXRT102X"
+        ],
+        "macros": [
+            "CPU_MIMXRT1021DAG5A",
+            "FSL_RTOS_MBED",
+            "XIP_BOOT_HEADER_ENABLE=1",
+            "XIP_EXTERNAL_FLASH=1",
+            "FSL_SDK_DRIVER_QUICK_ACCESS_ENABLE=1",
+            "SKIP_SYSCLK_INIT",
+            "__STARTUP_INITIALIZE_RAMFUNCTION",
+            "__STARTUP_INITIALIZE_NONCACHEDATA",
+            "MBED_MPU_CUSTOM",
+            "MBED_TICKLESS",
+            "DATA_SECTION_IS_CACHEABLE=1"
+        ],
+        "inherits": [
+            "Target"
+        ],
+        "device_has": [
+            "RTC",
+            "SLEEP",
+            "USTICKER",
+            "ANALOGIN",
+            "EMAC",
+            "I2C",
+            "I2CSLAVE",
+            "INTERRUPTIN",
+            "PORTIN",
+            "PORTINOUT",
+            "PORTOUT",
+            "PWMOUT",
+            "SERIAL",
+            "SPI",
+            "SPISLAVE",
+            "TRNG",
+            "WATCHDOG",
+            "USBDEVICE",
+            "LPTICKER"
+        ],
+        "overrides": {
+            "deep-sleep-latency": 10
+        },
+         "config": {
+             "enable-overdrive-mode": {
+                 "help": "Enable 'overdrive mode' and raise core clock from 400MHz to 500MHz.",
+                 "value": 1
+             }
+         },
+         "is_mcu_family_target": true
+     },
+    "MIMXRT1020_EVK": {
+        "inherits": [
+            "MIMXRT102X"
+        ],
+        "extra_labels_add": [
+            "EVK",
+            "1020_EVK",
+            "MIMXRT1020"
+        ],
+        "supported_form_factors": [
+            "ARDUINO_UNO"
+        ],
+        "macros_add": [
+            "XIP_BOOT_HEADER_DCD_ENABLE=1",
+            "FSL_FEATURE_PHYKSZ8081_USE_RMII50M_MODE"
+        ],
+        "device_has_add": [
+            "FLASH"
+        ],
+        "overrides": {
+            "network-default-interface-type": "ETHERNET"
+        },
+        "device_name": "MIMXRT1021DAG5A",
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/i.MX-RT1020-EVK-TOP.jpg"
+    },
+
     // Note: "MIMXRT105X" target is for the MIMXRT1051, MIMXRT1052, MIMXRT1061, and MIMXRT1062
     // See here for details: https://github.com/mbed-ce/mbed-os/wiki/MCU-Info-Page:-MIMXRT105x-and-106x
     "MIMXRT105X": {
