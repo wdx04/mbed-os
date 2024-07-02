@@ -162,14 +162,18 @@ void mbed_mpu_init()
             ARM_MPU_REGION_SIZE_4GB)    // Size
     );
 
-    // Select region 2 and use it for the WT ram region
+    // Select region 2 and use it for the WT ram or XIP region
     // - RAM 0x80000000 to 0x9FFFFFFF
     ARM_MPU_SetRegion(
         ARM_MPU_RBAR(
             2,                          // Region
             0x80000000),                // Base
         ARM_MPU_RASR(
+#if MBED_CONF_TARGET_XIP_ENABLE
+            0,                          // EnableExec
+#else
             1,                          // DisableExec
+#endif
             ARM_MPU_AP_FULL,            // AccessPermission
             0,                          // TypeExtField
             0,                          // IsShareable
