@@ -135,7 +135,7 @@ uint8_t BSP_PSRAM_Init(void)
 
 /**
   * @brief  Configure the MPU attributes as Write Back for PSRAM.
-  * @note   The Base Address is 0x64000000.
+  * @note   The Base Address is 0x60000000.
   *         The Region Size is 1MBytes, it is related to PSRAM memory size.
   * @param  None
   * @retval None
@@ -147,21 +147,6 @@ static void MPU_ConfigPSRAM(void)
   /* Disable the MPU */
   HAL_MPU_Disable();
   
-  /* Configure the MPU as Strongly ordered for not defined regions */
-  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-  MPU_InitStruct.BaseAddress = 0x00;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
-  MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
-  MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-  MPU_InitStruct.SubRegionDisable = 0x87;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-
-  HAL_MPU_ConfigRegion(&MPU_InitStruct);
-
   /* Configure the MPU attributes for PSRAM with recommended configurations:
      Normal memory, Shareable, write-back */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
@@ -171,7 +156,7 @@ static void MPU_ConfigPSRAM(void)
   MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
   MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+  MPU_InitStruct.Number = MPU_REGION_NUMBER4;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
   MPU_InitStruct.SubRegionDisable = 0x00;
   MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
@@ -186,7 +171,7 @@ static void MPU_ConfigPSRAM(void)
   MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
   MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER2;
+  MPU_InitStruct.Number = MPU_REGION_NUMBER5;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
   MPU_InitStruct.SubRegionDisable = 0x0;
   MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;

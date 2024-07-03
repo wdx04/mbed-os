@@ -668,8 +668,5 @@ MBED_WEAK const PinMap PinMap_OSPI_SSEL[] = {
 //*** USBDEVICE ***
 
 MBED_WEAK const PinMap PinMap_USB_HS[] = {
-    {PA_11,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_USB_HS)}, // USB_OTG_HS_DM // Connected to USB_FS_DM
-    {PA_12,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_USB_HS)}, // USB_OTG_HS_DP // Connected to USB_FS_DP
-    {PC_2,      USB_HS, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, GPIO_AF_NONE)}, // Connected to VBUS_SENSE
     {NC, NC, 0}
 };

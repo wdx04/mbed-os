@@ -2353,7 +2353,7 @@
         "config": {
             "usb_speed":  {
                 "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS",
-                "value": "USE_USB_HS_IN_FS"
+                "value": "USE_USB_OTG_HS"
             }
         },
         "overrides": {

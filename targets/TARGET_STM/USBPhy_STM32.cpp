@@ -249,12 +249,20 @@ void USBPhyHw::init(USBPhyEvents *events)
     hpcd.Init.speed = PCD_SPEED_HIGH;
 #if defined(TARGET_STM32U5)
     hpcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
+    __HAL_RCC_USBPHYC_CLK_ENABLE();
+#elif defined(STM32F723xx)
+    hpcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
+    __HAL_RCC_OTGPHYC_CLK_ENABLE();
 #else
     hpcd.Init.phy_itface = PCD_PHY_ULPI;
-    __HAL_RCC_USB_OTG_HS_ULPI_CLK_ENABLE();
-    __HAL_RCC_USB_OTG_HS_ULPI_CLK_SLEEP_ENABLE();
 #endif
 
+#ifdef __HAL_RCC_USB_OTG_HS_ULPI_CLK_ENABLE
+    __HAL_RCC_USB_OTG_HS_ULPI_CLK_ENABLE();
+#endif
+#ifdef __HAL_RCC_USB_OTG_HS_ULPI_CLK_SLEEP_ENABLE
+    __HAL_RCC_USB_OTG_HS_ULPI_CLK_SLEEP_ENABLE();
+#endif
     __HAL_RCC_USB_OTG_HS_CLK_ENABLE();
     __HAL_RCC_USB_OTG_HS_CLK_SLEEP_ENABLE();
     map = PinMap_USB_HS;
