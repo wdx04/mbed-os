@@ -7,6 +7,7 @@ target_sources(mbed-disco-f746ng
     INTERFACE
         PeripheralPins.c
         system_clock.c
+        TargetInit.c
 )
 
 target_include_directories(mbed-disco-f746ng

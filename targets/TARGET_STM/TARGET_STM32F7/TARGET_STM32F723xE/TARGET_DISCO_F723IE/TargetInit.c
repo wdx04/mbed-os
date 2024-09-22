@@ -99,9 +99,7 @@ uint8_t BSP_PSRAM_Init(void)
   Timing.AddressSetupTime      = 9;
   Timing.AddressHoldTime       = 0;
   Timing.DataSetupTime         = 5;
-  Timing.BusTurnAroundDuration = 1;
-  Timing.CLKDivision           = 2;
-  Timing.DataLatency           = 0;
+  Timing.BusTurnAroundDuration = 0;
   Timing.AccessMode            = FMC_ACCESS_MODE_A;
   
   psramHandle.Init.NSBank             = FMC_NORSRAM_BANK1;
