@@ -6,11 +6,13 @@
 # OPENOCD_CHIP_CONFIG_COMMANDS - Specifies all OpenOCD commands needed to configure openocd for your target processor.
 # This method creates the following options:
 # OPENOCD_ADAPTER_SERIAL - Serial number of the debug adapter to select for OpenOCD.  Set to empty to detect any matching adapter.
+# OPENOCD_VERSION_RANGE - Acceptable version range of OpenOCD.  This may be a single version, in which case it is treated as
+#   a minimum, or a versionMin...<versionMax constraint, e.g. 0.12...<0.13, to accept any 0.12.x version but not 0.13 or higher.
 
 set(UPLOAD_SUPPORTS_DEBUG TRUE)
 
 ### Check if upload method can be enabled on this machine
-find_package(OpenOCD)
+find_package(OpenOCD ${OPENOCD_VERSION_RANGE})
 set(UPLOAD_OPENOCD_FOUND ${OpenOCD_FOUND})
 
 ### Setup options
@@ -39,7 +41,7 @@ if { [adapter name] == \"hla\" } {
 	set(OPENOCD_ADAPTER_SERIAL_COMMAND -f ${CMAKE_BINARY_DIR}/openocd_adapter_config.cfg CACHE INTERNAL "" FORCE)
 endif()
 
-function(gen_upload_target TARGET_NAME BIN_FILE)
+function(gen_upload_target TARGET_NAME BINARY_FILE)
 
 	# unlike other upload methods, OpenOCD uses the elf file
 	add_custom_target(flash-${TARGET_NAME}
@@ -48,7 +50,7 @@ function(gen_upload_target TARGET_NAME BIN_FILE)
 		${OPENOCD_CHIP_CONFIG_COMMANDS}
 		${OPENOCD_ADAPTER_SERIAL_COMMAND}
 		-c "gdb_port disabled" # Don't start a GDB server when just programming
-		-c "program $<TARGET_FILE:${TARGET_NAME}> reset exit"
+		-c "program ${BINARY_FILE} reset exit"
 		VERBATIM)
 
 	add_dependencies(flash-${TARGET_NAME} ${TARGET_NAME})

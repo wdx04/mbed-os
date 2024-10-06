@@ -16,6 +16,11 @@
  */
 
 #include "CellularContext.h"
+#include "netsocket/CellularInterface.h"
+
+void CellularInterface::set_default_parameters()
+{
+}
 
 namespace mbed {
 

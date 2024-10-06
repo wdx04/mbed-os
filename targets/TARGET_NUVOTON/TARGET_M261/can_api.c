@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2015-2022 Nuvoton
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@
  #include "cmsis.h"
  #include "pinmap.h"
  #include "PeripheralPins.h"
+ #include "gpio_api.h"
  #include "nu_modutil.h"
  #include "nu_miscutil.h"
  #include "nu_bitutil.h"

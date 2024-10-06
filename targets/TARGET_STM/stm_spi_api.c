@@ -75,14 +75,6 @@
 /* Consider 10ms as the default timeout for sending/receving 1 byte */
 #define TIMEOUT_1_BYTE 10
 
-#if defined(SPI_FLAG_FRLVL) // STM32F0 STM32F3 STM32F7 STM32L4
-#if defined(STM32U5)
-extern HAL_StatusTypeDef HAL_SPIEx_FlushRxFifo(const SPI_HandleTypeDef *hspi);
-#else
-extern HAL_StatusTypeDef HAL_SPIEx_FlushRxFifo(SPI_HandleTypeDef *hspi);
-#endif
-#endif
-
 #if defined(SPI_DATASIZE_17BIT) || defined(SPI_DATASIZE_18BIT) || defined(SPI_DATASIZE_19BIT) || defined(SPI_DATASIZE_20BIT) || \
     defined(SPI_DATASIZE_21BIT) || defined(SPI_DATASIZE_22BIT) || defined(SPI_DATASIZE_23BIT) || defined(SPI_DATASIZE_24BIT) || \
     defined(SPI_DATASIZE_25BIT) || defined(SPI_DATASIZE_26BIT) || defined(SPI_DATASIZE_27BIT) || defined(SPI_DATASIZE_28BIT) || \
@@ -291,8 +283,10 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
         PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SPI1;
 #if defined (RCC_SPI123CLKSOURCE_PLL)
         PeriphClkInit.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL;
+#elif defined (RCC_SPI1CLKSOURCE_SYSCLK)
+        PeriphClkInit.Spi1ClockSelection = RCC_SPI1CLKSOURCE_SYSCLK;   
 #else
-        PeriphClkInit.Spi1ClockSelection = RCC_SPI1CLKSOURCE_SYSCLK;
+        PeriphClkInit.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL1Q;
 #endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
@@ -314,8 +308,10 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
         PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SPI2;
 #if defined (RCC_SPI123CLKSOURCE_PLL)
         PeriphClkInit.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL;
-#else
+#elif defined (RCC_SPI2CLKSOURCE_SYSCLK)
         PeriphClkInit.Spi2ClockSelection = RCC_SPI2CLKSOURCE_SYSCLK;
+#else
+        PeriphClkInit.Spi2ClockSelection = RCC_SPI2CLKSOURCE_PLL1Q; 
 #endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
@@ -337,8 +333,10 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
         PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SPI3;
 #if defined (RCC_SPI123CLKSOURCE_PLL)
         PeriphClkInit.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL;
-#else
+#elif defined (RCC_SPI2CLKSOURCE_SYSCLK)
         PeriphClkInit.Spi3ClockSelection = RCC_SPI3CLKSOURCE_SYSCLK;
+#else
+        PeriphClkInit.Spi3ClockSelection = RCC_SPI3CLKSOURCE_PLL1Q;
 #endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
@@ -358,7 +356,11 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
     if (spiobj->spi == SPI_4) {
 #if defined(SPI_IP_VERSION_V2)
         PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SPI4;
+#if defined  RCC_SPI45CLKSOURCE_PCLK1
         PeriphClkInit.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK1;
+#else
+        PeriphClkInit.Spi4ClockSelection = RCC_SPI4CLKSOURCE_PCLK2;
+#endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
         }
@@ -377,7 +379,11 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
     if (spiobj->spi == SPI_5) {
 #if defined(SPI_IP_VERSION_V2)
         PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SPI5;
+#if defined RCC_SPI45CLKSOURCE_PCLK1
         PeriphClkInit.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK1;
+#else
+        PeriphClkInit.Spi5ClockSelection = RCC_SPI5CLKSOURCE_PCLK3;
+#endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
         }
@@ -396,7 +402,11 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
     if (spiobj->spi == SPI_6) {
 #if defined(SPI_IP_VERSION_V2)
         PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SPI6;
+#if defined RCC_SPI6CLKSOURCE_PCLK4
         PeriphClkInit.Spi6ClockSelection = RCC_SPI6CLKSOURCE_PCLK4;
+#else
+        PeriphClkInit.Spi6ClockSelection = RCC_SPI6CLKSOURCE_PCLK2;
+#endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
         }
@@ -508,7 +518,7 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
     SPI_INIT_DIRECT(obj, &explicit_spi_pinmap);
 }
 
-#ifdef STM32_SPI_CAPABILITY_DMA
+#if STM32_SPI_CAPABILITY_DMA
 
 /**
  * Initialize the DMA for an SPI object in the Tx direction.
@@ -853,9 +863,8 @@ void spi_format(spi_t *obj, int bits, int mode, int slave)
             /*  SPI slave implemtation in MBED does not support the 3 wires SPI.
              *  (e.g. when MISO is not connected). So we're forcing slave in
              *  2LINES mode. As MISO is not connected, slave will only read
-             *  from master, and cannot write to it. Inform user.
+             *  from master, and cannot write to it.
              */
-            debug("3 wires SPI slave not supported - slave will only read\r\n");
             handle->Init.Direction = SPI_DIRECTION_2LINES;
         }
 
@@ -1536,6 +1545,63 @@ typedef enum {
     SPI_TRANSFER_TYPE_TXRX = 3,
 } transfer_type_t;
 
+/*
+ * Configure a DMA channel's transfer size to match the given SPI word size
+ */
+static void configure_dma_transfer_size(const uint32_t spiDataSize, DMA_HandleTypeDef * const dmaChannel)
+{
+#if DMA_IP_VERSION_V3
+    uint32_t * const transferSizePtr1 = &dmaChannel->Init.DestDataWidth;
+    uint32_t * const transferSizePtr2 = &dmaChannel->Init.SrcDataWidth;
+    uint32_t neededSizeVal1;
+    uint32_t neededSizeVal2;
+
+    if(spiDataSize <= SPI_DATASIZE_8BIT)
+    {
+        neededSizeVal1 = DMA_DEST_DATAWIDTH_BYTE;
+        neededSizeVal2 = DMA_SRC_DATAWIDTH_BYTE;
+    }
+    else if(spiDataSize <= SPI_DATASIZE_16BIT)
+    {
+        neededSizeVal1 = DMA_DEST_DATAWIDTH_HALFWORD;
+        neededSizeVal2 = DMA_SRC_DATAWIDTH_HALFWORD;
+    }
+    else
+    {
+        neededSizeVal1 = DMA_DEST_DATAWIDTH_WORD;
+        neededSizeVal2 = DMA_SRC_DATAWIDTH_WORD;
+    }
+#else
+    uint32_t * const transferSizePtr1 = &dmaChannel->Init.PeriphDataAlignment;
+    uint32_t * const transferSizePtr2 = &dmaChannel->Init.MemDataAlignment;
+    uint32_t neededSizeVal1;
+    uint32_t neededSizeVal2;
+
+    if(spiDataSize <= SPI_DATASIZE_8BIT)
+    {
+        neededSizeVal1 = DMA_PDATAALIGN_BYTE;
+        neededSizeVal2 = DMA_MDATAALIGN_BYTE;
+    }
+    else if(spiDataSize <= SPI_DATASIZE_16BIT)
+    {
+        neededSizeVal1 = DMA_PDATAALIGN_HALFWORD;
+        neededSizeVal2 = DMA_MDATAALIGN_HALFWORD;
+    }
+    else
+    {
+        neededSizeVal1 = DMA_PDATAALIGN_WORD;
+        neededSizeVal2 = DMA_MDATAALIGN_WORD;
+    }
+#endif
+
+    // Check values and reinit DMA if needed
+    if(*transferSizePtr1 != neededSizeVal1 || *transferSizePtr2 != neededSizeVal2)
+    {
+        *transferSizePtr1 = neededSizeVal1;
+        *transferSizePtr2 = neededSizeVal2;
+        HAL_DMA_Init(dmaChannel);
+    }
+}
 
 /// @returns True if DMA was used, false otherwise
 static bool spi_master_start_asynch_transfer(spi_t *obj, transfer_type_t transfer_type, const void *tx, void *rx, size_t length, DMAUsage hint)
@@ -1580,6 +1646,18 @@ static bool spi_master_start_asynch_transfer(spi_t *obj, transfer_type_t transfe
         }
 
         useDMA = true;
+
+        // Make sure that the DMA word size matches the SPI word size.  Also check address alignment.
+        if(transfer_type == SPI_TRANSFER_TYPE_TXRX || transfer_type == SPI_TRANSFER_TYPE_TX)
+        {
+            MBED_ASSERT(((ptrdiff_t)tx) % (1 << bitshift) == 0); // <-- if you hit this assert you passed an unaligned pointer to an SPI async transfer
+            configure_dma_transfer_size(handle->Init.DataSize, handle->hdmatx);
+        }
+        if(transfer_type == SPI_TRANSFER_TYPE_TXRX || transfer_type == SPI_TRANSFER_TYPE_RX)
+        {
+            MBED_ASSERT(((ptrdiff_t)rx) % (1 << bitshift) == 0); // <-- if you hit this assert you passed an unaligned pointer to an SPI async transfer
+            configure_dma_transfer_size(handle->Init.DataSize, handle->hdmarx);
+        }
     }
 
     obj->spi.curr_transfer_uses_dma = useDMA;
@@ -1652,7 +1730,9 @@ static bool spi_master_start_asynch_transfer(spi_t *obj, transfer_type_t transfe
             LL_SPI_Enable(SPI_INST(obj));
         }
 #endif
-        DEBUG_PRINTF("SPI: RC=%u\n", rc);
+
+        // Unfortunately there is no way to propagate the error code back up, better to print a warning than swallow it entirely
+        printf("Warning: async SPI transfer start failed in STM32 HAL, error code = %d", rc);
     }
 
     return useDMA;
@@ -1821,7 +1901,17 @@ void spi_abort_asynch(spi_t *obj)
     // Use HAL abort function.
     // Conveniently, this is smart enough to automatically abort the DMA transfer
     // if DMA was used.
-    HAL_SPI_Abort_IT(handle);
+    HAL_StatusTypeDef rc = HAL_SPI_Abort_IT(handle);
+
+    if(rc != HAL_OK)
+    {
+        printf("Warning: async SPI abort failed in STM32 HAL, error code = %d\n", rc);
+    }
+    if((handle->hdmatx != NULL && handle->hdmatx->State != HAL_DMA_STATE_READY) || (handle->hdmarx != NULL && handle->hdmarx->State != HAL_DMA_STATE_READY))
+    {
+        printf("Warning: DMA did not return to ready state after abort!\n");
+        return;
+    }
 }
 
 #endif //DEVICE_SPI_ASYNCH

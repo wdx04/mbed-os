@@ -58,16 +58,8 @@ target_link_libraries(mbed-cytfm-064b0s2-4343w
         mbed-cytfm-064b0s2-4343w-cm4
         mbed-cytfm-064b0s2-4343w-bsp-design-modus
         mbed-psoc6
+        mbed-psa
 )
-
-if("WHD" IN_LIST MBED_TARGET_LABELS)
-    target_link_libraries(mbed-cytfm-064b0s2-4343w
-        INTERFACE
-            mbed-cy-psoc6-whd
-            mbed-cy-psoc6-whd-4343w
-            mbed-cytfm-064b0s2-4343w-whd
-    )
-endif()
 
 target_compile_definitions(mbed-cytfm-064b0s2-4343w
     INTERFACE
@@ -79,7 +71,6 @@ target_compile_definitions(mbed-cytfm-064b0s2-4343w
 )
 
 mbed_post_build_psoc6_sign_image(
-    "tfm_s.hex"
     "CYTFM_064B0S2_4343W"
     "policy_multi_CM0_CM4_tfm.json"
     "multi_image"

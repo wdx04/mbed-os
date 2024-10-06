@@ -33,7 +33,7 @@ namespace mbed {
 
 /** A SPI slave, used for communicating with a SPI master device.
  *
- * The default format is set to 8 bits, mode 0 and a clock frequency of 1MHz.
+ * The default format is set to 8 bits, mode 0.
  *
  * @note Synchronization level: Not protected
  *
@@ -80,6 +80,11 @@ public:
     SPISlave(const spi_pinmap_t &pinmap);
     SPISlave(const spi_pinmap_t &&) = delete; // prevent passing of temporary objects
 
+    /**
+     * @brief Destructor.  Frees the SPI peripheral so it can be used elsewhere.
+     */
+    ~SPISlave();
+
     /** Configure the data transmission format.
      *
      *  @param bits Number of bits per SPI frame (4 - 16).
@@ -95,12 +100,6 @@ public:
      * @endcode
      */
     void format(int bits, int mode = 0);
-
-    /** Set the SPI bus clock frequency.
-     *
-     *  @param hz Clock frequency in hz (default = 1MHz).
-     */
-    void frequency(int hz = 1000000);
 
     /** Polls the SPI to see if data has been received.
      *
@@ -133,8 +132,6 @@ protected:
     int _bits;
     /* Clock phase and polarity */
     int _mode;
-    /* Clock frequency */
-    int _hz;
 
 #endif //!defined(DOXYGEN_ONLY)
 };

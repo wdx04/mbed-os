@@ -53,6 +53,7 @@ target_link_libraries(mbed-netsocket-api
     PUBLIC
         mbed-core-flags
         mbed-mbedtls
+        mbed-nanostack-libservice
 )
 
 # Currently, netsocket-api needs to link to whichever library is providing an implementation
@@ -62,6 +63,17 @@ if("MBED_CONF_NSAPI_DEFAULT_STACK=LWIP" IN_LIST MBED_CONFIG_DEFINITIONS)
 elseif("MBED_CONF_NSAPI_DEFAULT_STACK=NANOSTACK" IN_LIST MBED_CONFIG_DEFINITIONS)
     target_link_libraries(mbed-netsocket-api PUBLIC mbed-nanostack)
 endif()
+
+# Pull in cellular if cellular is the default network interface (used by NetworkInterfaceDefaults.cpp)
+if("MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE=CELLULAR" IN_LIST MBED_CONFIG_DEFINITIONS)
+    target_link_libraries(mbed-netsocket-api PUBLIC mbed-cellular)
+endif()
+
+# Similarly if mesh networking is used bring in that library
+if("MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE=MESH" IN_LIST MBED_CONFIG_DEFINITIONS)
+    target_link_libraries(mbed-netsocket-api PUBLIC mbed-nanostack-mbed_mesh_api)
+endif()
+
 
 if("DEVICE_EMAC=1" IN_LIST MBED_TARGET_DEFINITIONS)
     target_link_libraries(mbed-netsocket-api
