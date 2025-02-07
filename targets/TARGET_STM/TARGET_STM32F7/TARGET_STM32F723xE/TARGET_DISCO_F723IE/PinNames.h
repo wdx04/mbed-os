@@ -277,6 +277,14 @@ typedef enum {
     USB_OTG_HS_SOF = PA_4,
     USB_OTG_HS_VBUS = PB_13,
 
+    /**** QSPI pins ****/
+    QSPI_FLASH1_IO0 = PC_9,
+    QSPI_FLASH1_IO1 = PC_10,
+    QSPI_FLASH1_IO2 = PE_2,
+    QSPI_FLASH1_IO3 = PD_13,
+    QSPI_FLASH1_SCK = PB_2,
+    QSPI_FLASH1_CSN = PB_6,
+
     /**** OSCILLATOR pins ****/
     RCC_OSC32_IN = PC_14,
     RCC_OSC32_OUT = PC_15,

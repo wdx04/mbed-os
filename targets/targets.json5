@@ -2340,12 +2340,16 @@
         "extra_labels_add": [
             "STM32F723xE"
         ],
+        "device_has_add": [
+            "USBDEVICE",
+            "QSPI"
+        ],
+        "components_add": [
+            "QSPIF"
+        ],
         "macros_add": [
             "STM32F723xx",
             "HSE_VALUE=25000000"
-        ],
-        "device_has_add": [
-            "USBDEVICE"
         ],
         "supported_form_factors": [
             "ARDUINO_UNO"
@@ -2357,9 +2361,55 @@
             }
         },
         "overrides": {
-            "clock_source": "USE_PLL_HSE_XTAL|USE_PLL_HSI"
+            "clock_source": "USE_PLL_HSE_XTAL"
         },
-        "device_name": "STM32F723IETx"
+        "memory_banks": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 196608,
+                "start": 536936448,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 65536,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }            
+        }
     },
     "DISCO_F746NG": {
         "inherits": [
@@ -5246,6 +5296,158 @@
     },
     // NXP i.MX RT Targets ---------------------------------------------------------------------------------------------
 
+    "MIMXRT101X": {
+        "core": "Cortex-M7FD",
+        "supported_toolchains": [
+            "GCC_ARM"
+        ],
+        "supported_application_profiles": [
+            "full",
+            "bare-metal"
+        ],
+        "public": false,
+        "extra_labels": [
+            "NXP",
+            "MCUXpresso_MCUS",
+            "IMX",
+            "NXP_EMAC",
+            "USB",
+            "MIMXRT101X"
+        ],
+        "macros": [
+            "CPU_MIMXRT1011DAE5A",
+            "FSL_RTOS_MBED",
+            "XIP_BOOT_HEADER_ENABLE=1",
+            "XIP_EXTERNAL_FLASH=1",
+            "FSL_SDK_DRIVER_QUICK_ACCESS_ENABLE=1",
+            "SKIP_SYSCLK_INIT",
+            "__STARTUP_INITIALIZE_RAMFUNCTION",
+            "__STARTUP_INITIALIZE_NONCACHEDATA",
+            "MBED_MPU_CUSTOM",
+            "MBED_TICKLESS",
+            "DATA_SECTION_IS_CACHEABLE=1"
+        ],
+        "inherits": [
+            "Target"
+        ],
+        "device_has": [
+            "RTC",
+            "SLEEP",
+            "USTICKER",
+            "ANALOGIN",
+            "I2C",
+            "I2CSLAVE",
+            "INTERRUPTIN",
+            "PORTIN",
+            "PORTINOUT",
+            "PORTOUT",
+            "PWMOUT",
+            "SERIAL",
+            "SPI",
+            "SPISLAVE",
+            "TRNG",
+            "WATCHDOG",
+            "USBDEVICE",
+            "LPTICKER"
+        ],
+        "overrides": {
+            "deep-sleep-latency": 10
+        },
+         "config": {
+             "enable-overdrive-mode": {
+                 "help": "Enable 'overdrive mode' and raise core clock from 400MHz to 500MHz.",
+                 "value": 1
+             }
+         },
+        "memory_banks": {
+            // Note: In Mbed, we reconfigure the RAM at boot to assign:
+            //  - 64kiB OCRAM
+            //  - 32kiB DTCM
+            //  - 32kiB ITCM
+            "SRAM_DTC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "size": 0x8000,
+                "start": 0x20000000,
+                "startup": false
+            },
+            "SRAM_ITC": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "size": 0x8000,
+                "start": 0,
+                "startup": false
+            },
+            "SRAM_OC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 0x10000,
+                "start": 0x20200000,
+                "startup": false
+            }
+        },
+        "is_mcu_family_target": true
+     },
+    "MIMXRT1010_EVK": {
+        "inherits": [
+            "MIMXRT101X"
+        ],
+        "extra_labels_add": [
+            "EVK",
+            "1010_EVK",
+            "MIMXRT1010"
+        ],
+        "supported_form_factors": [
+            "ARDUINO_UNO"
+        ],
+        "macros_add": [
+            "XIP_BOOT_HEADER_DCD_ENABLE=0"
+        ],
+        "device_has_add": [
+            "FLASH"
+        ],
+        "memory_banks": {
+            "EXT_FLASH": {
+                "access": {
+                    "execute": true,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 0x1000000, // 16MiB
+                "start": 0x60000000,
+                "startup": true
+            }
+        },
+        "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/i.MXRT1010-TOP.jpg"
+    },
+
     "MIMXRT102X": {
         "core": "Cortex-M7FD",
         "supported_toolchains": [
@@ -5310,7 +5512,58 @@
                  "value": 1
              }
          },
-         "is_mcu_family_target": true
+        "memory_banks": {
+            // Note: In Mbed, we reconfigure the RAM at boot to assign:
+            //  - 128kiB OCRAM
+            //  - 64kiB DTCM
+            //  - 64kiB ITCM
+            "SRAM_DTC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "size": 0x10000,
+                "start": 0x20000000,
+                "startup": false
+            },
+            "SRAM_ITC": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "size": 0x10000,
+                "start": 0,
+                "startup": false
+            },
+            "SRAM_OC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 0x20000,
+                "start": 0x20200000,
+                "startup": false
+            }
+        },
+        "is_mcu_family_target": true
      },
     "MIMXRT1020_EVK": {
         "inherits": [
@@ -5333,6 +5586,34 @@
         ],
         "overrides": {
             "network-default-interface-type": "ETHERNET"
+        },
+        "memory_banks": {
+            "SDRAM": {
+                "access": {
+                    "execute": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "size": 0x2000000, // 32MiB
+                "start": 0x80000000,
+                "startup": false
+            },
+            "EXT_FLASH": {
+                "access": {
+                    "execute": true,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 0x800000, // 8MiB
+                "start": 0x60000000,
+                "startup": true
+            }
         },
         "device_name": "MIMXRT1021DAG5A",
         "image_url": "https://www.nxp.com/assets/images/en/dev-board-image/i.MX-RT1020-EVK-TOP.jpg"
@@ -9956,6 +10237,23 @@
             // voltages higher than the I/O voltage are illegal for the analog pins
             // (so the ADC can never read 100%).
             "default-adc-vref": 3.3
+        },
+        "memory_banks": {
+            "EXT_FLASH": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 0x200000,
+                "start": 0x10000000,
+                "startup": true
+            }
         },
         "image_url": "https://cdn11.bigcommerce.com/s-2fbyfnm8ev/images/stencil/1280x1280/products/1212/4275/Pico3__75642.1611086462.jpg?c=2"
     },

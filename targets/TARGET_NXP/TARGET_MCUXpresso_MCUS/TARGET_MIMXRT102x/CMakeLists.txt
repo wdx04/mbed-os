@@ -1,12 +1,12 @@
 # Copyright (c) 2020-2021 ARM Limited. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+# Target for MIMXRT102x common code.
 if(${MBED_TOOLCHAIN} STREQUAL "GCC_ARM")
-    set(STARTUP_FILE device/TOOLCHAIN_GCC_ARM/startup_MIMXRT1021.S)
-    set(LINKER_FILE device/TOOLCHAIN_GCC_ARM/MIMXRT1021xxxxx.ld)
+    set(RT102X_STARTUP_FILE device/TOOLCHAIN_GCC_ARM/startup_MIMXRT1021.S)
+    set(RT102X_LINKER_FILE device/TOOLCHAIN_GCC_ARM/MIMXRT1021xxxxx.ld)
 endif()
 
-# Target for MIMXRT102x common code.
 add_library(mbed-mimxrt102x INTERFACE)
 
 target_include_directories(mbed-mimxrt102x
@@ -26,7 +26,6 @@ target_sources(mbed-mimxrt102x
         trng_api.c
         us_ticker.c
         clock_config.c
-        PeripheralPins.c
         pinmap.c
         mimxrt_clock_adjustment.c
         lpm.c
@@ -96,7 +95,7 @@ target_sources(mbed-mimxrt102x
         drivers/fsl_xbara.c
         drivers/fsl_xbarb.c
 
-        ${STARTUP_FILE}
+        ${RT102X_STARTUP_FILE}
 )
 
 target_link_libraries(mbed-mimxrt102x
@@ -106,6 +105,6 @@ target_link_libraries(mbed-mimxrt102x
         mbed-nxp-usb
 )
 
-mbed_set_linker_script(mbed-mimxrt102x ${CMAKE_CURRENT_SOURCE_DIR}/${LINKER_FILE})
+mbed_set_linker_script(mbed-mimxrt102x ${CMAKE_CURRENT_SOURCE_DIR}/${RT102X_LINKER_FILE})
 
 add_subdirectory(TARGET_EVK EXCLUDE_FROM_ALL)

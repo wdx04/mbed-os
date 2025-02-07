@@ -690,7 +690,7 @@ int QSPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(bd_addr_t, mbed
     // Detect and Set fastest Bus mode (default 1-1-1)
     _sfdp_detect_best_bus_read_mode(param_table, sfdp_info.bptbl.size, shouldSetQuadEnable, is_qpi_mode);
     if (true == shouldSetQuadEnable) {
-        if (_needs_fast_mode) {
+        if (_needs_fast_mode && _num_status_registers == 3) {
             _enable_fast_mode();
         }
         // Set Quad Enable and QPI Bus modes if Supported

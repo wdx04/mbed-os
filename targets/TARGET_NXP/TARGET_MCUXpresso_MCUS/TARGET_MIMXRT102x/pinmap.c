@@ -20,7 +20,9 @@
 #include "fsl_clock.h"
 
 /* Array of IOMUX base address. */
-static uint32_t iomux_base_addrs[FSL_FEATURE_SOC_IGPIO_COUNT] = { 0x401F80BC, 0x401F813C, 0u, 0x401F8014, 0x400A8000 };
+#define IOMUXC_PAD_CONTROL_OFFSET 0x174
+
+static uint32_t iomux_base_addrs[FSL_FEATURE_SOC_IGPIO_COUNT] = { 0x401F80BC, 0x401F813C, 0u, 0x401F8014 }; // RT1020
 
 /* Get the IOMUX register address from the GPIO3 pin number */
 static uint32_t get_iomux_reg_base(PinName pin)
@@ -84,7 +86,7 @@ void pin_mode(PinName pin, PinMode mode)
     if (instance == 5) {
         configregister = muxregister + 0x10;
     } else {
-        configregister = muxregister + 0x1F0;
+        configregister = muxregister + IOMUXC_PAD_CONTROL_OFFSET;
     }
 
     reg = *((volatile uint32_t *)configregister);
@@ -147,7 +149,7 @@ void pin_mode_opendrain(PinName pin, bool enable)
     if (instance == 5) {
         configregister = muxregister + 0x10;
     } else {
-        configregister = muxregister + 0x1F0;
+        configregister = muxregister + IOMUXC_PAD_CONTROL_OFFSET;
     }
 
     if (enable) {

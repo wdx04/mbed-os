@@ -6,6 +6,8 @@ add_library(mbed-wio-h725ae INTERFACE)
 target_sources(mbed-wio-h725ae
     INTERFACE
         PeripheralPins.c
+        TargetInit.c
+        aps6408.c
 )
 
 target_include_directories(mbed-wio-h725ae
