@@ -35,6 +35,7 @@ function(mbed_set_profile_options target mbed_toolchain)
         )
 
         list(APPEND profile_link_options
+            "-flto"
             "-Wl,--compress-debug-sections=zlib"
             "-Wl,--gc-sections"
             "-Wl,--wrap,main"

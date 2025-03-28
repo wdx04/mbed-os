@@ -46,6 +46,7 @@ list(APPEND common_options
 
 list(APPEND cxx_compile_options
     "-Wno-register"
+    "-Wno-volatile"
 )
 
 # Configure the toolchain to select the selected C library
