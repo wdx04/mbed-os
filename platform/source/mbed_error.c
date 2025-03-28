@@ -320,6 +320,13 @@ WEAK MBED_NORETURN mbed_error_status_t mbed_error(mbed_error_status_t error_stat
     //Protect report_error_ctx while we update it
     core_util_critical_section_enter();
     report_error_ctx = last_error_ctx;
+
+    // If the MCU has a data cache, ensure that the fault data is flushed to main memory
+    // before reboot
+#if __DCACHE_PRESENT
+    SCB_CleanDCache_by_Addr(&report_error_ctx, sizeof(mbed_crash_data_t));
+#endif
+
     core_util_critical_section_exit();
     //We need not call delete_mbed_crc(crc_obj) here as we are going to reset the system anyway, and calling delete while handling a fatal error may cause nested exception
 #if MBED_CONF_PLATFORM_FATAL_ERROR_AUTO_REBOOT_ENABLED && (MBED_CONF_PLATFORM_ERROR_REBOOT_MAX > 0)
@@ -654,6 +661,18 @@ static void print_error_report(const mbed_error_ctx *ctx, const char *error_msg,
 #endif
 
     mbed_error_printf("\n-- MbedOS Error Info --\n");
+
+    // Print error summary for Greentea tests if desired.
+#ifdef MBED_CONF_PLATFORM_MBED_ERROR_EMIT_GREENTEA_KV
+    // Flag that error occurred. Print this first because the default test runner
+    // just ends the test right away when it sees this.
+    mbed_error_printf("{{mbed_error;1}}\r\n");
+
+    mbed_error_printf("{{mbed_error_module;%d}}\r\n", error_module);
+    mbed_error_printf("{{mbed_error_code;%d}}\r\n", error_code);
+    mbed_error_printf("{{mbed_error_message;%s}}\r\n", error_msg);
+    mbed_error_printf("{{mbed_error_location;0x%" PRIx32 "}}\r\n", ctx->error_address);
+#endif
 }
 #endif //ifndef NDEBUG
 
