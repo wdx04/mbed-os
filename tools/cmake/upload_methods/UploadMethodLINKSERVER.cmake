@@ -4,18 +4,15 @@
 ### NXP LinkServer Upload Method
 # This method needs the following parameters:
 # LINKSERVER_DEVICE - Chip name and board to connect to, separated by a colon.
-# LINKSERVER_PROBE_SN - Serial number, or serial number substring, of the debug probe to connect to.  If blank, will connect to any probe.
 
 set(UPLOAD_SUPPORTS_DEBUG TRUE)
 
 ### Handle options
-set(LINKSERVER_PROBE_SN "" CACHE STRING "Serial number, or serial number substring, of the debug probe to connect to.  If blank, will connect to any probe.")
-
-if("${LINKSERVER_PROBE_SN}" STREQUAL "")
+if("${MBED_UPLOAD_SERIAL_NUMBER}" STREQUAL "")
 	# This argument causes Redlink to connect to the first available debug probe
 	set(LINKSERVER_PROBE_ARGS "" CACHE INTERNAL "" FORCE)
 else()
-	set(LINKSERVER_PROBE_ARGS --probe ${LINKSERVER_PROBE_SN} CACHE INTERNAL "" FORCE)
+	set(LINKSERVER_PROBE_ARGS --probe ${MBED_UPLOAD_SERIAL_NUMBER} CACHE INTERNAL "" FORCE)
 endif()
 
 if("${LINKSERVER_DEVICE}" STREQUAL "")
@@ -25,6 +22,12 @@ endif()
 ### Check if upload method can be enabled on this machine
 find_package(LinkServer)
 set(UPLOAD_LINKSERVER_FOUND ${LinkServer_FOUND})
+
+if(LinkServer_FOUND)
+	if(${LinkServer_VERSION} VERSION_LESS 1.5.30 AND "${MBED_OUTPUT_EXT}" STREQUAL "hex")
+		message(FATAL_ERROR "LinkServer <1.5.30 does not support flashing hex files! Please upgrade LinkServer and then clean and rebuild the project.")
+	endif()
+endif()
 
 ### Function to generate upload target
 
@@ -37,9 +40,8 @@ function(gen_upload_target TARGET_NAME BINARY_FILE)
 			${LINKSERVER_PROBE_ARGS}
 			${LINKSERVER_DEVICE}
 			load
-			$<TARGET_FILE:${TARGET_NAME}>)
-
-	add_dependencies(flash-${TARGET_NAME} ${TARGET_NAME})
+			--addr ${MBED_UPLOAD_BASE_ADDR}
+			${BINARY_FILE})
 
 endfunction(gen_upload_target)
 
@@ -48,7 +50,7 @@ set(UPLOAD_GDBSERVER_DEBUG_COMMAND
 	${LinkServer_PATH}
 	gdbserver
 	${LINKSERVER_PROBE_ARGS}
-	--gdb-port ${GDB_PORT}
+	--gdb-port ${MBED_GDB_PORT}
 	${LINKSERVER_DEVICE}
 )
 

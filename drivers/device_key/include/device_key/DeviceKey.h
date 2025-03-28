@@ -25,7 +25,7 @@
 
 // Whole class is not supported if entropy is not enabled
 // Flash device is required as Device Key is currently depending on it
-#if !DEVICE_FLASH || !defined(COMPONENT_FLASHIAP)
+#if !DEVICE_FLASH
 #undef DEVICEKEY_ENABLED
 #define DEVICEKEY_ENABLED 0
 #endif
@@ -60,7 +60,7 @@ enum DeviceKeyStatus {
 /** Use this singleton if you need to derive a new key from the device root of trust.
  *
  * @note Synchronization level: Thread safe
- * @ingroup device-key
+ * \defgroup device-key Device Key
  */
 /**
  */

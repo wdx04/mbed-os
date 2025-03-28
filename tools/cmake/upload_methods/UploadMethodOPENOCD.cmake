@@ -4,8 +4,9 @@
 ### OpenOCD Upload Method
 # This method needs the following parameters:
 # OPENOCD_CHIP_CONFIG_COMMANDS - Specifies all OpenOCD commands needed to configure openocd for your target processor.
+# OPENOCD_LOAD_ADDRESS - Address where the bin or hex file will be loaded to memory, e.g. 0x8000000.  If not set, will default to
+#     the configured address of the first ROM bank (MBED_CONFIGURED_ROM_START)
 # This method creates the following options:
-# OPENOCD_ADAPTER_SERIAL - Serial number of the debug adapter to select for OpenOCD.  Set to empty to detect any matching adapter.
 # OPENOCD_VERSION_RANGE - Acceptable version range of OpenOCD.  This may be a single version, in which case it is treated as
 #   a minimum, or a versionMin...<versionMax constraint, e.g. 0.12...<0.13, to accept any 0.12.x version but not 0.13 or higher.
 
@@ -15,12 +16,9 @@ set(UPLOAD_SUPPORTS_DEBUG TRUE)
 find_package(OpenOCD ${OPENOCD_VERSION_RANGE})
 set(UPLOAD_OPENOCD_FOUND ${OpenOCD_FOUND})
 
-### Setup options
-set(OPENOCD_ADAPTER_SERIAL "" CACHE STRING "Serial number of the debug adapter to select for OpenOCD.  Set to empty to detect any matching adapter.")
-
 ### Function to generate upload target
 set(OPENOCD_ADAPTER_SERIAL_COMMAND "" CACHE INTERNAL "" FORCE)
-if(NOT "${OPENOCD_ADAPTER_SERIAL}" STREQUAL "")
+if(NOT "${MBED_UPLOAD_SERIAL_NUMBER}" STREQUAL "")
 
 	# Generate script file that tells OpenOCD how to find the correct debug adapter.
 	file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/openocd_adapter_config.cfg CONTENT
@@ -29,7 +27,7 @@ if(NOT "${OPENOCD_ADAPTER_SERIAL}" STREQUAL "")
 
 # There's supposed to be a standard command to select the adapter serial ('adapter serial'), but it seems
 # like not all adapters support this yet so extra work is needed.
-set adapter_serial \"${OPENOCD_ADAPTER_SERIAL}\"
+set adapter_serial \"${MBED_UPLOAD_SERIAL_NUMBER}\"
 if { [adapter name] == \"hla\" } {
 	hla_serial $adapter_serial
 } elseif { [adapter name] == \"cmsis-dap\" } {
@@ -43,17 +41,15 @@ endif()
 
 function(gen_upload_target TARGET_NAME BINARY_FILE)
 
-	# unlike other upload methods, OpenOCD uses the elf file
 	add_custom_target(flash-${TARGET_NAME}
 		COMMENT "Flashing ${TARGET_NAME} with OpenOCD..."
 		COMMAND ${OpenOCD}
 		${OPENOCD_CHIP_CONFIG_COMMANDS}
 		${OPENOCD_ADAPTER_SERIAL_COMMAND}
 		-c "gdb_port disabled" # Don't start a GDB server when just programming
-		-c "program ${BINARY_FILE} reset exit"
+		-c "program ${BINARY_FILE} ${MBED_UPLOAD_BASE_ADDR} reset exit"
 		VERBATIM)
 
-	add_dependencies(flash-${TARGET_NAME} ${TARGET_NAME})
 endfunction(gen_upload_target)
 
 ### Commands to run the debug server.
@@ -64,7 +60,7 @@ set(UPLOAD_GDBSERVER_DEBUG_COMMAND
 	# Shut down OpenOCD when GDB disconnects.
 	# see https://github.com/Marus/cortex-debug/issues/371#issuecomment-999727626
 	-c "[target current] configure -event gdb-detach {shutdown}"
-	-c "gdb_port ${GDB_PORT}")
+	-c "gdb_port ${MBED_GDB_PORT}")
 
 # request extended-remote GDB sessions
 set(UPLOAD_WANTS_EXTENDED_REMOTE TRUE)
