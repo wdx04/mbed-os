@@ -45,6 +45,37 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass);
 uint8_t SetSysClock_PLL_HSI(void);
 #endif /* ((CLOCK_SOURCE) & USE_PLL_HSI) */
 
+static void EnableICache()
+{
+    MPU_Attributes_InitTypeDef   attr;
+    MPU_Region_InitTypeDef       region;
+
+    /* Disable MPU before perloading and config update */
+    HAL_MPU_Disable();
+
+    /* Define cacheable memory via MPU */
+    attr.Number             = MPU_ATTRIBUTES_NUMBER5;
+    attr.Attributes         = INNER_OUTER(MPU_NOT_CACHEABLE);
+    HAL_MPU_ConfigMemoryAttributes(&attr);
+
+    /* BaseAddress-LimitAddress configuration */
+    region.Enable           = MPU_REGION_ENABLE;
+    region.Number           = MPU_REGION_NUMBER5;
+    region.AttributesIndex  = MPU_ATTRIBUTES_NUMBER5;
+    region.BaseAddress      = 0x08FFF800;
+    region.LimitAddress     = 0x08FFFFFF;
+    region.AccessPermission = MPU_REGION_ALL_RW;
+    region.DisableExec      = MPU_INSTRUCTION_ACCESS_DISABLE;
+    region.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
+    HAL_MPU_ConfigRegion(&region);
+
+    /* Enable the MPU */
+    HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+
+    /* Enable ICACHE */
+    HAL_ICACHE_Enable();
+}
+
 /**
   * @brief  Configures the System clock source
   * @note   This function should be called only once the RCC clock configuration
@@ -74,6 +105,7 @@ void SetSysClock(void)
             }
         }
     }
+    EnableICache();
 }
 
 

@@ -468,7 +468,9 @@ static qspi_status_t _qspi_init_direct(qspi_t *obj, const qspi_pinmap_t *pinmap,
     pin_mode(pinmap->ssel_pin, PullNone);
 
 #if defined(OCTOSPI2)
+#if defined(__HAL_RCC_OSPIM_CLK_ENABLE)
     __HAL_RCC_OSPIM_CLK_ENABLE();
+#endif
 
     OSPIM_CfgTypeDef OSPIM_Cfg_Struct = {0};
 

@@ -6,6 +6,7 @@ add_library(mbed-disco-f469ni INTERFACE)
 target_sources(mbed-disco-f469ni
     INTERFACE
         PeripheralPins.c
+        TargetInit.c
 )
 
 target_include_directories(mbed-disco-f469ni
