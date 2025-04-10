@@ -2601,6 +2601,110 @@
         "sub_family": null,
         "vendor": "Maxim:23"
     },
+    "MIMXRT1021DAG5A": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "devices/MIMXRT1021/arm/MIMXRT1021_QuadSPI_4KB_SEC.FLM",
+                "ram_size": 32768,
+                "ram_start": 536870912,
+                "size": 8388608,
+                "start": 1610612736,
+                "style": "Keil"
+            }
+        ],
+        "family": "MIMXRT1021",
+        "from_pack": {
+            "pack": "MIMXRT1021_DFP",
+            "url": "https://mcuxpresso.nxp.com/cmsis_pack/repo/",
+            "vendor": "NXP",
+            "version": "19.0.0"
+        },
+        "memories": {
+            "ROMCP": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "p_name": null,
+                "size": 98304,
+                "start": 2097152,
+                "startup": false
+            },
+            "SRAM_DTC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "p_name": null,
+                "size": 65536,
+                "start": 536870912,
+                "startup": false
+            },
+            "SRAM_ITC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "p_name": null,
+                "size": 65536,
+                "start": 0,
+                "startup": false
+            },
+            "SRAM_OC": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "p_name": null,
+                "size": 131072,
+                "start": 538968064,
+                "startup": false
+            }
+        },
+        "name": "MIMXRT1021DAG5A",
+        "processors": [
+            {
+                "address": null,
+                "ap": 0,
+                "apid": null,
+                "core": "CortexM7",
+                "default_reset_sequence": null,
+                "dp": 0,
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "name": null,
+                "svd": "devices/MIMXRT1021/MIMXRT1021.xml",
+                "unit": 0
+            }
+        ],
+        "sub_family": null,
+        "vendor": "NXP:11"
+    },
     "MIMXRT1052DVL6A": {
         "algorithms": [
             {
