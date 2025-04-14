@@ -26,7 +26,7 @@
   * APB1CLK (MHz)       | 160
   * APB2CLK (MHz)       | 160
   * APB3CLK (MHz)       | 160
-  * USB capable         | TODO
+  * USB capable         | Yes
   *-----------------------------------------------------------------------------
 **/
 
@@ -142,15 +142,17 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 #else
     RCC_OscInitStruct.HSI48State            = RCC_HSI48_OFF;
 #endif /* DEVICE_USBDEVICE */
-#if HSE_VALUE==10000000UL
     RCC_OscInitStruct.PLL.PLLState          = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource         = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLMBOOST         = RCC_PLLMBOOST_DIV1;
-    RCC_OscInitStruct.PLL.PLLM              = 1; // VCO input clock = 10 MHz (10 MHz / 1)
+    RCC_OscInitStruct.PLL.PLLM              = 1;
+#if HSE_VALUE==10000000UL
+    RCC_OscInitStruct.PLL.PLLN              = 16; // VCO output clock = 160 MHz (10 MHz * 16)
+#elif HSE_VALUE==8000000UL
+    RCC_OscInitStruct.PLL.PLLN              = 20; // VCO output clock = 160 MHz (8 MHz * 20)
 #else
 #error Unsupported external clock value, check HSE_VALUE define
 #endif
-    RCC_OscInitStruct.PLL.PLLN              = 16; // VCO output clock = 160 MHz (10 MHz * 16)
     RCC_OscInitStruct.PLL.PLLP              = 2;
     RCC_OscInitStruct.PLL.PLLQ              = 2;
     RCC_OscInitStruct.PLL.PLLR              = 1;  // PLL clock = 160 MHz
@@ -162,11 +164,12 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     }
 
 #if DEVICE_USBDEVICE
-    RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
-    PeriphClkIniRCC_PeriphClkInittStruct.UsbClockSelection    = RCC_USBCLKSOURCE_HSI48; /* 48 MHz */
+    RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+    RCC_PeriphClkInit.IclkClockSelection = RCC_CLK48CLKSOURCE_HSI48;
     if (HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit) != HAL_OK) {
         return 0; // FAIL
     }
+    HAL_PWREx_EnableVddUSB();
 #endif /* DEVICE_USBDEVICE */
 
     // Select PLL clock as system clock source and configure the HCLK, PCLK1 and PCLK2 clock dividers
@@ -244,15 +247,18 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
     }
 
 #if MBED_CONF_TARGET_LSE_AVAILABLE
-        /* Enable MSI Auto-calibration through LSE */
-        HAL_RCCEx_EnableMSIPLLMode();
+    /* Enable MSI Auto-calibration through LSE */
+    HAL_RCCEx_EnableMSIPLLMode();
+    HAL_RCCEx_EnableMSIPLLFastStartup();
 #endif /* MBED_CONF_TARGET_LSE_AVAILABLE */
 
 #if DEVICE_USBDEVICE
-        /* Select MSI output as USB clock source */
-        PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
-        PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_MSI; /* 48 MHz */
-        HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+    RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+    RCC_PeriphClkInit.IclkClockSelection = RCC_CLK48CLKSOURCE_HSI48;
+    if (HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit) != HAL_OK) {
+        return 0; // FAIL
+    }
+    HAL_PWREx_EnableVddUSB();
 #endif /* DEVICE_USBDEVICE */
 
     // Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers

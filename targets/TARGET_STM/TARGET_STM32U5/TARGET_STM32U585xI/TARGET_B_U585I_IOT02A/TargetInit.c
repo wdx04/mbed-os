@@ -1,6 +1,7 @@
 #include "mbed_error.h"
 #include "stm32u5xx.h"
 #include "aps6408.h"
+#include "memory.h"
 
 /* Common Error codes */
 #define BSP_ERROR_NONE                    0
@@ -516,7 +517,7 @@ int32_t BSP_OSPI_RAM_EnableMemoryMappedMode(uint32_t Instance)
 
 void TargetBSP_Init(void)
 {
-  DCACHE_HandleTypeDef hdcache1;
+  DCACHE_HandleTypeDef hdcache1 = { 0 };
   hdcache1.Instance = DCACHE1;
   hdcache1.Init.ReadBurstType = DCACHE_READ_BURST_WRAP;
   if (HAL_DCACHE_Init(&hdcache1) != HAL_OK)
