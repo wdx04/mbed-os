@@ -31,6 +31,8 @@
 #include "stm32h7xx_ll_pwr.h"
 #include "stm32h7xx_ll_system.h"
 
+#include "stm_dma_info.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -112,6 +114,7 @@ struct ospi_s {
     PinName sclk;
     PinName ssel;
     PinName dqs;
+    bool dmaInitialized;
 };
 #endif
 

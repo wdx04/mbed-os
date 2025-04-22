@@ -60,6 +60,11 @@ static const DMALinkInfo SPIRxDMALinks[] = {
         {2, 1, 3}  // SPI3 Rx is DMA2 Ch1 Request 3
 };
 
+/// Mapping from QSPI index to DMA link info
+static const DMALinkInfo QSPIDMALinks[] = {
+        {2, 7, 3}, // QUADSPI is DMA2 Ch7 Request 3
+};
+
 #endif
 
 #endif //MBED_OS_STM_DMA_INFO_H

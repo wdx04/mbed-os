@@ -31,6 +31,8 @@
 #include "stm32l4xx_ll_pwr.h"
 #include "stm32l4xx_ll_rcc.h"
 
+#include "stm_dma_utils.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -116,6 +118,7 @@ struct qspi_s {
     PinName io3;
     PinName sclk;
     PinName ssel;
+    bool dmaInitialized;
 };
 #endif
 

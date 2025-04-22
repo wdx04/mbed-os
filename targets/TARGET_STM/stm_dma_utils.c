@@ -624,6 +624,11 @@ DMA_HandleTypeDef *stm_init_dma_link(const DMALinkInfo *dmaLink, uint32_t direct
             __HAL_RCC_BDMA_CLK_ENABLE();
             break;
 #endif
+#ifdef MDMA
+        case 4:
+            __HAL_RCC_MDMA_CLK_ENABLE();
+            break;
+#endif
         default:
             mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid DMA controller", dmaLink->dmaIdx, MBED_FILENAME, __LINE__);
     }
