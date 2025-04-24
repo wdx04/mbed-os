@@ -96,6 +96,8 @@ struct qspi_s {
     PinName io3;
     PinName sclk;
     PinName ssel;
+    IRQn_Type qspiIRQ;
+    bool dmaInitialized;
 };
 #endif
 
@@ -114,6 +116,7 @@ struct ospi_s {
     PinName sclk;
     PinName ssel;
     PinName dqs;
+    IRQn_Type ospiIRQ;
     bool dmaInitialized;
 };
 #endif

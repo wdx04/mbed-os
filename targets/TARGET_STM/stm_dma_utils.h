@@ -69,12 +69,22 @@ typedef struct DMALinkInfo {
 #endif
 } DMALinkInfo;
 
+typedef union DMAInstancePointer {
+    DMA_TypeDef *dma;
+#ifdef BDMA
+    BDMA_TypeDef *bdma;
+#endif
+#ifdef MDMA
+    MDMA_TypeDef *mdma;
+#endif
+} DMAInstancePointer;
+
 /**
  * @brief Get the DMA instance for a DMA link
  *
  * @param dmaLink DMA instance
  */
-DMA_TypeDef * stm_get_dma_instance(DMALinkInfo const * dmaLink);
+DMAInstancePointer stm_get_dma_instance(DMALinkInfo const * dmaLink);
 
 /**
  * @brief Get the DMA channel instance for a DMA link
@@ -137,6 +147,15 @@ DMA_HandleTypeDef * stm_init_dma_link(DMALinkInfo const * dmaLink, uint32_t dire
  * @param dmaLink DMA link ponter to free.
  */
 void stm_free_dma_link(DMALinkInfo const * dmaLink);
+
+#ifdef MDMA
+    // STM32H7 MDMA version
+    MDMA_Channel_TypeDef * stm_get_mdma_channel(DMALinkInfo const * dmaLink);
+    bool stm_set_mdma_handle_for_link(DMALinkInfo const * dmaLink, MDMA_HandleTypeDef *handle);
+    MDMA_HandleTypeDef * stm_get_mdma_handle_for_link(DMALinkInfo const * dmaLink);
+    MDMA_HandleTypeDef * stm_init_mdma_link(const DMALinkInfo *dmaLink, uint32_t direction, bool sourceInc, bool destInc, uint8_t sourceDataAlignment, uint8_t destDataAlignment);
+    void stm_free_mdma_link(DMALinkInfo const * dmaLink);
+#endif
 
 #if defined(__cplusplus)
 }

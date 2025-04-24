@@ -51,12 +51,12 @@ void QUADSPI_IRQHandler()
 
 void HAL_QSPI_ErrorCallback(QSPI_HandleTypeDef * handle)
 {
-    handle->State = HAL_QSPI_STATE_READY;
+    handle->State = HAL_QSPI_STATE_ERROR;
 }
 
 void HAL_QSPI_TimeOutCallback(QSPI_HandleTypeDef * handle)
 {
-    handle->State = HAL_QSPI_STATE_READY;
+    handle->State = HAL_QSPI_STATE_ERROR;
 }
 #endif
 
@@ -69,12 +69,12 @@ void OCTOSPI1_IRQHandler()
 
 void HAL_OSPI_ErrorCallback(OSPI_HandleTypeDef * handle)
 {
-    handle->State = HAL_OSPI_STATE_READY;
+    handle->State = HAL_OSPI_STATE_ERROR;
 }
 
 void HAL_OSPI_TimeOutCallback(OSPI_HandleTypeDef * handle)
 {
-    handle->State = HAL_OSPI_STATE_READY;
+    handle->State = HAL_OSPI_STATE_ERROR;
 }
 #endif
 
@@ -432,15 +432,27 @@ qspi_status_t qspi_prepare_command(const qspi_command_t *command, QSPI_CommandTy
  * Initialize the DMA for an QSPI object
  * Does nothing if DMA is already initialized.
  */
-static void qspi_init_dma(struct ospi_s * obj)
+static void qspi_init_dma(struct qspi_s * obj)
 {
     if(!obj->dmaInitialized)
     {
         // Get DMA handle
-        DMALinkInfo const *dmaLink = &OSPIDMALinks[0];
-
+        DMALinkInfo const *dmaLink;
+#if defined(OCTOSPI2)
+        if(obj->qspi == (QSPIName) OSPI_1)
+        {
+            dmaLink = &OSPIDMALinks[0];
+        }
+        else
+        {
+            dmaLink = &OSPIDMALinks[1];
+        }
+#else
+        dmaLink = &OSPIDMALinks[0];
+#endif
         // Initialize DMA channel
-        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
+#if defined(MDMA)
+        MDMA_HandleTypeDef *dmaHandle = stm_init_mdma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
 
         if(dmaHandle == NULL)
         {
@@ -448,21 +460,31 @@ static void qspi_init_dma(struct ospi_s * obj)
         }
 
         __HAL_LINKDMA(&obj->handle, hmdma, *dmaHandle);
+#else
+        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
+
+        if(dmaHandle == NULL)
+        {
+            mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
+        }
+
+        __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle);
+#endif
         obj->dmaInitialized = true;
     }
 }
 
-// Store the spi_s * inside an SPI handle, for later retrieval in callbacks
-static inline void store_ospi_pointer(OSPI_HandleTypeDef * ospiHandle, struct ospi_s * ospis) {
+// Store the qspi_s * inside an OSPI handle, for later retrieval in callbacks
+static inline void store_qspi_pointer(OSPI_HandleTypeDef * ospiHandle, struct qspi_s * qspis) {
     // Annoyingly, STM neglected to provide any sort of "user data" pointer inside OSPI_HandleTypeDef for use
     // in callbacks.  However, there are some variables in the Init struct that are never accessed after HAL_OSPI_Init().
     // So, we can reuse those to store our pointer.
-    ospiHandle->Init.ChipSelectHighTime = (uint32_t)ospis;
+    ospiHandle->Init.ChipSelectHighTime = (uint32_t)qspis;
 }
 
-// Get spi_s * from SPI_HandleTypeDef
-static inline struct ospi_s * get_ospi_pointer(OSPI_HandleTypeDef * ospiHandle) {
-    return (struct ospi_s *) ospiHandle->Init.ChipSelectHighTime;
+// Get qspi_s * from OSPI_HandleTypeDef
+static inline struct qspi_s * get_qspi_pointer(OSPI_HandleTypeDef * ospiHandle) {
+    return (struct qspi_s *) ospiHandle->Init.ChipSelectHighTime;
 }
 
 #if STATIC_PINMAP_READY
@@ -503,15 +525,20 @@ static qspi_status_t _qspi_init_direct(qspi_t *obj, const qspi_pinmap_t *pinmap,
 
     // tested all combinations, take first
     obj->qspi = pinmap->peripheral;
+    obj->dmaInitialized = false;
 
 #if defined(OCTOSPI1)
     if (obj->qspi == QSPI_1) {
         obj->handle.Instance = OCTOSPI1;
+        obj->qspiIRQ = OCTOSPI1_IRQn;
+        ospiHandle1 = &obj->handle;
     }
 #endif
 #if defined(OCTOSPI2)
     if (obj->qspi == QSPI_2) {
         obj->handle.Instance = OCTOSPI2;
+        obj->qspiIRQ = OCTOSPI2_IRQn;
+        ospiHandle2 = &obj->handle;
     }
 #endif
 
@@ -846,6 +873,9 @@ qspi_status_t qspi_frequency(qspi_t *obj, int hz)
     tr_debug("qspi_frequency hz %d", hz);
     qspi_status_t status = QSPI_STATUS_OK;
 
+    // Reset flag used by store_qspi_pointer()
+    obj->handle.Init.ChipSelectHighTime = 3;
+
     /* HCLK drives QSPI. QSPI clock depends on prescaler value:
     *  0: Freq = HCLK
     *  1: Freq = HCLK/2
@@ -865,6 +895,8 @@ qspi_status_t qspi_frequency(qspi_t *obj, int hz)
         tr_error("HAL_OSPI_Init error");
         status = QSPI_STATUS_ERROR;
     }
+
+    store_qspi_pointer(&obj->handle, obj);
 
     return status;
 }
@@ -923,10 +955,29 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
         tr_error("HAL_OSPI_Command error");
         status = QSPI_STATUS_ERROR;
     } else {
-        if (HAL_OSPI_Transmit(&obj->handle, (uint8_t *)data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+        qspi_init_dma(obj);
+        NVIC_ClearPendingIRQ(obj->qspiIRQ);
+        NVIC_SetPriority(obj->qspiIRQ, 1);
+        NVIC_EnableIRQ(obj->qspiIRQ);
+#if defined(__DCACHE_PRESENT)
+        // For chips with a cache (e.g. Cortex-M7), we need to evict the Tx fill data from cache to main memory.
+        // This ensures that the DMA controller can see the most up-to-date copy of the data.
+        SCB_CleanDCache_by_Addr((volatile void *)data, *length);
+#endif
+        if (HAL_OSPI_Transmit_DMA(&obj->handle, (uint8_t *)data) != HAL_OK) {
             tr_error("HAL_OSPI_Transmit error");
             status = QSPI_STATUS_ERROR;
         }
+        else {
+            // wait until transfer complete or timeout
+            while(obj->handle.State == HAL_OSPI_STATE_BUSY_TX);
+            if(obj->handle.State != HAL_OSPI_STATE_READY)
+            {
+                status = QSPI_STATUS_ERROR;
+                obj->handle.State = HAL_OSPI_STATE_READY;
+            }
+        }
+        NVIC_DisableIRQ(obj->qspiIRQ);
     }
 
     return status;
@@ -962,6 +1013,11 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
         else {
             // wait until transfer complete or timeout
             while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_TX);
+            if(obj->handle.State != HAL_QSPI_STATE_READY)
+            {
+                status = QSPI_STATUS_ERROR;
+                obj->handle.State = HAL_QSPI_STATE_READY;
+            }
         }
         NVIC_DisableIRQ(QUADSPI_IRQn);
     }
@@ -986,10 +1042,33 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
         tr_error("HAL_OSPI_Command error");
         status = QSPI_STATUS_ERROR;
     } else {
-        if (HAL_OSPI_Receive(&obj->handle, data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+        qspi_init_dma(obj);
+        NVIC_ClearPendingIRQ(obj->qspiIRQ);
+        NVIC_SetPriority(obj->qspiIRQ, 1);
+        NVIC_EnableIRQ(obj->qspiIRQ);
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+        if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0)
+        {
+            SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
+        }
+#endif
+    if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
             tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
             status = QSPI_STATUS_ERROR;
         }
+        else {
+            // wait until transfer complete or timeout
+            while(obj->handle.State == HAL_OSPI_STATE_BUSY_RX);
+            if(obj->handle.State != HAL_OSPI_STATE_READY)
+            {
+                status = QSPI_STATUS_ERROR;
+                obj->handle.State = HAL_OSPI_STATE_READY;
+            }
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+            SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
+#endif
+        }
+        NVIC_DisableIRQ(obj->qspiIRQ);
     }
 
     debug_if(qspi_api_c_debug, "qspi_read size %u\n", *length);
@@ -1013,7 +1092,13 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
         qspi_init_dma(obj);
         NVIC_ClearPendingIRQ(QUADSPI_IRQn);
         NVIC_SetPriority(QUADSPI_IRQn, 1);
-        NVIC_EnableIRQ(QUADSPI_IRQn);        
+        NVIC_EnableIRQ(QUADSPI_IRQn);
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+        if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0)
+        {
+            SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
+        }
+#endif
         if (HAL_QSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
             status = QSPI_STATUS_ERROR;
         }
@@ -1023,6 +1108,11 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
 #endif
             while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_RX);
+            if(obj->handle.State != HAL_QSPI_STATE_READY)
+            {
+                status = QSPI_STATUS_ERROR;
+                obj->handle.State = HAL_QSPI_STATE_READY;
+            }
         }
         NVIC_DisableIRQ(QUADSPI_IRQn);
     }

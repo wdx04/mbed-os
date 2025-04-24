@@ -20,6 +20,30 @@ namespace mbed {
 
 using namespace std::chrono_literals;
 
+namespace LAN8720 {
+
+    /// Driver for the Microchip LAN8720 PHY
+    /// Datasheet: https://ww1.microchip.com/downloads/en/devicedoc/8720a.pdf
+    /// @{
+
+    inline constexpr GenericEthPhy::Config DefaultConfig = {
+        .OUI = 0x1F0,
+        .model = 0x0F,
+        .address = 0, // Address set via PHYAD[0] strap.
+    };
+
+    class Driver : public GenericEthPhy {
+    public:
+        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
+        GenericEthPhy(config)
+        {}
+    };
+
+
+    /// @}
+
+}
+
 namespace LAN8742 {
 
 /// Driver for the Microchip LAN8742 PHY

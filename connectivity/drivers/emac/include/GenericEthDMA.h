@@ -229,7 +229,7 @@ namespace mbed {
             }
 
             tr_debug("Transmitting packet of length %lu in %zu buffers and %zu descs\n",
-               memory_manager->get_total_len(buf), memory_manager->count_buffers(buf), neededDescs);
+               memory_manager->get_total_len(buf), memory_manager->count_buffers(buf), neededFreeDescs);
 
             // Step 2: Copy packet if needed
             if(needToCopy)

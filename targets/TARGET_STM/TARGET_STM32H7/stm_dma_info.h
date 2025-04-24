@@ -44,8 +44,8 @@ static const DMALinkInfo SPIRxDMALinks[] = {
 
 /// Mapping from QSPI index to DMA link info
 static const DMALinkInfo OSPIDMALinks[] = {
-        {4, 0, MDMA_REQUEST_OCTOSPI1_TC},
-        {4, 1, MDMA_REQUEST_OCTOSPI2_TC}
+        {4, 0, MDMA_REQUEST_OCTOSPI1_FIFO_TH},
+        {4, 1, MDMA_REQUEST_OCTOSPI2_FIFO_TH}
 };
 
 

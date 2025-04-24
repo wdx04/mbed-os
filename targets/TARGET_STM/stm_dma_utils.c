@@ -27,25 +27,46 @@
 // Note: arrays are 0-indexed, so DMA1 Channel2 is at stmDMAHandles[0][1].
 static DMA_HandleTypeDef * stmDMAHandles[NUM_DMA_CONTROLLERS][MAX_DMA_CHANNELS_PER_CONTROLLER];
 
-DMA_TypeDef * stm_get_dma_instance(DMALinkInfo const * dmaLink)
+#if defined(MDMA)
+// MDMA has 16 channels, 0-indexed
+#define MAX_MDMA_CHANNELS 16
+static MDMA_HandleTypeDef * stmMDMAHandles[MAX_MDMA_CHANNELS];
+#endif
+
+DMAInstancePointer stm_get_dma_instance(DMALinkInfo const * dmaLink)
 {
+    DMAInstancePointer dma_instance;
     switch(dmaLink->dmaIdx)
     {
 #ifdef DMA1
         case 1:
-            return DMA1;
+            dma_instance.dma = DMA1;
+            break;
 #endif
 #ifdef DMA2
         case 2:
-            return DMA2;
+            dma_instance.dma = DMA2;
+            break;
 #endif
 #ifdef GPDMA1
         case 1:
-            return GPDMA1;
+            dma_instance.dma = GPDMA1;
+            break;
+#endif
+#ifdef BDMA
+        case 3:
+            dma_instance.bdma = BDMA;
+            break;
+#endif
+#ifdef MDMA
+        case 4:
+            dma_instance.mdma = MDMA;
+            break;
 #endif
         default:
             mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid DMA controller", dmaLink->dmaIdx, MBED_FILENAME, __LINE__);
     }
+    return dma_instance;
 }
 
 DMA_Channel_TypeDef * stm_get_dma_channel(const DMALinkInfo *dmaLink)
@@ -266,6 +287,55 @@ DMA_Channel_TypeDef * stm_get_dma_channel(const DMALinkInfo *dmaLink)
 
     }
 }
+
+#if defined(MDMA)
+MDMA_Channel_TypeDef * stm_get_mdma_channel(const DMALinkInfo *dmaLink)
+{
+    switch(dmaLink->dmaIdx)
+    {
+        case 4:
+            switch(dmaLink->channelIdx)
+            {
+                case 0:
+                    return MDMA_Channel0;
+                case 1:
+                    return MDMA_Channel1;
+                case 2:
+                    return MDMA_Channel2;
+                case 3:
+                    return MDMA_Channel3;
+                case 4:
+                    return MDMA_Channel4;
+                case 5:
+                    return MDMA_Channel5;
+                case 6:
+                    return MDMA_Channel6;
+                case 7:
+                    return MDMA_Channel7;
+                case 8:
+                    return MDMA_Channel8;
+                case 9:
+                    return MDMA_Channel9;
+                case 10:
+                    return MDMA_Channel10;
+                case 11:
+                    return MDMA_Channel11;
+                case 12:
+                    return MDMA_Channel12;
+                case 13:
+                    return MDMA_Channel13;
+                case 14:
+                    return MDMA_Channel14;
+                case 15:
+                    return MDMA_Channel15;
+                default:
+                    mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid MDMA channel", dmaLink->channelIdx, MBED_FILENAME, __LINE__);
+            }
+        default:
+            mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid MDMA controller", dmaLink->dmaIdx, MBED_FILENAME, __LINE__);
+    }
+}
+#endif
 
 IRQn_Type stm_get_dma_irqn(const DMALinkInfo *dmaLink)
 {
@@ -547,6 +617,11 @@ IRQn_Type stm_get_dma_irqn(const DMALinkInfo *dmaLink)
                     mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid DMA channel", dmaLink->channelIdx, MBED_FILENAME, __LINE__);
             }
 #endif
+
+#ifdef MDMA
+        case 4:
+            return MDMA_IRQn;
+#endif
         default:
             mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid DMA controller", dmaLink->dmaIdx, MBED_FILENAME, __LINE__);
 
@@ -579,6 +654,28 @@ DMA_HandleTypeDef *stm_get_dma_handle_for_link(DMALinkInfo const * dmaLink)
 #endif
     return stmDMAHandles[dmaLink->dmaIdx - 1][channelIdx];
 }
+
+#if defined(MDMA)
+bool stm_set_mdma_handle_for_link(DMALinkInfo const * dmaLink, MDMA_HandleTypeDef *handle)
+{
+    uint8_t channelIdx = dmaLink->channelIdx;
+    if(stmMDMAHandles[channelIdx] != NULL && handle != NULL)
+    {
+        return false;
+    }
+    stmMDMAHandles[channelIdx] = handle;
+    return true;
+}
+
+MDMA_HandleTypeDef *stm_get_mdma_handle_for_link(DMALinkInfo const * dmaLink)
+{
+    if(dmaLink->dmaIdx != 4)
+    {
+        return NULL;
+    }
+    return stmMDMAHandles[dmaLink->channelIdx];
+}
+#endif
 
 DMA_HandleTypeDef *stm_init_dma_link(const DMALinkInfo *dmaLink, uint32_t direction, bool periphInc, bool memInc,
                                      uint8_t periphDataAlignment, uint8_t memDataAlignment){
@@ -806,6 +903,109 @@ void stm_free_dma_link(const DMALinkInfo *dmaLink)
     free(stmDMAHandles[dmaLink->dmaIdx - 1][channelIdx]);
     stmDMAHandles[dmaLink->dmaIdx - 1][channelIdx] = NULL;
 }
+
+#ifdef MDMA
+MDMA_HandleTypeDef *stm_init_mdma_link(const DMALinkInfo *dmaLink, uint32_t direction, bool sourceInc, bool destInc,
+    uint8_t sourceDataAlignment, uint8_t destDataAlignment){
+
+    uint8_t channelIdx = dmaLink->channelIdx;
+
+    if(dmaLink->dmaIdx != 4)
+    {
+        mbed_error(MBED_ERROR_ITEM_NOT_FOUND, "Invalid DMA controller", dmaLink->dmaIdx, MBED_FILENAME, __LINE__);
+    }
+
+    if(stmMDMAHandles[channelIdx] != NULL)
+    {
+        // Wrong DMA index or Channel already allocated
+        return NULL;
+    }
+
+    // Turn on clock for the MDMA module
+    __HAL_RCC_MDMA_CLK_ENABLE();
+
+    // Allocate DMA handle.
+    // Yes it's a little gross that we have to allocate on the heap, but this structure uses quite a lot of memory,
+    // so we don't want to allocate DMA handles until they're needed.
+    MDMA_HandleTypeDef * dmaHandle = malloc(sizeof(MDMA_HandleTypeDef));
+    memset(dmaHandle, 0, sizeof(MDMA_HandleTypeDef));
+    stmMDMAHandles[channelIdx] = dmaHandle;
+
+    dmaHandle->Init.Request = dmaLink->sourceNumber;
+    dmaHandle->Init.TransferTriggerMode = MDMA_BUFFER_TRANSFER;
+    dmaHandle->Init.Priority = MDMA_PRIORITY_HIGH;
+    dmaHandle->Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
+
+    dmaHandle->Init.SourceInc = sourceInc ? MDMA_SRC_INC_BYTE: MDMA_SRC_INC_DISABLE;
+    dmaHandle->Init.DestinationInc = destInc ? MDMA_DEST_INC_BYTE: MDMA_DEST_INC_DISABLE;
+    switch(sourceDataAlignment)
+    {
+    case 8:
+        dmaHandle->Init.SourceDataSize = MDMA_SRC_DATASIZE_DOUBLEWORD;
+        break;
+    case 4:
+        dmaHandle->Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
+        break;
+    case 2:
+        dmaHandle->Init.SourceDataSize = MDMA_SRC_DATASIZE_HALFWORD;
+        break;
+    case 1:
+        dmaHandle->Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
+        break;
+    }
+    switch(destDataAlignment)
+    {
+        case 8:
+        dmaHandle->Init.DestDataSize = MDMA_DEST_DATASIZE_DOUBLEWORD;
+        break;
+    case 4:
+        dmaHandle->Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
+        break;
+    case 2:
+        dmaHandle->Init.DestDataSize = MDMA_DEST_DATASIZE_HALFWORD;
+        break;
+    case 1:
+        dmaHandle->Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
+        break;
+    }
+    dmaHandle->Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
+    dmaHandle->Init.BufferTransferLength = 16;
+    dmaHandle->Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
+    dmaHandle->Init.DestBurst = MDMA_DEST_BURST_SINGLE;
+
+    dmaHandle->Init.SourceBlockAddressOffset = 0;
+    dmaHandle->Init.DestBlockAddressOffset = 0;
+
+    dmaHandle->Instance = stm_get_mdma_channel(dmaLink);
+
+    HAL_MDMA_Init(dmaHandle);
+
+    // Set up interrupt
+    IRQn_Type irqNum = stm_get_dma_irqn(dmaLink);
+    NVIC_EnableIRQ(irqNum);
+    NVIC_SetPriority(irqNum, 0);
+
+    return dmaHandle;
+}
+
+void stm_free_mdma_link(const DMALinkInfo *dmaLink)
+{
+    // Note: we can't disable the interrupt here, in case one ISR is shared by multiple DMA channels
+    // and another channel is still using the interrupt.
+    if(dmaLink->dmaIdx != 4)
+    {
+        return;
+    }
+
+    uint8_t channelIdx = dmaLink->channelIdx;
+    // Deinit hardware channel
+    HAL_MDMA_DeInit(stmMDMAHandles[channelIdx]);
+
+    // Free memory
+    free(stmMDMAHandles[channelIdx]);
+    stmMDMAHandles[channelIdx] = NULL;
+}
+#endif
 
 #ifdef DMA_IP_VERSION_V2
 
@@ -1260,4 +1460,18 @@ void GPDMA1_Channel15_IRQHandler(void)
     HAL_DMA_IRQHandler(stmDMAHandles[0][15]);
 }
 #endif
+
 #endif // DMA_IP_VERSION_V3
+
+#ifdef MDMA
+void MDMA_IRQHandler(void)
+{
+    for(size_t i = 0; i < MAX_MDMA_CHANNELS; i++)
+    {
+        if(stmMDMAHandles[i] != NULL)
+        {
+            HAL_MDMA_IRQHandler(stmMDMAHandles[i]);
+        }
+    }
+}
+#endif
