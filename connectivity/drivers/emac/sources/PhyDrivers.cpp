@@ -44,6 +44,53 @@ namespace LAN8720 {
 
 }
 
+namespace DP83848VY {
+
+    /// Driver for the  DP83848VY PHY
+    /// Datasheet: https://www.ti.com/lit/ds/symlink/dp83848c.pdf
+    /// @{
+
+    inline constexpr GenericEthPhy::Config DefaultConfig = {
+        .OUI = 0x80017,
+        .model = 0x0A,
+        .address = 1, // Address set via PHYAD[0] strap.
+    };
+
+    class Driver : public GenericEthPhy {
+    public:
+        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
+        GenericEthPhy(config)
+        {}
+    };
+
+
+    /// @}
+
+}
+
+namespace DP83848VV {
+
+    /// Driver for the  DP83848VV PHY
+    /// @{
+
+    inline constexpr GenericEthPhy::Config DefaultConfig = {
+        .OUI = 0x80017,
+        .model = 0x09,
+        .address = 1, // Address set via PHYAD[0] strap.
+    };
+
+    class Driver : public GenericEthPhy {
+    public:
+        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
+        GenericEthPhy(config)
+        {}
+    };
+
+
+    /// @}
+
+}
+
 namespace LAN8742 {
 
 /// Driver for the Microchip LAN8742 PHY

@@ -451,24 +451,15 @@ static void qspi_init_dma(struct qspi_s * obj)
         dmaLink = &OSPIDMALinks[0];
 #endif
         // Initialize DMA channel
+        DMAHandlePointer dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
+        if(dmaHandle.hdma == NULL)
+        {
+            mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
+        }
 #if defined(MDMA)
-        MDMA_HandleTypeDef *dmaHandle = stm_init_mdma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
-
-        if(dmaHandle == NULL)
-        {
-            mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
-        }
-
-        __HAL_LINKDMA(&obj->handle, hmdma, *dmaHandle);
+        __HAL_LINKDMA(&obj->handle, hmdma, *dmaHandle.hmdma);
 #else
-        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
-
-        if(dmaHandle == NULL)
-        {
-            mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
-        }
-
-        __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle);
+        __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle.hdma);
 #endif
         obj->dmaInitialized = true;
     }
@@ -665,14 +656,16 @@ static void qspi_init_dma(struct qspi_s * obj)
         DMALinkInfo const *dmaLink = &QSPIDMALinks[0];
 
         // Initialize DMA channel
-        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
-
-        if(dmaHandle == NULL)
+        DMAHandlePointer dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1);
+        if(dmaHandle.hdma == NULL)
         {
             mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
         }
-
-        __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle);
+#if defined(MDMA)
+        __HAL_LINKDMA(&obj->handle, hmdma, *dmaHandle.hmdma);
+#else
+        __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle.hdma);
+#endif
         obj->dmaInitialized = true;
     }
 }
@@ -802,6 +795,26 @@ qspi_status_t qspi_init(qspi_t *obj, PinName io0, PinName io1, PinName io2, PinN
 qspi_status_t qspi_free(qspi_t *obj)
 {
     tr_debug("qspi_free");
+
+    if(obj->dmaInitialized)
+    {
+        // Get DMA handle
+        DMALinkInfo const *dmaLink;
+#if defined(OCTOSPI2)
+        if(obj->qspi == (QSPIName) OSPI_1)
+        {
+            dmaLink = &OSPIDMALinks[0];
+        }
+        else
+        {
+            dmaLink = &OSPIDMALinks[1];
+        }
+#else
+        dmaLink = &OSPIDMALinks[0];
+#endif
+        stm_free_dma_link(dmaLink);
+    }
+
     if (HAL_OSPI_DeInit(&obj->handle) != HAL_OK) {
         return QSPI_STATUS_ERROR;
     }
@@ -834,6 +847,13 @@ qspi_status_t qspi_free(qspi_t *obj)
 qspi_status_t qspi_free(qspi_t *obj)
 {
     tr_debug("qspi_free");
+
+    if(obj->dmaInitialized)
+    {
+        // Get DMA handle
+        DMALinkInfo const *dmaLink = &QSPIDMALinks[0];
+        stm_free_dma_link(dmaLink);
+    }
 
     if (HAL_QSPI_DeInit(&obj->handle) != HAL_OK) {
         return QSPI_STATUS_ERROR;
@@ -955,29 +975,36 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
         tr_error("HAL_OSPI_Command error");
         status = QSPI_STATUS_ERROR;
     } else {
-        qspi_init_dma(obj);
-        NVIC_ClearPendingIRQ(obj->qspiIRQ);
-        NVIC_SetPriority(obj->qspiIRQ, 1);
-        NVIC_EnableIRQ(obj->qspiIRQ);
+        if(st_command.NbData >= 8) {
+            qspi_init_dma(obj);
+            NVIC_ClearPendingIRQ(obj->qspiIRQ);
+            NVIC_SetPriority(obj->qspiIRQ, 1);
+            NVIC_EnableIRQ(obj->qspiIRQ);
 #if defined(__DCACHE_PRESENT)
-        // For chips with a cache (e.g. Cortex-M7), we need to evict the Tx fill data from cache to main memory.
-        // This ensures that the DMA controller can see the most up-to-date copy of the data.
-        SCB_CleanDCache_by_Addr((volatile void *)data, *length);
+            // For chips with a cache (e.g. Cortex-M7), we need to evict the Tx fill data from cache to main memory.
+            // This ensures that the DMA controller can see the most up-to-date copy of the data.
+            SCB_CleanDCache_by_Addr((volatile void *)data, *length);
 #endif
-        if (HAL_OSPI_Transmit_DMA(&obj->handle, (uint8_t *)data) != HAL_OK) {
-            tr_error("HAL_OSPI_Transmit error");
-            status = QSPI_STATUS_ERROR;
+            if (HAL_OSPI_Transmit_DMA(&obj->handle, (uint8_t *)data) != HAL_OK) {
+                tr_error("HAL_OSPI_Transmit error");
+                status = QSPI_STATUS_ERROR;
+            }
+            else {
+                // wait until transfer complete or timeout
+                while(obj->handle.State == HAL_OSPI_STATE_BUSY_TX);
+                if(obj->handle.State != HAL_OSPI_STATE_READY) {
+                    status = QSPI_STATUS_ERROR;
+                    obj->handle.State = HAL_OSPI_STATE_READY;
+                }
+            }
+            NVIC_DisableIRQ(obj->qspiIRQ);
         }
         else {
-            // wait until transfer complete or timeout
-            while(obj->handle.State == HAL_OSPI_STATE_BUSY_TX);
-            if(obj->handle.State != HAL_OSPI_STATE_READY)
-            {
+            if (HAL_OSPI_Transmit(&obj->handle, (uint8_t *)data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_OSPI_Transmit error");
                 status = QSPI_STATUS_ERROR;
-                obj->handle.State = HAL_OSPI_STATE_READY;
             }
         }
-        NVIC_DisableIRQ(obj->qspiIRQ);
     }
 
     return status;
@@ -998,28 +1025,34 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
     if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
         status = QSPI_STATUS_ERROR;
     } else {
-        qspi_init_dma(obj);
-        NVIC_ClearPendingIRQ(QUADSPI_IRQn);
-        NVIC_SetPriority(QUADSPI_IRQn, 1);
-        NVIC_EnableIRQ(QUADSPI_IRQn);
+        if(st_command.NbData >= 8) {
+            qspi_init_dma(obj);
+            NVIC_ClearPendingIRQ(QUADSPI_IRQn);
+            NVIC_SetPriority(QUADSPI_IRQn, 1);
+            NVIC_EnableIRQ(QUADSPI_IRQn);
 #if defined(__DCACHE_PRESENT)
-        // For chips with a cache (e.g. Cortex-M7), we need to evict the Tx fill data from cache to main memory.
-        // This ensures that the DMA controller can see the most up-to-date copy of the data.
-        SCB_CleanDCache_by_Addr(data, *length);
+            // For chips with a cache (e.g. Cortex-M7), we need to evict the Tx fill data from cache to main memory.
+            // This ensures that the DMA controller can see the most up-to-date copy of the data.
+            SCB_CleanDCache_by_Addr(data, *length);
 #endif
-        if (HAL_QSPI_Transmit_DMA(&obj->handle, (uint8_t *)data) != HAL_OK) {
-            status = QSPI_STATUS_ERROR;
+            if (HAL_QSPI_Transmit_DMA(&obj->handle, (uint8_t *)data) != HAL_OK) {
+                status = QSPI_STATUS_ERROR;
+            }
+            else {
+                // wait until transfer complete or timeout
+                while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_TX);
+                if(obj->handle.State != HAL_QSPI_STATE_READY) {
+                    status = QSPI_STATUS_ERROR;
+                    obj->handle.State = HAL_QSPI_STATE_READY;
+                }
+            }
+            NVIC_DisableIRQ(QUADSPI_IRQn);
         }
         else {
-            // wait until transfer complete or timeout
-            while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_TX);
-            if(obj->handle.State != HAL_QSPI_STATE_READY)
-            {
+            if (HAL_QSPI_Transmit(&obj->handle, (uint8_t *)data, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
                 status = QSPI_STATUS_ERROR;
-                obj->handle.State = HAL_QSPI_STATE_READY;
             }
         }
-        NVIC_DisableIRQ(QUADSPI_IRQn);
     }
 
     return status;
@@ -1042,33 +1075,39 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
         tr_error("HAL_OSPI_Command error");
         status = QSPI_STATUS_ERROR;
     } else {
-        qspi_init_dma(obj);
-        NVIC_ClearPendingIRQ(obj->qspiIRQ);
-        NVIC_SetPriority(obj->qspiIRQ, 1);
-        NVIC_EnableIRQ(obj->qspiIRQ);
+        if(st_command.NbData >= 8) {
+            qspi_init_dma(obj);
+            NVIC_ClearPendingIRQ(obj->qspiIRQ);
+            NVIC_SetPriority(obj->qspiIRQ, 1);
+            NVIC_EnableIRQ(obj->qspiIRQ);
 #if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-        if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0)
-        {
-            SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
-        }
+            if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0) {
+                SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
+            }
 #endif
-    if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
-            tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
-            status = QSPI_STATUS_ERROR;
+            if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
+                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+            else {
+                // wait until transfer complete or timeout
+                while(obj->handle.State == HAL_OSPI_STATE_BUSY_RX);
+                if(obj->handle.State != HAL_OSPI_STATE_READY) {
+                    status = QSPI_STATUS_ERROR;
+                    obj->handle.State = HAL_OSPI_STATE_READY;
+                }
+    #if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+                SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
+    #endif
+            }
+            NVIC_DisableIRQ(obj->qspiIRQ);
         }
         else {
-            // wait until transfer complete or timeout
-            while(obj->handle.State == HAL_OSPI_STATE_BUSY_RX);
-            if(obj->handle.State != HAL_OSPI_STATE_READY)
-            {
+            if (HAL_OSPI_Receive(&obj->handle, data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
                 status = QSPI_STATUS_ERROR;
-                obj->handle.State = HAL_OSPI_STATE_READY;
             }
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-            SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
-#endif
         }
-        NVIC_DisableIRQ(obj->qspiIRQ);
     }
 
     debug_if(qspi_api_c_debug, "qspi_read size %u\n", *length);
@@ -1089,32 +1128,38 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
     if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
         status = QSPI_STATUS_ERROR;
     } else {
-        qspi_init_dma(obj);
-        NVIC_ClearPendingIRQ(QUADSPI_IRQn);
-        NVIC_SetPriority(QUADSPI_IRQn, 1);
-        NVIC_EnableIRQ(QUADSPI_IRQn);
+        if(st_command.NbData >= 8) {
+            qspi_init_dma(obj);
+            NVIC_ClearPendingIRQ(QUADSPI_IRQn);
+            NVIC_SetPriority(QUADSPI_IRQn, 1);
+            NVIC_EnableIRQ(QUADSPI_IRQn);
 #if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-        if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0)
-        {
-            SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
-        }
+            if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0) {
+                SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
+            }
 #endif
-        if (HAL_QSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
-            status = QSPI_STATUS_ERROR;
-        }
-        else {
-            // wait until transfer complete or timeout
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-            SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
-#endif
-            while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_RX);
-            if(obj->handle.State != HAL_QSPI_STATE_READY)
-            {
+            if (HAL_QSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
                 status = QSPI_STATUS_ERROR;
-                obj->handle.State = HAL_QSPI_STATE_READY;
+            }
+            else {
+                // wait until transfer complete or timeout
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+                SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
+#endif
+                while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_RX);
+                if(obj->handle.State != HAL_QSPI_STATE_READY) {
+                    status = QSPI_STATUS_ERROR;
+                    obj->handle.State = HAL_QSPI_STATE_READY;
+                }
+            }
+            NVIC_DisableIRQ(QUADSPI_IRQn);
+        }
+        else
+        {
+            if (HAL_QSPI_Receive(&obj->handle, data, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                status = QSPI_STATUS_ERROR;
             }
         }
-        NVIC_DisableIRQ(QUADSPI_IRQn);
     }
 
     debug_if(qspi_api_c_debug, "qspi_read size %u\n", *length);
