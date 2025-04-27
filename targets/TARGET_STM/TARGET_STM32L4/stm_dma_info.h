@@ -40,8 +40,8 @@ static const DMALinkInfo SPIRxDMALinks[] = {
         {1, 6, DMA_REQUEST_SPI3_RX}
 };
 
-/// Mapping from QSPI index to DMA link info
-static const DMALinkInfo QSPIDMALinks[] = {
+/// Mapping from OSPI index to DMA link info
+static const DMALinkInfo OSPIDMALinks[] = {
         {1, 7, DMA_REQUEST_OCTOSPI1},
         {2, 1, DMA_REQUEST_OCTOSPI2},
 };

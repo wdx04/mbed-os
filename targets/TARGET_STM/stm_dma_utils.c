@@ -990,7 +990,7 @@ DMAHandlePointer stm_init_dma_link(const DMALinkInfo *dmaLink, uint32_t directio
             break;
         }
         dmaHandle->Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
-        dmaHandle->Init.BufferTransferLength = 16;
+        dmaHandle->Init.BufferTransferLength = 64;
         dmaHandle->Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
         dmaHandle->Init.DestBurst = MDMA_DEST_BURST_SINGLE;
 
@@ -1041,6 +1041,8 @@ void stm_free_dma_link(const DMALinkInfo *dmaLink)
         break;
 #endif
     }
+    IRQn_Type irqNum = stm_get_dma_irqn(dmaLink);
+    NVIC_DisableIRQ(irqNum);
     free(stmDMAHandles[dmaLink->dmaIdx - 1][channelIdx].hdma);
     stmDMAHandles[dmaLink->dmaIdx - 1][channelIdx].hdma = NULL;
 }

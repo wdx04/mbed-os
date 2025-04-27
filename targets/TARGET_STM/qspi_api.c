@@ -1154,8 +1154,7 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             }
             NVIC_DisableIRQ(QUADSPI_IRQn);
         }
-        else
-        {
+        else {
             if (HAL_QSPI_Receive(&obj->handle, data, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
                 status = QSPI_STATUS_ERROR;
             }

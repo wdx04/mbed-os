@@ -108,6 +108,7 @@ struct can_s {
 struct qspi_s {
 #if defined(OCTOSPI1)
     OSPI_HandleTypeDef handle;
+    IRQn_Type qspiIRQ;
 #else
     QSPI_HandleTypeDef handle;
 #endif
@@ -137,6 +138,8 @@ struct ospi_s {
     PinName sclk;
     PinName ssel;
     PinName dqs;
+    IRQn_Type ospiIRQ;
+    bool dmaInitialized;    
 };
 #endif
 
