@@ -175,17 +175,7 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
         return 0; // FAIL
     }
-
-    if(__HAL_RCC_PWR_IS_CLK_DISABLED())
-    {
-      __HAL_RCC_PWR_CLK_ENABLE();
       HAL_PWREx_EnableVddUSB();
-      __HAL_RCC_PWR_CLK_DISABLE();
-    }
-    else
-    {
-      HAL_PWREx_EnableVddUSB();
-    }
 #endif /* DEVICE_USBDEVICE */
 
     /** Enable MSI Auto calibration

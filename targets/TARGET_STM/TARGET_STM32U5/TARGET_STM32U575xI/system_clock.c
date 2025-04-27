@@ -169,30 +169,20 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
         return 0; // FAIL
     }
 
+    /** Enable MSI Auto calibration
+     */
+    HAL_RCCEx_EnableMSIPLLModeSelection(RCC_MSIKPLL_MODE_SEL);
+    HAL_RCCEx_EnableMSIPLLMode();
+    HAL_RCCEx_EnableMSIPLLFastStartup();
+
 #if DEVICE_USBDEVICE
     PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
     PeriphClkInit.IclkClockSelection = RCC_CLK48CLKSOURCE_MSIK;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
         return 0; // FAIL
     }
-
-    if(__HAL_RCC_PWR_IS_CLK_DISABLED())
-    {
-      __HAL_RCC_PWR_CLK_ENABLE();
       HAL_PWREx_EnableVddUSB();
-      __HAL_RCC_PWR_CLK_DISABLE();
-    }
-    else
-    {
-      HAL_PWREx_EnableVddUSB();
-    }
 #endif /* DEVICE_USBDEVICE */
-
-    /** Enable MSI Auto calibration
-     */
-    HAL_RCCEx_EnableMSIPLLModeSelection(RCC_MSIKPLL_MODE_SEL);
-    HAL_RCCEx_EnableMSIPLLMode();
-    HAL_RCCEx_EnableMSIPLLFastStartup();
 
     /** Enable ICACHE
      */

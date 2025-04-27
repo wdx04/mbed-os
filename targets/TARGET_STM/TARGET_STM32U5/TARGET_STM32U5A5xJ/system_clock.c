@@ -166,22 +166,10 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     __HAL_RCC_USBPHYC_CLK_ENABLE();
 
     /* Enable VDDUSB */
-    if(__HAL_RCC_PWR_IS_CLK_DISABLED())
-    {
-      __HAL_RCC_PWR_CLK_ENABLE();
       HAL_PWREx_EnableVddUSB();
 
       /*configure VOSR register of USB*/
       HAL_PWREx_EnableUSBHSTranceiverSupply();
-      __HAL_RCC_PWR_CLK_DISABLE();
-    }
-    else
-    {
-      HAL_PWREx_EnableVddUSB();
-
-      /*configure VOSR register of USB*/
-      HAL_PWREx_EnableUSBHSTranceiverSupply();
-    }
 
     /*Configuring the SYSCFG registers OTG_HS PHY*/
     /*OTG_HS PHY enable*/
