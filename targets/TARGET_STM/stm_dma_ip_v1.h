@@ -31,6 +31,7 @@
 #ifdef MDMA
 // For STM32H7, MDMA has 16 channels, while DMA1, DMA2 and BDMA all have 8 channels
 #define NUM_DMA_CONTROLLERS 5
+#define MAX_MDMA_CHANNELS 16
 #else
 #ifdef DMA1
 #ifdef DMA2

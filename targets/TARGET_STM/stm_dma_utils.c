@@ -474,6 +474,17 @@ IRQn_Type stm_get_dma_irqn(const DMALinkInfo *dmaLink)
                 case 6:
                 case 7:
                     return DMA1_Channel4_5_6_7_IRQn;
+// STM32U0 has shared ISRs for Ch2-Ch3 and Ch4-Ch7
+#elif defined(TARGET_MCU_STM32U0)
+                case 2:
+                case 3:
+                    return DMA1_Channel2_3_IRQn;
+
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    return DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX_OVR_IRQn;
 #else
 #ifdef DMA1_Channel2
                 case 2:
@@ -560,6 +571,14 @@ IRQn_Type stm_get_dma_irqn(const DMALinkInfo *dmaLink)
                 case 4:
                 case 5:
                     return DMA1_Ch4_7_DMA2_Ch3_5_IRQn;
+#elif defined(TARGET_MCU_STM32U0)
+                // STM32U0 has a rather bespoke mapping
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    return DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX_OVR_IRQn;
 #else
 
 #ifdef DMA2_Channel1
@@ -1507,7 +1526,7 @@ void GPDMA1_Channel15_IRQHandler(void)
 void MDMA_IRQHandler(void)
 {
     DMAHandlePointer *stmMDMAHandle = stmDMAHandles[3];
-    for(size_t i = 0; i < MAX_DMA_CHANNELS_PER_CONTROLLER; i++)
+    for(size_t i = 0; i < MAX_MDMA_CHANNELS; i++)
     {
         if(stmMDMAHandle[i].hmdma != NULL)
         {
