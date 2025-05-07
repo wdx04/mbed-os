@@ -32,6 +32,8 @@
 #include "stm32h7xx_ll_system.h"
 
 #include "stm_dma_info.h"
+#include "cmsis_os.h"
+#include "cmsis_os2.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -98,6 +100,8 @@ struct qspi_s {
     PinName ssel;
     IRQn_Type qspiIRQ;
     bool dmaInitialized;
+    osSemaphoreId_t semaphoreId;
+    osRtxSemaphore_t semaphoreMem;
 };
 #endif
 
@@ -118,6 +122,8 @@ struct ospi_s {
     PinName dqs;
     IRQn_Type ospiIRQ;
     bool dmaInitialized;
+    osSemaphoreId_t semaphoreId;
+    osRtxSemaphore_t semaphoreMem;
 };
 #endif
 

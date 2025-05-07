@@ -44,42 +44,95 @@
 
 #if defined(QUADSPI)
 static QSPI_HandleTypeDef * qspiHandle; // Handle of whatever QSPI structure is used for QUADSPI
+
+// Store the spi_s * inside an SPI handle, for later retrieval in callbacks
+static inline void store_qspi_pointer(QSPI_HandleTypeDef * qspiHandle, struct qspi_s * qspis) {
+    // Annoyingly, STM neglected to provide any sort of "user data" pointer inside QSPI_HandleTypeDef for use
+    // in callbacks.  However, there are some variables in the Init struct that are never accessed after HAL_QSPI_Init().
+    // So, we can reuse those to store our pointer.
+    qspiHandle->Init.ChipSelectHighTime = (uint32_t)qspis;
+}
+
+// Get spi_s * from SPI_HandleTypeDef
+static inline struct qspi_s * get_qspi_pointer(QSPI_HandleTypeDef * qspiHandle) {
+    return (struct qspi_s *) qspiHandle->Init.ChipSelectHighTime;
+}
+
 void QUADSPI_IRQHandler()
 {
     HAL_QSPI_IRQHandler(qspiHandle);
 }
 
+void HAL_QSPI_TxCpltCallback(QSPI_HandleTypeDef * handle)
+{
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
+}
+
+void HAL_QSPI_RxCpltCallback(QSPI_HandleTypeDef * handle)
+{
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
+}
+
 void HAL_QSPI_ErrorCallback(QSPI_HandleTypeDef * handle)
 {
     handle->State = HAL_QSPI_STATE_ERROR;
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
 }
 
 void HAL_QSPI_TimeOutCallback(QSPI_HandleTypeDef * handle)
 {
     handle->State = HAL_QSPI_STATE_ERROR;
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
 }
 #endif
 
 #if defined(OCTOSPI1)
 static OSPI_HandleTypeDef * ospiHandle1;
+
+// Store the qspi_s * inside an OSPI handle, for later retrieval in callbacks
+static inline void store_qspi_pointer(OSPI_HandleTypeDef * ospiHandle, struct qspi_s * qspis) {
+    // Annoyingly, STM neglected to provide any sort of "user data" pointer inside OSPI_HandleTypeDef for use
+    // in callbacks.  However, there are some variables in the Init struct that are never accessed after HAL_OSPI_Init().
+    // So, we can reuse those to store our pointer.
+    ospiHandle->Init.ChipSelectHighTime = (uint32_t)qspis;
+}
+
+// Get qspi_s * from OSPI_HandleTypeDef
+static inline struct qspi_s * get_qspi_pointer(OSPI_HandleTypeDef * ospiHandle) {
+    return (struct qspi_s *) ospiHandle->Init.ChipSelectHighTime;
+}
+
 void OCTOSPI1_IRQHandler()
 {
     HAL_OSPI_IRQHandler(ospiHandle1);
 }
 
+void HAL_OSPI_TxCpltCallback(OSPI_HandleTypeDef * handle)
+{
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
+}
+
+void HAL_OSPI_RxCpltCallback(OSPI_HandleTypeDef * handle)
+{
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
+}
+
 void HAL_OSPI_ErrorCallback(OSPI_HandleTypeDef * handle)
 {
     handle->State = HAL_OSPI_STATE_ERROR;
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
 }
 
 void HAL_OSPI_TimeOutCallback(OSPI_HandleTypeDef * handle)
 {
     handle->State = HAL_OSPI_STATE_ERROR;
+    osSemaphoreRelease(get_qspi_pointer(handle)->semaphoreId);
 }
 #endif
 
 #if defined(OCTOSPI2)
 static OSPI_HandleTypeDef * ospiHandle2;
+
 void OCTOSPI2_IRQHandler()
 {
     HAL_OSPI_IRQHandler(ospiHandle2);
@@ -462,20 +515,11 @@ static void qspi_init_dma(struct qspi_s * obj)
         __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle.hdma);
 #endif
         obj->dmaInitialized = true;
+        osSemaphoreAttr_t attr = { 0 };
+        attr.cb_mem = &obj->semaphoreMem;
+        attr.cb_size = sizeof(osRtxSemaphore_t);
+        obj->semaphoreId = osSemaphoreNew(1, 0, &attr);
     }
-}
-
-// Store the qspi_s * inside an OSPI handle, for later retrieval in callbacks
-static inline void store_qspi_pointer(OSPI_HandleTypeDef * ospiHandle, struct qspi_s * qspis) {
-    // Annoyingly, STM neglected to provide any sort of "user data" pointer inside OSPI_HandleTypeDef for use
-    // in callbacks.  However, there are some variables in the Init struct that are never accessed after HAL_OSPI_Init().
-    // So, we can reuse those to store our pointer.
-    ospiHandle->Init.ChipSelectHighTime = (uint32_t)qspis;
-}
-
-// Get qspi_s * from OSPI_HandleTypeDef
-static inline struct qspi_s * get_qspi_pointer(OSPI_HandleTypeDef * ospiHandle) {
-    return (struct qspi_s *) ospiHandle->Init.ChipSelectHighTime;
 }
 
 #if STATIC_PINMAP_READY
@@ -667,20 +711,11 @@ static void qspi_init_dma(struct qspi_s * obj)
         __HAL_LINKDMA(&obj->handle, hdma, *dmaHandle.hdma);
 #endif
         obj->dmaInitialized = true;
+        osSemaphoreAttr_t attr = { 0 };
+        attr.cb_mem = &obj->semaphoreMem;
+        attr.cb_size = sizeof(osRtxSemaphore_t);
+        obj->semaphoreId = osSemaphoreNew(1, 0, &attr);
     }
-}
-
-// Store the spi_s * inside an SPI handle, for later retrieval in callbacks
-static inline void store_qspi_pointer(QSPI_HandleTypeDef * qspiHandle, struct qspi_s * qspis) {
-    // Annoyingly, STM neglected to provide any sort of "user data" pointer inside QSPI_HandleTypeDef for use
-    // in callbacks.  However, there are some variables in the Init struct that are never accessed after HAL_QSPI_Init().
-    // So, we can reuse those to store our pointer.
-    qspiHandle->Init.ChipSelectHighTime = (uint32_t)qspis;
-}
-
-// Get spi_s * from SPI_HandleTypeDef
-static inline struct qspi_s * get_qspi_pointer(QSPI_HandleTypeDef * qspiHandle) {
-    return (struct qspi_s *) qspiHandle->Init.ChipSelectHighTime;
 }
 
 #if STATIC_PINMAP_READY
@@ -853,6 +888,9 @@ qspi_status_t qspi_free(qspi_t *obj)
         // Get DMA handle
         DMALinkInfo const *dmaLink = &QSPIDMALinks[0];
         stm_free_dma_link(dmaLink);
+
+        // Free semaphore
+        osSemaphoreRelease(obj->semaphoreId);
     }
 
     if (HAL_QSPI_DeInit(&obj->handle) != HAL_OK) {
@@ -991,7 +1029,7 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
             }
             else {
                 // wait until transfer complete or timeout
-                while(obj->handle.State == HAL_OSPI_STATE_BUSY_TX);
+                osSemaphoreAcquire(obj->semaphoreId, HAL_OSPI_TIMEOUT_DEFAULT_VALUE);
                 if(obj->handle.State != HAL_OSPI_STATE_READY) {
                     status = QSPI_STATUS_ERROR;
                     obj->handle.State = HAL_OSPI_STATE_READY;
@@ -1033,14 +1071,14 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
 #if defined(__DCACHE_PRESENT)
             // For chips with a cache (e.g. Cortex-M7), we need to evict the Tx fill data from cache to main memory.
             // This ensures that the DMA controller can see the most up-to-date copy of the data.
-            SCB_CleanDCache_by_Addr(data, *length);
+            SCB_CleanDCache_by_Addr((volatile void *)data, *length);
 #endif
             if (HAL_QSPI_Transmit_DMA(&obj->handle, (uint8_t *)data) != HAL_OK) {
                 status = QSPI_STATUS_ERROR;
             }
             else {
                 // wait until transfer complete or timeout
-                while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_TX);
+                osSemaphoreAcquire(obj->semaphoreId, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
                 if(obj->handle.State != HAL_QSPI_STATE_READY) {
                     status = QSPI_STATUS_ERROR;
                     obj->handle.State = HAL_QSPI_STATE_READY;
@@ -1081,9 +1119,7 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             NVIC_SetPriority(obj->qspiIRQ, 1);
             NVIC_EnableIRQ(obj->qspiIRQ);
 #if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-            if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0) {
-                SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
-            }
+            SCB_CleanInvalidateDCache_by_Addr((volatile void *)data, *length);
 #endif
             if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
                 tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
@@ -1091,14 +1127,11 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             }
             else {
                 // wait until transfer complete or timeout
-                while(obj->handle.State == HAL_OSPI_STATE_BUSY_RX);
+                osSemaphoreAcquire(obj->semaphoreId, HAL_OSPI_TIMEOUT_DEFAULT_VALUE);
                 if(obj->handle.State != HAL_OSPI_STATE_READY) {
                     status = QSPI_STATUS_ERROR;
                     obj->handle.State = HAL_OSPI_STATE_READY;
                 }
-    #if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-                SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
-    #endif
             }
             NVIC_DisableIRQ(obj->qspiIRQ);
         }
@@ -1134,19 +1167,14 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             NVIC_SetPriority(QUADSPI_IRQn, 1);
             NVIC_EnableIRQ(QUADSPI_IRQn);
 #if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-            if(((uint32_t) data) % __SCB_DCACHE_LINE_SIZE != 0 || (*length) % __SCB_DCACHE_LINE_SIZE != 0) {
-                SCB_CleanDCache_by_Addr((uint32_t*)data, *length);
-            }
+            SCB_CleanInvalidateDCache_by_Addr((volatile void *)data, *length);
 #endif
             if (HAL_QSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
                 status = QSPI_STATUS_ERROR;
             }
             else {
                 // wait until transfer complete or timeout
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-                SCB_InvalidateDCache_by_Addr((uint32_t*)data, *length);
-#endif
-                while(obj->handle.State == HAL_QSPI_STATE_BUSY_INDIRECT_RX);
+                osSemaphoreAcquire(obj->semaphoreId, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
                 if(obj->handle.State != HAL_QSPI_STATE_READY) {
                     status = QSPI_STATUS_ERROR;
                     obj->handle.State = HAL_QSPI_STATE_READY;

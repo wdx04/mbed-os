@@ -175,7 +175,7 @@ typedef struct {
 #if FF_FS_HEAPBUF
 	BYTE	*win;			/* Disk access window for Directory, FAT (and file data at tiny cfg) */
 #else
-	BYTE	win[FF_MAX_SS];	/* Disk access window for Directory, FAT (and file data at tiny cfg) */
+	BYTE	win[FF_MAX_SS] __attribute__((aligned(32)));	/* Disk access window for Directory, FAT (and file data at tiny cfg) */
 #endif
 } FATFS;
 
@@ -224,7 +224,7 @@ typedef struct {
 #if FF_FS_HEAPBUF
 	BYTE	*buf;			/* File private data read/write window */
 #else
-	BYTE	buf[FF_MAX_SS];	/* File private data read/write window */
+	BYTE	buf[FF_MAX_SS] __attribute__((aligned(32)));	/* File private data read/write window */
 #endif
 #endif
 } FIL;

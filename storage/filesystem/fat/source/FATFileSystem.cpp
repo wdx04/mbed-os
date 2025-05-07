@@ -155,7 +155,7 @@ extern "C" DWORD get_fattime(void)
 
 extern "C" void *ff_memalloc(UINT size)
 {
-    return malloc(size);
+    return aligned_alloc(32U, size);
 }
 
 extern "C" void ff_memfree(void *p)

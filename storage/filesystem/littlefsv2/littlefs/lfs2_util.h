@@ -258,7 +258,7 @@ uint32_t lfs2_crc(uint32_t crc, const void *buffer, size_t size);
 // Note, memory must be 64-bit aligned
 static inline void *lfs2_malloc(size_t size) {
 #ifndef LFS2_NO_MALLOC
-    return malloc(size);
+    return aligned_alloc(32U, size);
 #else
     (void)size;
     return NULL;
