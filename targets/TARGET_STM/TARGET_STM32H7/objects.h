@@ -88,6 +88,7 @@ struct analogin_s {
 struct qspi_s {
 #if defined(OCTOSPI1)
     OSPI_HandleTypeDef handle;
+    IRQn_Type qspiIRQ;
 #else
     QSPI_HandleTypeDef handle;
 #endif
@@ -98,7 +99,6 @@ struct qspi_s {
     PinName io3;
     PinName sclk;
     PinName ssel;
-    IRQn_Type qspiIRQ;
     bool dmaInitialized;
     osSemaphoreId_t semaphoreId;
     osRtxSemaphore_t semaphoreMem;

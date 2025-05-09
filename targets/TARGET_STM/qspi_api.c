@@ -1013,7 +1013,7 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
         tr_error("HAL_OSPI_Command error");
         status = QSPI_STATUS_ERROR;
     } else {
-        if(st_command.NbData >= 8) {
+        if(st_command.NbData >= 32) {
             qspi_init_dma(obj);
             NVIC_ClearPendingIRQ(obj->qspiIRQ);
             NVIC_SetPriority(obj->qspiIRQ, 1);
@@ -1063,7 +1063,7 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
     if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
         status = QSPI_STATUS_ERROR;
     } else {
-        if(st_command.NbData >= 8) {
+        if(st_command.NbData >= 32) {
             qspi_init_dma(obj);
             NVIC_ClearPendingIRQ(QUADSPI_IRQn);
             NVIC_SetPriority(QUADSPI_IRQn, 1);
@@ -1107,20 +1107,101 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
         return status;
     }
 
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    size_t pre_aligned_size = 0, aligned_size = 0, post_aligned_size = 0;
+    if(*length < __SCB_DCACHE_LINE_SIZE)
+    {
+        pre_aligned_size = *length;
+    }
+    else
+    {
+        size_t address_remainder = (size_t) data % __SCB_DCACHE_LINE_SIZE;
+        if(address_remainder == 0)
+        {
+            aligned_size = *length & ~(__SCB_DCACHE_LINE_SIZE - 1);
+            post_aligned_size = *length - aligned_size;
+        }
+        else
+        {
+            pre_aligned_size = __SCB_DCACHE_LINE_SIZE - address_remainder;
+            aligned_size = (*length - pre_aligned_size) & ~(__SCB_DCACHE_LINE_SIZE - 1);
+            post_aligned_size = *length - pre_aligned_size - aligned_size;
+        }
+        if(aligned_size == 0)
+        {
+            pre_aligned_size = *length;
+            post_aligned_size = 0;
+        }
+    }
+    if(pre_aligned_size > 0)
+    {
+        st_command.NbData = pre_aligned_size;
+        if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_OSPI_Command error");
+            status = QSPI_STATUS_ERROR;
+        } else {
+            if (HAL_OSPI_Receive(&obj->handle, data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+        }
+        st_command.Address += pre_aligned_size;
+        data += pre_aligned_size;
+    }
+    if(status == QSPI_STATUS_OK && aligned_size > 0)
+    {
+        st_command.NbData = aligned_size;
+        if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_OSPI_Command error");
+            status = QSPI_STATUS_ERROR;
+        } else {
+            qspi_init_dma(obj);
+            NVIC_ClearPendingIRQ(obj->qspiIRQ);
+            NVIC_SetPriority(obj->qspiIRQ, 1);
+            NVIC_EnableIRQ(obj->qspiIRQ);
+            SCB_CleanInvalidateDCache_by_Addr((volatile void *)data, *length);
+            if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
+                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+            else {
+                // wait until transfer complete or timeout
+                osSemaphoreAcquire(obj->semaphoreId, HAL_OSPI_TIMEOUT_DEFAULT_VALUE);
+                if(obj->handle.State != HAL_OSPI_STATE_READY) {
+                    status = QSPI_STATUS_ERROR;
+                    obj->handle.State = HAL_OSPI_STATE_READY;
+                }
+            }
+            NVIC_DisableIRQ(obj->qspiIRQ);
+        }
+        st_command.Address += aligned_size;
+        data += aligned_size;
+    }
+    if(status == QSPI_STATUS_OK && post_aligned_size > 0)
+    {
+        st_command.NbData = post_aligned_size;
+        if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_OSPI_Command error");
+            status = QSPI_STATUS_ERROR;
+        } else {
+            if (HAL_OSPI_Receive(&obj->handle, data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+        }
+    }
+#else
     st_command.NbData = *length;
 
     if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
         tr_error("HAL_OSPI_Command error");
         status = QSPI_STATUS_ERROR;
     } else {
-        if(st_command.NbData >= 8) {
+        if(st_command.NbData >= 32) {
             qspi_init_dma(obj);
             NVIC_ClearPendingIRQ(obj->qspiIRQ);
             NVIC_SetPriority(obj->qspiIRQ, 1);
             NVIC_EnableIRQ(obj->qspiIRQ);
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-            SCB_CleanInvalidateDCache_by_Addr((volatile void *)data, *length);
-#endif
             if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
                 tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
                 status = QSPI_STATUS_ERROR;
@@ -1142,7 +1223,7 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             }
         }
     }
-
+#endif
     debug_if(qspi_api_c_debug, "qspi_read size %u\n", *length);
 
     return status;
@@ -1156,20 +1237,61 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
         return status;
     }
 
-    st_command.NbData = *length;
-
-    if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
-        status = QSPI_STATUS_ERROR;
-    } else {
-        if(st_command.NbData >= 8) {
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    size_t pre_aligned_size = 0, aligned_size = 0, post_aligned_size = 0;
+    if(*length < __SCB_DCACHE_LINE_SIZE)
+    {
+        pre_aligned_size = *length;
+    }
+    else
+    {
+        size_t address_remainder = (size_t) data % __SCB_DCACHE_LINE_SIZE;
+        if(address_remainder == 0)
+        {
+            aligned_size = *length & ~(__SCB_DCACHE_LINE_SIZE - 1);
+            post_aligned_size = *length - aligned_size;
+        }
+        else
+        {
+            pre_aligned_size = __SCB_DCACHE_LINE_SIZE - address_remainder;
+            aligned_size = (*length - pre_aligned_size) & ~(__SCB_DCACHE_LINE_SIZE - 1);
+            post_aligned_size = *length - pre_aligned_size - aligned_size;
+        }
+        if(aligned_size == 0)
+        {
+            pre_aligned_size = *length;
+            post_aligned_size = 0;
+        }
+    }
+    if(pre_aligned_size > 0)
+    {
+        st_command.NbData = pre_aligned_size;
+        if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_QSPI_Command error");
+            status = QSPI_STATUS_ERROR;
+        } else {
+            if (HAL_QSPI_Receive(&obj->handle, data, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_QSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+        }
+        st_command.Address += pre_aligned_size;
+        data += pre_aligned_size;
+    }
+    if(status == QSPI_STATUS_OK && aligned_size > 0)
+    {
+        st_command.NbData = aligned_size;
+        if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_QSPI_Command error");
+            status = QSPI_STATUS_ERROR;
+        } else {
             qspi_init_dma(obj);
             NVIC_ClearPendingIRQ(QUADSPI_IRQn);
             NVIC_SetPriority(QUADSPI_IRQn, 1);
             NVIC_EnableIRQ(QUADSPI_IRQn);
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
             SCB_CleanInvalidateDCache_by_Addr((volatile void *)data, *length);
-#endif
             if (HAL_QSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
+                tr_error("HAL_QSPI_Receive error %d", obj->handle.ErrorCode);
                 status = QSPI_STATUS_ERROR;
             }
             else {
@@ -1182,13 +1304,56 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
             }
             NVIC_DisableIRQ(QUADSPI_IRQn);
         }
-        else {
+        st_command.Address += aligned_size;
+        data += aligned_size;
+    }
+    if(status == QSPI_STATUS_OK && post_aligned_size > 0)
+    {
+        st_command.NbData = post_aligned_size;
+        if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_QSPI_Command error");
+            status = QSPI_STATUS_ERROR;
+        } else {
             if (HAL_QSPI_Receive(&obj->handle, data, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_QSPI_Receive error %d", obj->handle.ErrorCode);
                 status = QSPI_STATUS_ERROR;
             }
         }
     }
+#else
+    st_command.NbData = *length;
 
+    if (HAL_QSPI_Command(&obj->handle, &st_command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+        tr_error("HAL_QSPI_Command error");
+        status = QSPI_STATUS_ERROR;
+    } else {
+        if(st_command.NbData >= 32) {
+            qspi_init_dma(obj);
+            NVIC_ClearPendingIRQ(obj->qspiIRQ);
+            NVIC_SetPriority(obj->qspiIRQ, 1);
+            NVIC_EnableIRQ(obj->qspiIRQ);
+            if (HAL_QSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
+                tr_error("HAL_QSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+            else {
+                // wait until transfer complete or timeout
+                osSemaphoreAcquire(obj->semaphoreId, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
+                if(obj->handle.State != HAL_QSPI_STATE_READY) {
+                    status = QSPI_STATUS_ERROR;
+                    obj->handle.State = HAL_QSPI_STATE_READY;
+                }
+            }
+            NVIC_DisableIRQ(obj->qspiIRQ);
+        }
+        else {
+            if (HAL_QSPI_Receive(&obj->handle, data, HAL_QSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_QSPI_Receive error %d", obj->handle.ErrorCode);
+                status = QSPI_STATUS_ERROR;
+            }
+        }
+    }
+#endif
     debug_if(qspi_api_c_debug, "qspi_read size %u\n", *length);
 
     return status;
