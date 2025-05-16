@@ -28,8 +28,10 @@
 #include "stm32u5xx_ll_rcc.h"
 
 #include "stm_dma_info.h"
+#if MBED_CONF_RTOS_PRESENT
 #include "cmsis_os.h"
 #include "cmsis_os2.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,8 +120,10 @@ struct qspi_s {
     PinName ssel;
     IRQn_Type qspiIRQ;
     bool dmaInitialized;
+#if MBED_CONF_RTOS_PRESENT
     osSemaphoreId_t semaphoreId;
     osRtxSemaphore_t semaphoreMem;
+#endif
 };
 
 struct ospi_s {
@@ -138,8 +142,10 @@ struct ospi_s {
     PinName dqs;
     IRQn_Type ospiIRQ;
     bool dmaInitialized;
+#if MBED_CONF_RTOS_PRESENT
     osSemaphoreId_t semaphoreId;
     osRtxSemaphore_t semaphoreMem;
+#endif
 };
 
 #ifdef __cplusplus
