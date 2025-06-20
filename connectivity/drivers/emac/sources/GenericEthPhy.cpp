@@ -49,7 +49,8 @@ CompositeEMAC::ErrCode GenericEthPhy::init() {
     // ID1 should be the upper 18 MSBits of the OUI, with the two MSBits chopped off.
     const uint16_t expectedID1 = config.OUI >> 6;
     // Bits 10-15 of ID2 are the 6 LSBits of the OUI. Bits 4-9 are the model number. Bits 0-3 are the revision and may be anything.
-    const uint16_t expectedID2 = (config.OUI << 10) | (config.model << 4);
+    const uint16_t expectedID2Min = (config.OUI << 10) | (config.model_min << 4);
+    const uint16_t expectedID2Max = (config.OUI << 10) | (config.model_max << 4);
     const uint16_t expectedID2Mask = 0xFFF0;
 
     // Read IDs
@@ -58,16 +59,16 @@ CompositeEMAC::ErrCode GenericEthPhy::init() {
     FORWARD_ERR(mac->mdioRead(config.address, GenPhyRegs::PHYIDR1, actualID1));
     FORWARD_ERR(mac->mdioRead(config.address, GenPhyRegs::PHYIDR2, actualID2));
 
-    if(actualID1 == expectedID1 && (actualID2 & expectedID2Mask) == expectedID2) {
+    if(actualID1 == expectedID1 && (actualID2 & expectedID2Mask) >= expectedID2Min && (actualID2 & expectedID2Mask) <= expectedID2Max) {
         // OK
-        tr_info("Detected ethernet PHY at MDIO addr %" PRIu8 " with OUI 0x%" PRIx32 ", model 0x%" PRIx8 ", and revision number %" PRIu8, config.address, config.OUI, config.model, actualID2 % 0xF);
+        tr_info("Detected ethernet PHY at MDIO addr %" PRIu8 " with OUI 0x%" PRIx32 ", model 0x%" PRIx8 ", and revision number %" PRIu8, config.address, config.OUI, (actualID2 >> 4) & 0x3F, actualID2 % 0xF);
     }
     else if(actualID1 == std::numeric_limits<uint16_t>::max() && actualID2 == std::numeric_limits<uint16_t>::max()) {
         tr_error("Got all 0xFFs when reading Ethernet PHY. Since MDIO is an open drain bus, this means the phy is not connected or not responding.");
         return CompositeEMAC::ErrCode::PHY_NOT_RESPONDING;
     }
     else {
-        tr_error("Ethernet phy model number verification mismatch. Expected PHYIDR1 = %" PRIu16 ", PHYIDR2 = %" PRIu16 ", got PHYIDR1 = %" PRIu16 ", PHYIDR2 = %" PRIu16 " [note: bottom 4 bits of PHYIDR2 ignored]", expectedID1, expectedID2, actualID1, actualID2);
+        tr_error("Ethernet phy model number verification mismatch. Expected PHYIDR1 = %" PRIu16 ", PHYIDR2 = %" PRIu16 "-%" PRIu16 ", got PHYIDR1 = %" PRIu16 ", PHYIDR2 = %" PRIu16 " [note: bottom 4 bits of PHYIDR2 ignored]", expectedID1, expectedID2Min, expectedID2Max, actualID1, actualID2);
         return CompositeEMAC::ErrCode::PHY_NOT_RESPONDING;
     }
 

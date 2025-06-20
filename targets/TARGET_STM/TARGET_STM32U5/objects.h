@@ -111,6 +111,7 @@ struct can_s {
 
 struct qspi_s {
     OSPI_HandleTypeDef handle;
+    IRQn_Type qspiIRQ;
     QSPIName qspi;
     PinName io0;
     PinName io1;
@@ -118,7 +119,6 @@ struct qspi_s {
     PinName io3;
     PinName sclk;
     PinName ssel;
-    IRQn_Type qspiIRQ;
     bool dmaInitialized;
 #if MBED_CONF_RTOS_PRESENT
     osSemaphoreId_t semaphoreId;
@@ -128,6 +128,7 @@ struct qspi_s {
 
 struct ospi_s {
     OSPI_HandleTypeDef handle;
+    IRQn_Type ospiIRQ;
     OSPIName ospi;
     PinName io0;
     PinName io1;
@@ -140,7 +141,6 @@ struct ospi_s {
     PinName sclk;
     PinName ssel;
     PinName dqs;
-    IRQn_Type ospiIRQ;
     bool dmaInitialized;
 #if MBED_CONF_RTOS_PRESENT
     osSemaphoreId_t semaphoreId;

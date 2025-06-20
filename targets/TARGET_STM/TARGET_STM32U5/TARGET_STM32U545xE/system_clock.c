@@ -156,20 +156,6 @@ uint8_t SetSysClock_PLL_HSI(void)
         return 0; // FAIL
     }
 
-#if DEVICE_USBDEVICE
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
-    PeriphClkInit.IclkClockSelection = RCC_CLK48CLKSOURCE_HSI48;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
-        return 0; // FAIL
-    }
-    HAL_PWREx_EnableVddUSB();
-#endif /* DEVICE_USBDEVICE */
-
-    /** Enable ICACHE
-     */
-    HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY);
-    HAL_ICACHE_Enable();
-
     return 1; // OK
 }
 #endif /* ((CLOCK_SOURCE) & USE_PLL_HSI) */
@@ -258,11 +244,6 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
     }
     HAL_PWREx_EnableVddUSB();
 #endif /* DEVICE_USBDEVICE */
-
-    /** Enable ICACHE
-     */
-    HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY);
-    HAL_ICACHE_Enable();
 
     return 1; // OK
 }

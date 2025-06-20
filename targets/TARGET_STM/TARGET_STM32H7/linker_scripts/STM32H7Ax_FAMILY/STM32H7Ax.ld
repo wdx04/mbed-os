@@ -34,8 +34,8 @@ MEMORY
 {
     FLASH       (rx)  : ORIGIN = MBED_CONFIGURED_ROM_BANK_IROM1_START, LENGTH = MBED_CONFIGURED_ROM_BANK_IROM1_SIZE
     SRAM_DTC   (xrw)  : ORIGIN = MBED_RAM_BANK_SRAM_DTC_START + MBED_VECTTABLE_RAM_SIZE, LENGTH = MBED_RAM_BANK_SRAM_DTC_SIZE - MBED_VECTTABLE_RAM_SIZE
+    SRAM_AHB   (xrw)  : ORIGIN = MBED_RAM_BANK_SRAM_AHB_START, LENGTH = MBED_RAM_BANK_SRAM_AHB_SIZE
     SRAM       (xrw)  : ORIGIN = MBED_RAM_BANK_SRAM_AXI_START, LENGTH = MBED_RAM_BANK_SRAM_AXI_SIZE
-    SRAM_D2    (xrw)  : ORIGIN = MBED_RAM_BANK_SRAM_AHB_START, LENGTH = MBED_RAM_BANK_SRAM_AHB_SIZE
     SRAM_D3    (xrw)  : ORIGIN = MBED_RAM_BANK_SRAM_D3_START, LENGTH = MBED_RAM_BANK_SRAM_D3_SIZE
     SRAM_ITC   (xrw)  : ORIGIN = MBED_RAM_BANK_SRAM_ITC_START, LENGTH = MBED_RAM_BANK_SRAM_ITC_SIZE
 }
@@ -112,19 +112,6 @@ SECTIONS
 
     __etext = .;
     _sidata = .;
-    
-    /* Put crash data in the otherwise unused D3 SRAM */
-    .crash_data_ram :
-    {
-        . = ALIGN(8);
-        __CRASH_DATA_RAM__ = .;
-        __CRASH_DATA_RAM_START__ = .; /* Create a global symbol at data start */
-        KEEP(*(.keep.crash_data_ram))
-        *(.m_crash_data_ram)     /* This is a user defined section */
-        . += M_CRASH_DATA_RAM_SIZE;
-        . = ALIGN(8);
-        __CRASH_DATA_RAM_END__ = .; /* Define a global symbol at data end */
-    } > SRAM_D3
 
     .data : AT (__etext)
     {
@@ -173,7 +160,7 @@ SECTIONS
         . = ALIGN(32);
         __uninitialized_end = .;
     } > SRAM
-    
+
     .bss :
     {
         . = ALIGN(8);
@@ -211,11 +198,24 @@ SECTIONS
     __StackLimit = __StackTop - MBED_CONF_TARGET_BOOT_STACK_SIZE;
     PROVIDE(__stack = __StackTop);
 
-    /* Use SRAM_D2 as additional heap */
+    /* Put crash data in the otherwise unused D3 SRAM */
+    .crash_data_ram :
+    {
+        . = ALIGN(8);
+        __CRASH_DATA_RAM__ = .;
+        __CRASH_DATA_RAM_START__ = .; /* Create a global symbol at data start */
+        KEEP(*(.keep.crash_data_ram))
+        *(.m_crash_data_ram)     /* This is a user defined section */
+        . += M_CRASH_DATA_RAM_SIZE;
+        . = ALIGN(8);
+        __CRASH_DATA_RAM_END__ = .; /* Define a global symbol at data end */
+    } > SRAM_D3
+
+    /* Use SRAM_AHB as additional heap */
     .heap (NOLOAD):
     {
         PROVIDE(__mbed_sbrk_start = .);
-        . += (ORIGIN(SRAM_D2) + LENGTH(SRAM_D2) - .);
+        . += (ORIGIN(SRAM_AHB) + LENGTH(SRAM_AHB) - .);
         PROVIDE(__mbed_krbs_start = .);
-    } > SRAM_D2
+    } > SRAM_AHB
 }

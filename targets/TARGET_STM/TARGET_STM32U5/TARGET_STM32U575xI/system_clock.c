@@ -179,27 +179,6 @@ MBED_WEAK uint8_t SetSysClock_PLL_MSI(void)
         return 0; // FAIL
     }
 
-#if MBED_CONF_TARGET_LSE_AVAILABLE
-    /** Enable MSI Auto calibration
-     */
-    HAL_RCCEx_EnableMSIPLLModeSelection(RCC_MSIKPLL_MODE_SEL);
-    HAL_RCCEx_EnableMSIPLLMode();
-    HAL_RCCEx_EnableMSIPLLFastStartup();
-#endif
-
-#if DEVICE_USBDEVICE
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
-    PeriphClkInit.IclkClockSelection = RCC_CLK48CLKSOURCE_MSIK;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
-        return 0; // FAIL
-    }
-      HAL_PWREx_EnableVddUSB();
-#endif /* DEVICE_USBDEVICE */
-
-    /** Enable ICACHE
-     */
-    HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY);
-    HAL_ICACHE_Enable();
 
     return 1; // OK
 }

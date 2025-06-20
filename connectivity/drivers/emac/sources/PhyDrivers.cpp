@@ -20,86 +20,17 @@ namespace mbed {
 
 using namespace std::chrono_literals;
 
-namespace LAN8720 {
+namespace LAN87XX {
 
-    /// Driver for the Microchip LAN8720 PHY
-    /// Datasheet: https://ww1.microchip.com/downloads/en/devicedoc/8720a.pdf
-    /// @{
-
-    inline constexpr GenericEthPhy::Config DefaultConfig = {
-        .OUI = 0x1F0,
-        .model = 0x0F,
-        .address = 0, // Address set via PHYAD[0] strap.
-    };
-
-    class Driver : public GenericEthPhy {
-    public:
-        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
-        GenericEthPhy(config)
-        {}
-    };
-
-
-    /// @}
-
-}
-
-namespace DP83848VY {
-
-    /// Driver for the  DP83848VY PHY
-    /// Datasheet: https://www.ti.com/lit/ds/symlink/dp83848c.pdf
-    /// @{
-
-    inline constexpr GenericEthPhy::Config DefaultConfig = {
-        .OUI = 0x80017,
-        .model = 0x0A,
-        .address = 1, // Address set via PHYAD[0] strap.
-    };
-
-    class Driver : public GenericEthPhy {
-    public:
-        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
-        GenericEthPhy(config)
-        {}
-    };
-
-
-    /// @}
-
-}
-
-namespace DP83848VV {
-
-    /// Driver for the  DP83848VV PHY
-    /// @{
-
-    inline constexpr GenericEthPhy::Config DefaultConfig = {
-        .OUI = 0x80017,
-        .model = 0x09,
-        .address = 1, // Address set via PHYAD[0] strap.
-    };
-
-    class Driver : public GenericEthPhy {
-    public:
-        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
-        GenericEthPhy(config)
-        {}
-    };
-
-
-    /// @}
-
-}
-
-namespace LAN8742 {
-
-/// Driver for the Microchip LAN8742 PHY
+/// Driver for the Microchip LAN8742 & LAN8720 PHY
 /// Datasheet: https://ww1.microchip.com/downloads/aemDocuments/documents/OTH/ProductDocuments/DataSheets/DS_LAN8742_00001989A.pdf
+///            https://ww1.microchip.com/downloads/en/devicedoc/8720a.pdf
 /// @{
 
 inline constexpr GenericEthPhy::Config DefaultConfig = {
     .OUI = 0x1F0,
-    .model = 0x13,
+    .model_min = 0x0F, // LAN8720
+    .model_max = 0x13, // LAN8742
     .address = 0, // Address set via PHYAD[0] strap.
 };
 
@@ -112,6 +43,57 @@ public:
 
 
 /// @}
+
+}
+
+namespace IP101G {
+
+    /// Driver for the IC+ IP101Gx PHY
+    /// Datasheet: https://www.lcsc.com/datasheet/lcsc_datasheet_IC-Plus-IP101GR_C79324.pdf
+    /// @{
+
+    inline constexpr GenericEthPhy::Config DefaultConfig = {
+        .OUI = 0x90C3,
+        .model_min = 0x5,
+        .model_max = 0x5,
+        .address = 1, // Address set via strapping pins, 1 is used on Nuvoton boards
+    };
+
+    class Driver : public GenericEthPhy {
+    public:
+        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
+        GenericEthPhy(config)
+        {}
+    };
+
+
+    /// @}
+
+}
+
+namespace DP8384X {
+
+    /// Driver for the  DP8384X PHY
+    /// Datasheet: https://www.ti.com/lit/ds/symlink/dp83848c.pdf
+    ///            https://www.ti.com/lit/ds/symlink/dp83849i.pdf
+    /// @{
+
+    inline constexpr GenericEthPhy::Config DefaultConfig = {
+        .OUI = 0x80017,
+        .model_min = 0x09, // DP83848VV, DP83849I
+        .model_max = 0x0A, // DP83848C/I/VYB/YB
+        .address = 1, // Address set via PHYAD[0] strap.
+    };
+
+    class Driver : public GenericEthPhy {
+    public:
+        explicit Driver(GenericEthPhy::Config const & config = DefaultConfig):
+        GenericEthPhy(config)
+        {}
+    };
+
+
+    /// @}
 
 }
 

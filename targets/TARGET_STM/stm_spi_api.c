@@ -284,7 +284,7 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
 #if defined (RCC_SPI123CLKSOURCE_PLL)
         PeriphClkInit.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL;
 #elif defined (RCC_SPI1CLKSOURCE_SYSCLK)
-        PeriphClkInit.Spi1ClockSelection = RCC_SPI1CLKSOURCE_SYSCLK;   
+        PeriphClkInit.Spi1ClockSelection = RCC_SPI1CLKSOURCE_SYSCLK;
 #else
         PeriphClkInit.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL1Q;
 #endif
@@ -311,7 +311,7 @@ static void _spi_init_direct(spi_t *obj, const spi_pinmap_t *pinmap)
 #elif defined (RCC_SPI2CLKSOURCE_SYSCLK)
         PeriphClkInit.Spi2ClockSelection = RCC_SPI2CLKSOURCE_SYSCLK;
 #else
-        PeriphClkInit.Spi2ClockSelection = RCC_SPI2CLKSOURCE_PLL1Q; 
+        PeriphClkInit.Spi2ClockSelection = RCC_SPI2CLKSOURCE_PLL1Q;
 #endif
         if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
             error("HAL_RCCEx_PeriphCLKConfig\n");
@@ -541,7 +541,7 @@ static void spi_init_tx_dma(struct spi_s * obj)
         DMALinkInfo const *dmaLink = &SPITxDMALinks[obj->spiIndex - 1];
 
         // Initialize DMA channel
-        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_MEMORY_TO_PERIPH, false, true, 1, 1).hdma;
+        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_MEMORY_TO_PERIPH, false, true, 1, 1, DMA_NORMAL).hdma;
 
         if(dmaHandle == NULL)
         {
@@ -574,7 +574,7 @@ static void spi_init_rx_dma(struct spi_s * obj)
         DMALinkInfo const *dmaLink = &SPIRxDMALinks[obj->spiIndex - 1];
 
         // Initialize DMA channel
-        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1).hdma;
+        DMA_HandleTypeDef *dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1, DMA_NORMAL).hdma;
 
         if(dmaHandle == NULL)
         {
