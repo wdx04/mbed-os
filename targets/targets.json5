@@ -2418,7 +2418,7 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
                 "size": 524288,
                 "start": 134217728,
                 "startup": true
-            }            
+            }
         }
     },
     "DISCO_F746NG": {
@@ -3183,11 +3183,13 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
             "MPU",
             "ANALOGOUT",
             "SPI_32BIT_WORDS",
-            "TRNG"
-        ],
-        "device_has_remove": [
+            "TRNG",
             "FLASH",
             "CAN",
+            "CRC"
+        ],
+        "device_has_remove": [
+			"LPTICKER",
 			"SERIAL_FC"
         ],
         "is_mcu_family_target": true
