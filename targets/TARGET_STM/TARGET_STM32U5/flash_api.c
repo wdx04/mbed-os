@@ -87,18 +87,19 @@ int32_t flash_erase_sector(flash_t *obj, uint32_t address)
 {
     uint32_t FirstPage = 0, BankNumber = 0;
     uint32_t PAGEError = 0;
+    int32_t status = 0;
     FLASH_EraseInitTypeDef EraseInitStruct;
 
     if ((address >= (flash_get_start_address(obj) + flash_get_size(obj))) || (address < flash_get_start_address(obj))) {
         return -1;
     }
 
-    if (HAL_ICACHE_Disable() != HAL_OK)
-    {
+    if (HAL_FLASH_Unlock() != HAL_OK) {
         return -1;
     }
 
-    if (HAL_FLASH_Unlock() != HAL_OK) {
+    if (HAL_ICACHE_Disable() != HAL_OK)
+    {
         return -1;
     }
 
@@ -120,21 +121,21 @@ int32_t flash_erase_sector(flash_t *obj, uint32_t address)
     EraseInitStruct.NbPages     = 1;
 
     if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK) {
-        return -1;
+        status = -1;
     }
 
     core_util_critical_section_exit();
-
-    if (HAL_FLASH_Lock() != HAL_OK) {
-        return -1;
-    }
 
     if (HAL_ICACHE_Enable() != HAL_OK)
     {
         return -1;
     }
 
-    return 0;
+    if (HAL_FLASH_Lock() != HAL_OK) {
+        return -1;
+    }
+
+    return status;
 }
 
 /** Program one page starting at defined address
@@ -162,12 +163,12 @@ int32_t flash_program_page(flash_t *obj, uint32_t address,
         return -1;
     }
 
-    if (HAL_ICACHE_Disable() != HAL_OK)
-    {
+    if (HAL_FLASH_Unlock() != HAL_OK) {
         return -1;
     }
 
-    if (HAL_FLASH_Unlock() != HAL_OK) {
+    if (HAL_ICACHE_Disable() != HAL_OK)
+    {
         return -1;
     }
 
@@ -186,12 +187,12 @@ int32_t flash_program_page(flash_t *obj, uint32_t address,
         }
     }
 
-    if (HAL_FLASH_Unlock() != HAL_OK) {
+    if (HAL_ICACHE_Enable() != HAL_OK)
+    {
         return -1;
     }
 
-    if (HAL_ICACHE_Enable() != HAL_OK)
-    {
+    if (HAL_FLASH_Unlock() != HAL_OK) {
         return -1;
     }
 
