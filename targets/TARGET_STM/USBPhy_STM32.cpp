@@ -327,6 +327,9 @@ void USBPhyHw::init(USBPhyEvents *events)
 #if defined(TARGET_STM32U5)
     hpcd.Instance = USB_DRD_FS;
     __HAL_RCC_USB_FS_CLK_ENABLE();
+#elif defined(TARGET_STM32H5)
+    hpcd.Instance = USB_DRD_FS;
+    __HAL_RCC_USB_CLK_ENABLE();
 #else
     hpcd.Instance = USB;
     __HAL_RCC_USB_CLK_ENABLE();
@@ -354,7 +357,7 @@ void USBPhyHw::init(USBPhyEvents *events)
     __HAL_RCC_PWR_CLK_ENABLE();
 #endif
 
-#if !defined(TARGET_STM32WB)
+#if !defined(TARGET_STM32WB) && !defined(TARGET_STM32H5)
     __HAL_RCC_SYSCFG_CLK_ENABLE();
 #endif
 
