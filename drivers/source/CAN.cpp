@@ -33,14 +33,11 @@ CAN::CAN(PinName rd, PinName td) : _can(), _irq()
 CAN::CAN(PinName rd, PinName td, int hz, int data_hz) : _can(), _irq()
 {
     // No lock needed in constructor
-    if(data_hz == 0)
-    {
-        can_init_freq(&_can, rd, td, hz);
-    }
-    else
-    {
-        canfd_init_freq(&_can, rd, td, hz, data_hz);
-    }
+#ifdef DEVICE_CAN_FD
+    canfd_init_freq(&_can, rd, td, hz, data_hz);
+#else
+    can_init_freq(&_can, rd, td, hz);
+#endif
     can_irq_init(&_can, (&CAN::_irq_handler), reinterpret_cast<uintptr_t>(this));
 }
 
@@ -54,14 +51,11 @@ CAN::CAN(const can_pinmap_t &pinmap) : _can(), _irq()
 CAN::CAN(const can_pinmap_t &pinmap, int hz, int data_hz) : _can(), _irq()
 {
     // No lock needed in constructor
-    if(data_hz == 0)
-    {
-        can_init_freq_direct(&_can, &pinmap, hz);
-    }
-    else
-    {
-        canfd_init_freq_direct(&_can, &pinmap, hz, data_hz);
-    }
+#ifdef DEVICE_CAN_FD
+    canfd_init_freq_direct(&_can, &pinmap, hz, data_hz);
+#else
+    can_init_freq_direct(&_can, &pinmap, hz);
+#endif
     can_irq_init(&_can, (&CAN::_irq_handler), reinterpret_cast<uintptr_t>(this));
 }
 
@@ -80,7 +74,11 @@ CAN::~CAN()
 int CAN::frequency(int f, int data_f)
 {
     lock();
+#ifdef DEVICE_CAN_FD
     int ret = canfd_frequency(&_can, f, data_f);
+#else
+    int ret = can_frequency(&_can, f);
+#endif
     unlock();
     return ret;
 }
@@ -89,14 +87,6 @@ int CAN::write(CANMessage msg)
 {
     lock();
     int ret = can_write(&_can, msg, 0);
-    unlock();
-    return ret;
-}
-
-int CAN::write(CANFDMessage msg)
-{
-    lock();
-    int ret = canfd_write(&_can, msg, 0);
     unlock();
     return ret;
 }
@@ -112,6 +102,16 @@ int CAN::read(CANMessage &msg, int handle)
     return ret;
 }
 
+#ifdef DEVICE_CAN_FD
+
+int CAN::write(CANFDMessage msg)
+{
+    lock();
+    int ret = canfd_write(&_can, msg, 0);
+    unlock();
+    return ret;
+}
+
 int CAN::read(CANFDMessage &msg, int handle)
 {
     lock();
@@ -122,6 +122,8 @@ int CAN::read(CANFDMessage &msg, int handle)
     unlock();
     return ret;
 }
+
+#endif
 
 void CAN::reset()
 {

@@ -137,16 +137,6 @@ public:
      */
     int write(CANMessage msg);
 
-    /** Write a CANFDMessage to the bus.
-     *
-     *  @param msg The CANFDMessage to write.
-     *
-     *  @returns
-     *    0 if write failed,
-     *    1 if write was successful
-     */
-    int write(CANFDMessage msg);
-
     /** Read a CANMessage from the bus.
      *
      *  @param msg A CANMessage to read to.
@@ -158,6 +148,18 @@ public:
      */
     int read(CANMessage &msg, int handle = 0);
 
+#ifdef DEVICE_CAN_FD
+
+    /** Write a CANFDMessage to the bus.
+     *
+     *  @param msg The CANFDMessage to write.
+     *
+     *  @returns
+     *    0 if write failed,
+     *    1 if write was successful
+     */
+    int write(CANFDMessage msg);
+
     /** Read a CANFDMessage from the bus.
      *
      *  @param msg A CANFDMessage to read to.
@@ -168,6 +170,8 @@ public:
      *    1 if message arrived
      */
     int read(CANFDMessage &msg, int handle = 0);
+
+#endif
 
     /** Reset CAN interface.
      *

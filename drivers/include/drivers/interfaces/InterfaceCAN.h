@@ -140,6 +140,8 @@ public:
     }
 };
 
+#ifdef DEVICE_CAN_FD
+
 /** CANFDMessage class
  *
  * @note Synchronization level: Thread safe
@@ -236,6 +238,8 @@ public:
         return !(*this == b);
     }
 };
+
+#endif
 
 /** @}*/
 
