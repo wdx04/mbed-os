@@ -337,13 +337,29 @@ void can_irq_free(can_t *obj)
 {
     CANName can = (CANName)obj->CanHandle.Instance;
     if (can == CAN_1) {
+#if defined(TARGET_STM32G0)
+        if(can_irq_contexts[1] == 0)
+        {
+            HAL_NVIC_DisableIRQ(TIM16_FDCAN_IT0_IRQn);
+            HAL_NVIC_DisableIRQ(TIM17_FDCAN_IT1_IRQn);
+        }
+#else
         HAL_NVIC_DisableIRQ(FDCAN1_IT0_IRQn);
         HAL_NVIC_DisableIRQ(FDCAN1_IT1_IRQn);
+#endif
     }
 #if defined(FDCAN2_BASE)
     else if (can == CAN_2) {
+#if defined(TARGET_STM32G0)
+        if(can_irq_contexts[0] == 0)
+        {
+            HAL_NVIC_DisableIRQ(TIM16_FDCAN_IT0_IRQn);
+            HAL_NVIC_DisableIRQ(TIM17_FDCAN_IT1_IRQn);
+        }
+#else
         HAL_NVIC_DisableIRQ(FDCAN2_IT0_IRQn);
         HAL_NVIC_DisableIRQ(FDCAN2_IT1_IRQn);
+#endif
     }
 #endif
 #if defined(FDCAN3_BASE)
@@ -845,6 +861,22 @@ static void can_irq(CANName name, int id)
     }
 }
 
+#if defined(TARGET_STM32G0)
+
+void FDCAN_IT0_IRQHandler(void)
+{
+    can_irq(CAN_1, 0);
+    can_irq(CAN_2, 1);
+}
+
+void FDCAN_IT1_IRQHandler(void)
+{
+    can_irq(CAN_1, 0);
+    can_irq(CAN_2, 1);
+}
+
+#else
+
 void FDCAN1_IT0_IRQHandler(void)
 {
     can_irq(CAN_1, 0);
@@ -879,6 +911,7 @@ void FDCAN3_IT1_IRQHandler(void)
 }
 #endif //FDCAN3_BASE
 
+#endif
 
 // TODO Add other interrupts ?
 void can_irq_set(can_t *obj, CanIrqType type, uint32_t enable)
@@ -923,6 +956,12 @@ void can_irq_set(can_t *obj, CanIrqType type, uint32_t enable)
         HAL_FDCAN_DeactivateNotification(&obj->CanHandle, interrupts);
     }
 
+#if defined(TARGET_STM32G0)
+    NVIC_SetVector(TIM16_FDCAN_IT0_IRQn, (uint32_t)&FDCAN_IT0_IRQHandler);
+    NVIC_EnableIRQ(TIM16_FDCAN_IT0_IRQn);
+    NVIC_SetVector(TIM17_FDCAN_IT1_IRQn, (uint32_t)&FDCAN_IT1_IRQHandler);
+    NVIC_EnableIRQ(TIM17_FDCAN_IT1_IRQn);
+#else
     NVIC_SetVector(FDCAN1_IT0_IRQn, (uint32_t)&FDCAN1_IT0_IRQHandler);
     NVIC_EnableIRQ(FDCAN1_IT0_IRQn);
     NVIC_SetVector(FDCAN1_IT1_IRQn, (uint32_t)&FDCAN1_IT1_IRQHandler);
@@ -938,6 +977,7 @@ void can_irq_set(can_t *obj, CanIrqType type, uint32_t enable)
     NVIC_EnableIRQ(FDCAN3_IT0_IRQn);
     NVIC_SetVector(FDCAN3_IT1_IRQn, (uint32_t)&FDCAN3_IT1_IRQHandler);
     NVIC_EnableIRQ(FDCAN3_IT1_IRQn);
+#endif
 #endif
 }
 

@@ -2900,7 +2900,9 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
             "STM32G0B1xx"
         ],
         "device_has_add": [
-            "ANALOGOUT"
+            "ANALOGOUT",
+            "CAN",
+            "CAN_FD"
         ]
     },
     "NUCLEO_G0B1RE": {
