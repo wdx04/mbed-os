@@ -23,6 +23,7 @@
 #include "pinmap.h"
 #include "PeripheralPins.h"
 #include "mbed_error.h"
+#include <memory.h>
 
 // Some STM32G4 series (and others) have 3 FDCAN devices
 // while others have 2
@@ -73,6 +74,44 @@ int can_internal_init(can_t *obj)
     }
 
     return 1;
+}
+
+/** Get the nominal phase clock prescaler and the number of time quantums for the specified frequency
+ */
+static uint32_t get_canfd_nominal_prescaler(uint32_t input_f, int f, uint32_t *ntq_out)
+{
+    uint32_t ntq = input_f / (uint32_t)f;
+    uint32_t nominalPrescaler = 1;
+    // !When the sample point should be lower than 50%, this must be changed to
+    // !IS_FDCAN_NOMINAL_TSEG2(ntq/nominalPrescaler), since
+    // NTSEG2 and SJW max values are lower. For now the sample point is fix @75%
+    while (!IS_FDCAN_NOMINAL_TSEG1(ntq / nominalPrescaler)) {
+        nominalPrescaler ++;
+        if (!IS_FDCAN_NOMINAL_PRESCALER(nominalPrescaler)) {
+            error("Could not determine good nominalPrescaler. Bad clock value\n");
+        }
+    }
+    *ntq_out = ntq / nominalPrescaler;
+    return nominalPrescaler;
+}
+
+/** Get the data phase clock prescaler and the number of time quantums for the specified frequency
+ */
+static uint32_t get_canfd_data_prescaler(uint32_t input_f, int data_f, uint32_t *ntq_out)
+{
+    uint32_t ntq_data = input_f / (uint32_t)data_f;
+    uint32_t dataPrescaler = 1;
+    // !When the sample point should be lower than 50%, this must be changed to
+    // !IS_FDCAN_DATA_TSEG2(ntq_data/dataPrescaler), since
+    // NTSEG2 and SJW max values are lower. For now the sample point is fix @70%
+    while (!IS_FDCAN_DATA_TSEG1(ntq_data / dataPrescaler)) {
+        dataPrescaler ++;
+        if (!IS_FDCAN_DATA_PRESCALER(dataPrescaler)) {
+            error("Could not determine good dataPrescaler. Bad clock value\n");
+        }
+    }
+    *ntq_out = ntq_data / dataPrescaler;
+    return dataPrescaler;
 }
 
 #if STATIC_PINMAP_READY
@@ -159,64 +198,40 @@ static void _canfd_init_freq_direct(can_t *obj, const can_pinmap_t *pinmap, int 
     Synchronization_Jump_width | 9 tq           | <nsjw> = <nts2>
     */
 
-    // !Attention Not all bitrates can be covered with all fdcan-core-clk values. When a clk
-    // does not work for the desired bitrate, change system_clock settings for FDCAN_CLK
-    // (default FDCAN_CLK is PLLQ)
+    /* See can_init_freq function for calculation details
+     *
+     * !Attention Not all bitrates can be covered with all fdcan-core-clk values. When a clk
+     * does not work for the desired bitrate, change system_clock settings for FDCAN_CLK
+     * (default FDCAN_CLK is PLLQ)
+     */
 #if (defined TARGET_STM32H7)
     // STM32H7 doesn't support yet HAL_RCCEx_GetPeriphCLKFreq for FDCAN
-    // We use PLL1.Q clock right now so get its frequency
     PLL1_ClocksTypeDef pll1_clocks;
     HAL_RCCEx_GetPLL1ClockFreq(&pll1_clocks);
-    uint32_t ntq = pll1_clocks.PLL1_Q_Frequency / (uint32_t)hz;
+    uint32_t input_hz = pll1_clocks.PLL1_Q_Frequency;
 #else
 #if (defined RCC_PERIPHCLK_FDCAN1)
-    uint32_t ntq = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN1) / (uint32_t)hz;
+    uint32_t input_hz = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN1);
 #else
-    uint32_t ntq = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN) / (uint32_t)hz;
+    uint32_t input_hz = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN);
 #endif
 #endif
-
-    uint32_t nominalPrescaler = 1;
-    uint32_t dataPrescaler = 1;
-    // !When the sample point should be lower than 50%, this must be changed to
-    // !IS_FDCAN_NOMINAL_TSEG2(ntq/nominalPrescaler), since
-    // NTSEG2 and SJW max values are lower. For now the sample point is fix @75%
-    while (!IS_FDCAN_NOMINAL_TSEG1(ntq / nominalPrescaler)) {
-        nominalPrescaler ++;
-        if (!IS_FDCAN_NOMINAL_PRESCALER(nominalPrescaler)) {
-            error("Could not determine good nominalPrescaler. Bad clock value\n");
-        }
-    }
-    ntq = ntq / nominalPrescaler;
+    uint32_t ntq = 0;
+    uint32_t nominalPrescaler = get_canfd_nominal_prescaler(input_hz, hz, &ntq);
     uint32_t ntq_data = ntq;
-
+    uint32_t dataPrescaler = nominalPrescaler;
     if(data_hz == 0)
     {
         obj->CanHandle.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-        dataPrescaler = nominalPrescaler;
     }
     else if(data_hz == hz)
     {
         obj->CanHandle.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
-        dataPrescaler = nominalPrescaler;
     }
     else
     {
         obj->CanHandle.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
-#if (defined TARGET_STM32H7)
-        ntq_data = pll1_clocks.PLL1_Q_Frequency / (uint32_t)data_hz;
-#elif (defined RCC_PERIPHCLK_FDCAN1)
-        ntq_data = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN1) / (uint32_t)data_hz;
-#else
-        ntq_data = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN) / (uint32_t)data_hz;
-#endif
-        while (!IS_FDCAN_DATA_TSEG1(ntq_data / dataPrescaler)) {
-            dataPrescaler ++;
-            if (!IS_FDCAN_DATA_PRESCALER(dataPrescaler)) {
-                error("Could not determine good dataPrescaler. Bad clock value\n");
-            }
-        }
-        ntq_data = ntq_data / dataPrescaler;
+        dataPrescaler = get_canfd_data_prescaler(input_hz, data_hz, &ntq_data);
     }
     obj->CanHandle.Init.Mode = FDCAN_MODE_NORMAL;
     obj->CanHandle.Init.AutoRetransmission = ENABLE;
@@ -412,7 +427,6 @@ void can_reset(can_t *obj)
     HAL_FDCAN_ResetTimestampCounter(&obj->CanHandle);
 }
 
-
 int canfd_frequency(can_t *obj, int f, int data_f)
 {
     if (HAL_FDCAN_Stop(&obj->CanHandle) != HAL_OK) {
@@ -433,56 +447,30 @@ int canfd_frequency(can_t *obj, int f, int data_f)
     // STM32H7 doesn't support yet HAL_RCCEx_GetPeriphCLKFreq for FDCAN
     PLL1_ClocksTypeDef pll1_clocks;
     HAL_RCCEx_GetPLL1ClockFreq(&pll1_clocks);
-    uint32_t ntq = pll1_clocks.PLL1_Q_Frequency / (uint32_t)f;
+    uint32_t input_f = pll1_clocks.PLL1_Q_Frequency;
 #else
 #if (defined RCC_PERIPHCLK_FDCAN1)
-    uint32_t ntq = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN1) / (uint32_t)f;
+    uint32_t input_f = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN1);
 #else
-    uint32_t ntq = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN) / (uint32_t)f;
+    uint32_t input_f = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN);
 #endif
 #endif
-
-    uint32_t nominalPrescaler = 1;
-    uint32_t dataPrescaler = 1;
-    // !When the sample point should be lower than 50%, this must be changed to
-    // !IS_FDCAN_NOMINAL_TSEG2(ntq/nominalPrescaler), since
-    // NTSEG2 and SJW max values are lower. For now the sample point is fix @75%
-    while (!IS_FDCAN_NOMINAL_TSEG1(ntq / nominalPrescaler)) {
-        nominalPrescaler ++;
-        if (!IS_FDCAN_NOMINAL_PRESCALER(nominalPrescaler)) {
-            error("Could not determine good nominalPrescaler. Bad clock value\n");
-        }
-    }
-    ntq = ntq / nominalPrescaler;
+    uint32_t ntq = 0;
+    uint32_t nominalPrescaler = get_canfd_nominal_prescaler(input_f, f, &ntq);
     uint32_t ntq_data = ntq;
-
+    uint32_t dataPrescaler = nominalPrescaler;
     if(data_f == 0)
     {
         obj->CanHandle.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-        dataPrescaler = nominalPrescaler;
     }
     else if(data_f == f)
     {
         obj->CanHandle.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
-        dataPrescaler = nominalPrescaler;
     }
     else
     {
         obj->CanHandle.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
-#if (defined TARGET_STM32H7)
-        ntq_data = pll1_clocks.PLL1_Q_Frequency / (uint32_t)data_f;
-#elif (defined RCC_PERIPHCLK_FDCAN1)
-        ntq_data = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN1) / (uint32_t)data_f;
-#else
-        ntq_data = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_FDCAN) / (uint32_t)data_f;
-#endif
-        while (!IS_FDCAN_DATA_TSEG1(ntq_data / dataPrescaler)) {
-            dataPrescaler ++;
-            if (!IS_FDCAN_DATA_PRESCALER(dataPrescaler)) {
-                error("Could not determine good dataPrescaler. Bad clock value\n");
-            }
-        }
-        ntq_data = ntq_data / dataPrescaler;
+        dataPrescaler = get_canfd_data_prescaler(input_f, data_f, &ntq_data);
     }
     obj->CanHandle.Init.Mode = FDCAN_MODE_NORMAL;
     obj->CanHandle.Init.AutoRetransmission = ENABLE;
@@ -549,9 +537,9 @@ int can_filter(can_t *obj, uint32_t id, uint32_t mask, CANFormat format, int32_t
 
 int can_write(can_t *obj, CAN_Message msg, int cc)
 {
-    FDCAN_TxHeaderTypeDef TxHeader = {0};
-
     UNUSED(cc);
+
+    FDCAN_TxHeaderTypeDef TxHeader = {0};
 
     // Configure Tx buffer message
     TxHeader.Identifier = msg.id;
@@ -582,9 +570,9 @@ int can_write(can_t *obj, CAN_Message msg, int cc)
 
 int canfd_write(can_t *obj, CANFD_Message msg, int cc)
 {
-    FDCAN_TxHeaderTypeDef TxHeader = {0};
-
     UNUSED(cc);
+
+    FDCAN_TxHeaderTypeDef TxHeader = {0};
 
     // Configure Tx buffer message
     TxHeader.Identifier = msg.id;
@@ -632,7 +620,7 @@ int canfd_write(can_t *obj, CANFD_Message msg, int cc)
             TxHeader.DataLength = FDCAN_DLC_BYTES_64;
             break;
         default:
-            error("Invalid message length for can_write\n");
+            error("Invalid message length for canfd_write\n");
             return 0;
     }
     TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
@@ -658,7 +646,8 @@ int can_read(can_t *obj, CAN_Message *msg, int handle)
     }
 
     FDCAN_RxHeaderTypeDef RxHeader = {0};
-    if (HAL_FDCAN_GetRxMessage(&obj->CanHandle, FDCAN_RX_FIFO0, &RxHeader, msg->data) != HAL_OK) {
+    unsigned char data[64];
+    if (HAL_FDCAN_GetRxMessage(&obj->CanHandle, FDCAN_RX_FIFO0, &RxHeader, data) != HAL_OK) {
         error("HAL_FDCAN_GetRxMessage error\n"); // Should not occur as previous HAL_FDCAN_GetRxFifoFillLevel call reported some data
         return 0;
     }
@@ -670,10 +659,16 @@ int can_read(can_t *obj, CAN_Message *msg, int handle)
     }
     msg->id   = RxHeader.Identifier;
     msg->type = (RxHeader.RxFrameType == FDCAN_DATA_FRAME) ? CANData : CANRemote;
-    msg->len  = RxHeader.DataLength;
 #if defined(TARGET_STM32L5) || defined(TARGET_STM32G0) || defined(TARGET_STM32G4)
-    msg->len >>= 16;
+    RxHeader.DataLength >>= 16;
 #endif
+    msg->len  = RxHeader.DataLength;
+    if(msg->len > 8)
+    {
+        error("can_read unexpectedly received a FD frame\n");
+        return 0;
+    }
+    memcpy(msg->data, data, msg->len);
     return 1;
 }
 
@@ -698,10 +693,10 @@ int canfd_read(can_t *obj, CANFD_Message *msg, int handle)
     }
     msg->id   = RxHeader.Identifier;
     msg->type = (RxHeader.RxFrameType == FDCAN_DATA_FRAME) ? CANData : CANRemote;
-    msg->len  = RxHeader.DataLength;
 #if defined(TARGET_STM32L5) || defined(TARGET_STM32G0) || defined(TARGET_STM32G4)
-    msg->len >>= 16;
+    RxHeader.DataLength >>= 16;
 #endif
+    msg->len  = RxHeader.DataLength;
     switch(msg->len) { // see FDCAN_data_length_code value
         case 9:
             msg->len = 12;
@@ -1264,6 +1259,8 @@ int can_frequency(can_t *obj, int f)
 
 int can_write(can_t *obj, CAN_Message msg, int cc)
 {
+    UNUSED(cc);
+
     uint32_t  transmitmailbox = CAN_TXSTATUS_NOMAILBOX;
     CAN_TypeDef *can = obj->CanHandle.Instance;
 
