@@ -75,7 +75,7 @@ static uint32_t get_alt_bytes_size(const uint32_t num_bytes)
 
 ospi_status_t ospi_prepare_command(const ospi_command_t *command, OSPI_RegularCmdTypeDef *st_command)
 {
-    debug_if(ospi_api_c_debug, "ospi_prepare_command In: instruction.value %x dummy_count %u address.bus_width %x address.disabled %x address.value %x address.size %x\n",
+    debug_if(ospi_api_c_debug, "ospi_prepare_command In: instruction.value %lx dummy_count %u address.bus_width %x address.disabled %x address.value %lx address.size %x\n",
              command->instruction.value, command->dummy_count, command->address.bus_width, command->address.disabled, command->address.value, command->address.size);
 
 #if defined(HAL_OSPI_DUALQUAD_DISABLE)
@@ -246,7 +246,7 @@ ospi_status_t ospi_prepare_command(const ospi_command_t *command, OSPI_RegularCm
             break;
     }
 
-    debug_if(ospi_api_c_debug, "ospi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
+    debug_if(ospi_api_c_debug, "ospi_prepare_command Out: InstructionMode %lx Instruction %lx AddressMode %lx AddressSize %lx Address %lx DataMode %lx\n",
              st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
 
     return OSPI_STATUS_OK;
@@ -275,7 +275,7 @@ static void ospi_init_dma(struct ospi_s * obj)
         dmaLink = &OSPIDMALinks[0];
 #endif
         // Initialize DMA channel
-        obj->dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 1, 1, DMA_NORMAL);
+        obj->dmaHandle = stm_init_dma_link(dmaLink, DMA_PERIPH_TO_MEMORY, false, true, 4, 4, DMA_NORMAL);
         if(obj->dmaHandle.hdma == NULL)
         {
             mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
@@ -291,7 +291,7 @@ static void ospi_init_dma(struct ospi_s * obj)
         // STM32H5 has only one OCTOSPI instance, but it requires separate DMA channels for RX and TX
         DMALinkInfo const *dmaLinkTX = &OSPIDMALinks[1];
         // Initialize DMA channel
-        obj->dmaHandleTX = stm_init_dma_link(dmaLinkTX, DMA_MEMORY_TO_PERIPH, false, true, 1, 1, DMA_NORMAL);
+        obj->dmaHandleTX = stm_init_dma_link(dmaLinkTX, DMA_MEMORY_TO_PERIPH, false, true, 4, 4, DMA_NORMAL);
         if(obj->dmaHandleTX.hdma == NULL)
         {
             mbed_error(MBED_ERROR_ALREADY_IN_USE, "DMA channel already used by something else!", 0, MBED_FILENAME, __LINE__);
@@ -568,20 +568,20 @@ ospi_status_t ospi_frequency(ospi_t *obj, int hz)
     obj->handle.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
 
     /* OSPI clock depends on prescaler value:
-    *  0: Freq = HCLK
-    *  1: Freq = HCLK/2
+    *  1: Freq = HCLK
+    *  2: Freq = HCLK/2
     *  ...
-    *  255: Freq = HCLK/256 (minimum value)
+    *  256: Freq = HCLK/256 (minimum value)
     */
 
-#if defined(TARGET_STM32L5)
+#if defined(TARGET_STM32L5) || defined(TARGET_STM32H7)
     uint32_t OSPI_clock_source = HAL_RCC_GetSysClockFreq();
 #else
     uint32_t OSPI_clock_source = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_OSPI);
 #endif
     int div = OSPI_clock_source / hz;
-    if (div > 255) {
-        div = 255;
+    if (div > 256) {
+        div = 256;
     } else {
         if (OSPI_clock_source % hz != 0) {
             div = div + 1;
@@ -602,6 +602,7 @@ ospi_status_t ospi_frequency(ospi_t *obj, int hz)
     return status;
 }
 
+extern void split_buffer_for_dma(const void *buffer, const size_t *length, size_t *pre_aligned_size, size_t *aligned_size, size_t *post_aligned_size);
 
 ospi_status_t ospi_write(ospi_t *obj, const ospi_command_t *command, const void *data, size_t *length)
 {
@@ -613,13 +614,32 @@ ospi_status_t ospi_write(ospi_t *obj, const ospi_command_t *command, const void 
         return status;
     }
 
-    st_command.NbData = *length;
+    size_t pre_aligned_size, aligned_size, post_aligned_size;
+    split_buffer_for_dma(data, length, &pre_aligned_size, &aligned_size, &post_aligned_size);
 
-    if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
-        tr_error("HAL_OSPI_Command error");
-        status = OSPI_STATUS_ERROR;
-    } else {
-        if(st_command.NbData >= OSPI_DMA_THRESHOLD_BYTES) {
+    if(pre_aligned_size > 0)
+    {
+        st_command.NbData = pre_aligned_size;
+        if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_OSPI_Command error");
+            status = OSPI_STATUS_ERROR;
+        } else {
+           if (HAL_OSPI_Transmit(&obj->handle, (uint8_t *)data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+                tr_error("HAL_OSPI_Transmit error");
+                status = OSPI_STATUS_ERROR;
+            }
+        }
+        st_command.Address += pre_aligned_size;
+        data += pre_aligned_size;
+    }
+
+    if(status == OSPI_STATUS_OK && aligned_size > 0)
+    {
+        st_command.NbData = aligned_size;
+        if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_OSPI_Command error");
+            status = OSPI_STATUS_ERROR;
+        } else {
             ospi_init_dma(obj);
             NVIC_ClearPendingIRQ(obj->ospiIRQ);
             NVIC_SetPriority(obj->ospiIRQ, 1);
@@ -647,7 +667,16 @@ ospi_status_t ospi_write(ospi_t *obj, const ospi_command_t *command, const void 
             }
             NVIC_DisableIRQ(obj->ospiIRQ);
         }
-        else {
+        st_command.Address += aligned_size;
+        data += aligned_size;
+    }
+    if(status == OSPI_STATUS_OK && post_aligned_size > 0)
+    {
+        st_command.NbData = post_aligned_size;
+        if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+            tr_error("HAL_OSPI_Command error");
+            status = OSPI_STATUS_ERROR;
+        } else {
             if (HAL_OSPI_Transmit(&obj->handle, (uint8_t *)data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
                 tr_error("HAL_OSPI_Transmit error");
                 status = OSPI_STATUS_ERROR;
@@ -666,10 +695,8 @@ ospi_status_t ospi_read(ospi_t *obj, const ospi_command_t *command, void *data, 
         return status;
     }
 
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
-    extern void split_buffer_by_cacheline(void *buffer, const size_t *length, size_t *pre_aligned_size, size_t *aligned_size, size_t *post_aligned_size);
     size_t pre_aligned_size, aligned_size, post_aligned_size;
-    split_buffer_by_cacheline(data, length, &pre_aligned_size, &aligned_size, &post_aligned_size);
+    split_buffer_for_dma(data, length, &pre_aligned_size, &aligned_size, &post_aligned_size);
     if(pre_aligned_size > 0)
     {
         st_command.NbData = pre_aligned_size;
@@ -696,7 +723,9 @@ ospi_status_t ospi_read(ospi_t *obj, const ospi_command_t *command, void *data, 
             NVIC_ClearPendingIRQ(obj->ospiIRQ);
             NVIC_SetPriority(obj->ospiIRQ, 1);
             NVIC_EnableIRQ(obj->ospiIRQ);
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
             SCB_CleanInvalidateDCache_by_Addr((volatile void *)data, *length);
+#endif
             if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
                 tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
                 status = OSPI_STATUS_ERROR;
@@ -731,44 +760,6 @@ ospi_status_t ospi_read(ospi_t *obj, const ospi_command_t *command, void *data, 
             }
         }
     }
-#else
-    st_command.NbData = *length;
-
-    if (HAL_OSPI_Command(&obj->handle, &st_command, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
-        tr_error("HAL_OSPI_Command error");
-        status = OSPI_STATUS_ERROR;
-    } else {
-        if(st_command.NbData >= OSPI_DMA_THRESHOLD_BYTES) {
-            ospi_init_dma(obj);
-            NVIC_ClearPendingIRQ(obj->ospiIRQ);
-            NVIC_SetPriority(obj->ospiIRQ, 1);
-            NVIC_EnableIRQ(obj->ospiIRQ);
-            if (HAL_OSPI_Receive_DMA(&obj->handle, data) != HAL_OK) {
-                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
-                status = OSPI_STATUS_ERROR;
-            }
-            else {
-                // wait until transfer complete or timeout
-#if MBED_CONF_RTOS_PRESENT
-                osSemaphoreAcquire(obj->semaphoreId, HAL_OSPI_TIMEOUT_DEFAULT_VALUE);
-#else
-                while(obj->handle.State == HAL_OSPI_STATE_BUSY_RX);
-#endif
-                if(obj->handle.State != HAL_OSPI_STATE_READY) {
-                    status = OSPI_STATUS_ERROR;
-                    obj->handle.State = HAL_OSPI_STATE_READY;
-                }
-            }
-            NVIC_DisableIRQ(obj->ospiIRQ);
-        }
-        else {
-            if (HAL_OSPI_Receive(&obj->handle, data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
-                tr_error("HAL_OSPI_Receive error %d", obj->handle.ErrorCode);
-                status = OSPI_STATUS_ERROR;
-            }
-        }
-    }
-#endif
 
     debug_if(ospi_api_c_debug, "ospi_read size %u\n", *length);
 
