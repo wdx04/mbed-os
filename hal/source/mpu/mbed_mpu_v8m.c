@@ -167,13 +167,13 @@ void mbed_mpu_init()
     ARM_MPU_SetRegion(
         LAST_RAM_REGION + 1,
         ARM_MPU_RBAR(
-            __noncached_start,          // Base
+            (unsigned long)__noncached_start,          // Base
             ARM_MPU_SH_OUTER,           // Sharability
             0,                          // Read-Write
             1,                          // Non-privileged
             1),                         // Execute Never
         ARM_MPU_RLAR(
-            __noncached_end - 1,        // Limit
+            (unsigned long)__noncached_end - 1,        // Limit
             MBED_MPU_ATTR_INDEX_NON_CACHEABLE)
     );
 #endif

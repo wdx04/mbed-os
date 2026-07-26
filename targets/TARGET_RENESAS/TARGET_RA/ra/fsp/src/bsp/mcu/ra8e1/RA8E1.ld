@@ -15,13 +15,13 @@ DTCM_START = 0x20000000;
 DTCM_LENGTH = 0x00004000;
 MEMORY
 {
-  RAM (rwx) : ORIGIN = RAM_START, LENGTH = RAM_LENGTH
-  FLASH (rx) : ORIGIN = FLASH_START, LENGTH = FLASH_LENGTH
+  RAM (rwx) : ORIGIN = MBED_CONFIGURED_RAM_BANK_SRAM_START, LENGTH = MBED_CONFIGURED_RAM_BANK_SRAM_SIZE
+  FLASH (rx) : ORIGIN = MBED_CONFIGURED_ROM_BANK_Flash_START, LENGTH = MBED_CONFIGURED_ROM_BANK_Flash_SIZE
   DATA_FLASH (rx) : ORIGIN = DATA_FLASH_START, LENGTH = DATA_FLASH_LENGTH
   OSPI0_CS0 (rwx) : ORIGIN = OSPI0_CS0_START, LENGTH = OSPI0_CS0_LENGTH
   OSPI0_CS1 (rx) : ORIGIN = OSPI0_CS1_START, LENGTH = OSPI0_CS1_LENGTH
-  ITCM (rwx) : ORIGIN = ITCM_START, LENGTH = ITCM_LENGTH
-  DTCM (rwx) : ORIGIN = DTCM_START, LENGTH = DTCM_LENGTH
+  ITCM (rwx) : ORIGIN = MBED_CONFIGURED_RAM_BANK_ITCM_START, LENGTH = MBED_CONFIGURED_RAM_BANK_ITCM_SIZE
+  DTCM (rwx) : ORIGIN = MBED_CONFIGURED_RAM_BANK_DTCM_START, LENGTH = MBED_CONFIGURED_RAM_BANK_DTCM_SIZE
 }
 
 /* code entry point...need to define to keep crt0 _start out */
@@ -360,6 +360,14 @@ SECTIONS
   *(vtable)
       __ram_from_flash$$Limit = . ;
   }  > RAM AT > FLASH
+  /* Non-cached ram for Mbed noncached memory support */
+  .noncached(NOLOAD): ALIGN(32)
+  {
+    __noncached_start = .;
+    *(.noncached)
+    . = ALIGN(32);
+    __noncached_end = .;
+  } > RAM
   /* Non-initialized, non-cached ram */
   .bss  (NOLOAD) : ALIGN(32)
   {
