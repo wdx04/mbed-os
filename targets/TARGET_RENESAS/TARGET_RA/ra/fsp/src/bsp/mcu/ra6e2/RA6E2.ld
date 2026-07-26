@@ -25,25 +25,25 @@ GROUP(libgcc.a libc.a libm.a)
 SECTIONS
 {
   /***** QSPI_FLASH memory section allocations ******/
-  .qspi_flash.startof  (READONLY) : 
+  .qspi_flash.startof  (READONLY) :
   {
        __ddsc_QSPI_FLASH_START = . ;
-      
+
   }  > QSPI_FLASH
   /***** RAM memory section allocations ******/
-  .ram.startof  : 
+  .ram.startof  :
   {
        __ddsc_RAM_START = . ;
-      
+
   }  > RAM
-  __ram_dtc_vector$$  (NOLOAD) : 
+  __ram_dtc_vector$$  (NOLOAD) :
   {
       __ram_dtc_vector$$Base = . ;
   *(.fsp_dtc_vector_table)
       __ram_dtc_vector$$Limit = . ;
   }  > RAM
   /* ram initialized from qspi_flash */
-  __ram_from_qspi_flash$$  : 
+  __ram_from_qspi_flash$$  :
   {
       __ram_from_qspi_flash$$Base = . ;__ram_from_qspi_flash$$Load = LOADADDR(__ram_from_qspi_flash$$) ;
   /* section.ram.from_qspi_flash */
@@ -53,7 +53,7 @@ SECTIONS
       __ram_from_qspi_flash$$Limit = . ;
   }  > RAM AT > QSPI_FLASH
 
-  __qspi_flash_readonly$$  (READONLY) : 
+  __qspi_flash_readonly$$  (READONLY) :
   {
       __qspi_flash_readonly$$Base = . ;
   /* section.qspi_flash.readonly */
@@ -62,28 +62,28 @@ SECTIONS
   *(.qspi_flash_code)
       __qspi_flash_readonly$$Limit = . ;
   }  > QSPI_FLASH
-  __qspi_flash_noinit$$  (NOLOAD) : 
+  __qspi_flash_noinit$$  (NOLOAD) :
   {
       __qspi_flash_noinit$$Base = . ;
   /* section.qspi_flash.noinit */
   *(.qspi_flash_noinit)
       __qspi_flash_noinit$$Limit = . ;
   }  > QSPI_FLASH
-  .qspi_flash.endof ALIGN(.,512) (READONLY) : 
+  .qspi_flash.endof ALIGN(.,512) (READONLY) :
   {
        __ddsc_QSPI_FLASH_END = . ;
-      
+
   }  > QSPI_FLASH
 
   /***** DATA_FLASH memory section allocations ******/
-  .data_flash.startof  (READONLY) : 
+  .data_flash.startof  (READONLY) :
   {
        __ddsc_DATA_FLASH_START = . ;
-      
+
   }  > DATA_FLASH
   /***** RAM memory section allocations ******/
   /* ram initialized from data_flash */
-  __ram_from_data_flash$$  : 
+  __ram_from_data_flash$$  :
   {
       __ram_from_data_flash$$Base = . ;__ram_from_data_flash$$Load = LOADADDR(__ram_from_data_flash$$) ;
   /* section.ram.from_data_flash */
@@ -93,7 +93,7 @@ SECTIONS
       __ram_from_data_flash$$Limit = . ;
   }  > RAM AT > DATA_FLASH
 
-  __data_flash_readonly$$  (READONLY) : 
+  __data_flash_readonly$$  (READONLY) :
   {
       __data_flash_readonly$$Base = . ;
   /* section.data_flash.readonly */
@@ -102,34 +102,34 @@ SECTIONS
   *(.data_flash_code)
       __data_flash_readonly$$Limit = . ;
   }  > DATA_FLASH
-  __data_flash_noinit$$  (NOLOAD) : 
+  __data_flash_noinit$$  (NOLOAD) :
   {
       __data_flash_noinit$$Base = . ;
   /* section.data_flash.noinit */
   *(.data_flash_noinit)
       __data_flash_noinit$$Limit = . ;
   }  > DATA_FLASH
-  .data_flash.endof ALIGN(.,512) (READONLY) : 
+  .data_flash.endof ALIGN(.,512) (READONLY) :
   {
        __ddsc_DATA_FLASH_END = . ;
-      
+
   }  > DATA_FLASH
 
   /***** FLASH memory section allocations ******/
-  .flash.startof  (READONLY) : 
+  .flash.startof  (READONLY) :
   {
        __ddsc_FLASH_START = . ;
-      
+
   }  > FLASH
   /* MCU vector table */
-  .text  (READONLY) : 
+  .text  (READONLY) :
   {
       __flash_vectors$$Base = . ; _VECTORS = . ;
   KEEP(*(.fixed_vectors))
   KEEP(*(.application_vectors))
       __flash_vectors$$Limit = . ;
   }  > FLASH
-  __flash_noinit$$  (NOLOAD) : 
+  __flash_noinit$$  (NOLOAD) :
   {
       __flash_noinit$$Base = . ;
   /* section.flash.noinit */
@@ -138,7 +138,7 @@ SECTIONS
   }  > FLASH
   /***** RAM memory section allocations ******/
   /* ram initialized from flash */
-  .data  : 
+  .data  :
   {
       __ram_from_flash$$Base = . ;__ram_from_flash$$Load = LOADADDR(.data) ;
   /* section.ram.from_flash */
@@ -158,7 +158,7 @@ SECTIONS
       __ram_noinit_nocache$$Limit = . ;
   }  > RAM
   /* Zeroed, non-cached ram */
-  .bss  (NOLOAD) : 
+  .bss  (NOLOAD) :
   {
       __ram_zero_nocache$$Base = . ;
   /* section.ram.zero_nocache */
@@ -167,7 +167,7 @@ SECTIONS
       __ram_zero_nocache$$Limit = . ;
   }  > RAM
   /* Non-initialized ram */
-  .bss  (NOLOAD) : 
+  .bss  (NOLOAD) :
   {
       __ram_noinit$$Base = . ;
     /* Main stack region */
@@ -180,7 +180,7 @@ SECTIONS
       __ram_noinit$$Limit = . ;
   }  > RAM
   /* Zeroed ram */
-  .bss  (NOLOAD) : 
+  .bss  (NOLOAD) :
   {
       __ram_zero$$Base = . ;
   /* section.ram.zero */
@@ -195,7 +195,7 @@ SECTIONS
   KEEP(*(.stack?*))
       __ram_thread_stack$$Limit = . ;
   }  > RAM
-  .ram.endof ALIGN(.,512) : 
+  .ram.endof ALIGN(.,512) :
   {
        __ddsc_RAM_END = . ;
         /* Heap region */
@@ -205,7 +205,7 @@ SECTIONS
         __HeapLimit = ORIGIN(RAM) + LENGTH(RAM);
   }  > RAM
 
-  .text  (READONLY) : 
+  .text  (READONLY) :
   {
       __flash_readonly$$Base = . ;
   /* section.flash.readonly */
@@ -218,9 +218,9 @@ SECTIONS
   KEEP(*(.version))
       __flash_readonly$$Limit = . ;
   }  > FLASH
-  __flash_ctor$$  (READONLY) : 
+  __flash_ctor$$  (READONLY) :
   {
-      
+
   *crtbegin.o(.ctors)
   *crtbegin?.o(.ctors)
   EXCLUDE_FILE (*crtend?.o *crtend.o) *(.ctors)
@@ -231,29 +231,29 @@ SECTIONS
   EXCLUDE_FILE (*crtend?.o *crtend.o) *(.dtors)
   *(SORT(.dtors.*))
   *(.dtors)
-      
+
   }  > FLASH
-  __flash_preinit_array$$  (READONLY) : 
+  __flash_preinit_array$$  (READONLY) :
   {
        __preinit_array_start = . ;
   KEEP(*(.preinit_array))
        __preinit_array_end = . ;
   }  > FLASH
-  __flash_.got$$  (READONLY) : 
+  __flash_.got$$  (READONLY) :
   {
-      
+
   *(.got.plt)
   *(.got)
-      
+
   }  > FLASH
-  __flash_init_array$$  (READONLY) : 
+  __flash_init_array$$  (READONLY) :
   {
        __init_array_start = . ;
   KEEP(*(SORT(.init_array.*)))
   KEEP(*(.init_array))
        __init_array_end = . ;
   }  > FLASH
-  __flash_fini_array$$  (READONLY) : 
+  __flash_fini_array$$  (READONLY) :
   {
        __fini_array_start = . ;
   KEEP(*(SORT(.fini_array.*)))
@@ -261,25 +261,25 @@ SECTIONS
        __fini_array_end = . ;
   }  > FLASH
   /* .ARM.extab sections contain exception unwinding information. */
-  __flash_arm.extab$$  (READONLY) : 
+  __flash_arm.extab$$  (READONLY) :
   {
-      
+
   *(.ARM.extab*)
   *(.gnu.linkonce.armextab.*)
-      
+
   }  > FLASH
   /* .ARM.exidx sections contains index entries for section unwinding. */
-  __flash_arm.exidx$$  (READONLY) : 
+  __flash_arm.exidx$$  (READONLY) :
   {
        __exidx_start = . ;
   *(.ARM.exidx*)
   *(.gnu.linkonce.armexidx.*)
        __exidx_end = . ;
   }  > FLASH
-  .flash.endof ALIGN(.,512) (READONLY) : 
+  .flash.endof ALIGN(.,512) (READONLY) :
   {
        __ddsc_FLASH_END = . ;
-      
+
   }  > FLASH
 
 }
