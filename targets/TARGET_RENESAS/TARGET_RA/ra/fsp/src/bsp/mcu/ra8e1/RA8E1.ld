@@ -1,4 +1,3 @@
-/* generated memory regions file - do not edit */
 RAM_START = 0x22060000;
 RAM_LENGTH = 0x00080000;
 FLASH_START = 0x02000000;
@@ -13,6 +12,8 @@ ITCM_START = 0x00000000;
 ITCM_LENGTH = 0x00004000;
 DTCM_START = 0x20000000;
 DTCM_LENGTH = 0x00004000;
+__vector_table_size__ = 112 * 4;
+
 MEMORY
 {
   RAM (rwx) : ORIGIN = MBED_CONFIGURED_RAM_BANK_SRAM_START, LENGTH = MBED_CONFIGURED_RAM_BANK_SRAM_SIZE
@@ -78,6 +79,15 @@ SECTIONS
        __ddsc_DTCM_START = . ;
 
   }  > DTCM
+
+  /* Stick the vector table at start of DTCM */
+  .vector_ram (NOLOAD) :
+  {
+      __vector_ram_start__ = .;
+      . += __vector_table_size__;
+      __vector_ram_end__ = .;
+  } > DTCM
+
   /* dtcm initialized from ospi0_cs1 */
   __dtcm_from_ospi0_cs1$$  :
   {

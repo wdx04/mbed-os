@@ -1,4 +1,3 @@
-/* generated memory regions file - do not edit */
 RAM_START = 0x20000000;
 RAM_LENGTH = 0x00020000;
 FLASH_START = 0x00000000;
@@ -7,6 +6,7 @@ DATA_FLASH_START = 0x08000000;
 DATA_FLASH_LENGTH = 0x00002000;
 QSPI_FLASH_START = 0x60000000;
 QSPI_FLASH_LENGTH = 0x04000000;
+__vector_table_size__ = 112 * 4;
 
 MEMORY
 {
@@ -36,6 +36,13 @@ SECTIONS
        __ddsc_RAM_START = . ;
 
   }  > RAM
+  /* Stick the vector table at start of SRAM */
+  .vector_ram (NOLOAD) :
+  {
+      __vector_ram_start__ = .;
+      . += __vector_table_size__;
+      __vector_ram_end__ = .;
+  } > RAM
   __ram_dtc_vector$$  (NOLOAD) :
   {
       __ram_dtc_vector$$Base = . ;

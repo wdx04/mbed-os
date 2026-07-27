@@ -14,6 +14,10 @@
 #define NVIC_NUM_SYSTEM_EXCEPTIONS   (16)
 
 /* Total number of vectors = system exceptions + IRQs */
-#define NVIC_NUM_VECTORS  (NVIC_NUM_SYSTEM_EXCEPTIONS + VECTOR_DATA_IRQ_COUNT)
+#define NVIC_NUM_VECTORS (NVIC_NUM_SYSTEM_EXCEPTIONS + VECTOR_DATA_IRQ_COUNT)
+
+extern uint32_t __vector_ram_start__;
+
+#define NVIC_RAM_VECTOR_ADDRESS (uint32_t *)&__vector_ram_start__
 
 #endif
