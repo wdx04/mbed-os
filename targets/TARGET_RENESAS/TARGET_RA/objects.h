@@ -47,11 +47,18 @@ struct dac_s {
 
 #if DEVICE_PWMOUT
 #include "r_timer_api.h"
+#include "r_gpt.h"
+#include "r_agt.h"
 
 typedef enum {
     PWM_OUTPUT_A = 0,
     PWM_OUTPUT_B = 1,
 } pwm_output_t;
+
+typedef enum {
+    PWM_TIMER_TYPE_GPT = 0,
+    PWM_TIMER_TYPE_AGT
+} pwm_timer_type_t;
 
 struct pwmout_s {
     PinName pin;
@@ -60,6 +67,14 @@ struct pwmout_s {
     uint32_t period_counts;
     uint32_t duty_counts;
     uint8_t initialized;
+
+    pwm_timer_type_t timer_type;
+    bool is_16bit;
+    timer_cfg_t cfg;
+    union {
+        gpt_extended_cfg_t gpt_ext;
+        agt_extended_cfg_t agt_ext;
+    } ext_cfg;
 };
 #endif
 
