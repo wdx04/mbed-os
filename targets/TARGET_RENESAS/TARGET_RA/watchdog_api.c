@@ -31,6 +31,7 @@ static const wdt_clock_division_t s_divs[] = {
     WDT_CLOCK_DIVISION_128,
     WDT_CLOCK_DIVISION_256,
     WDT_CLOCK_DIVISION_512,
+    WDT_CLOCK_DIVISION_2048,
     WDT_CLOCK_DIVISION_8192,
 };
 
@@ -40,78 +41,100 @@ static const uint32_t s_div_values[] = {
     128u,
     256u,
     512u,
+    2048u,
     8192u,
 };
 
-static void pick_wdt_params(uint32_t requested_ms,
+static bool pick_wdt_params(uint32_t requested_ms,
                             wdt_timeout_t *p_timeout,
                             wdt_clock_division_t *p_div,
                             uint32_t *p_effective_ms)
 {
-    uint32_t pclkb = R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB);
-    uint32_t best_diff = 0xFFFFFFFFu;
-    uint32_t best_ms   = 0;
-    wdt_timeout_t best_timeout = WDT_TIMEOUT_1024;
-    wdt_clock_division_t best_div = WDT_CLOCK_DIVISION_4;
+    const uint32_t pclkb = R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB);
+
+    if ((pclkb == 0U) || (requested_ms == 0U)) {
+        return false;
+    }
+
+    bool found = false;
+    uint64_t best_cycles = UINT64_MAX;
+    size_t best_i = 0;
+    size_t best_j = 0;
 
     for (size_t i = 0; i < sizeof(s_timeouts) / sizeof(s_timeouts[0]); i++) {
         for (size_t j = 0; j < sizeof(s_divs) / sizeof(s_divs[0]); j++) {
-            uint64_t cycles = (uint64_t)s_timeout_cycles[i] * (uint64_t)s_div_values[j];
-            uint32_t ms = (uint32_t)((cycles * 1000u + pclkb / 2u) / pclkb);
-
-            uint32_t diff = (ms > requested_ms) ? (ms - requested_ms) : (requested_ms - ms);
-            if (diff < best_diff) {
-                best_diff   = diff;
-                best_ms     = ms;
-                best_timeout = s_timeouts[i];
-                best_div     = s_divs[j];
+            const uint64_t cycles = (uint64_t)s_timeout_cycles[i] * (uint64_t)s_div_values[j];
+            if ((cycles * 1000ULL) >= ((uint64_t)requested_ms * (uint64_t)pclkb) &&
+				(cycles * 1000ULL) <= ((uint64_t)requested_ms * (uint64_t)pclkb * 2ULL)) {
+                if ((!found) || (cycles < best_cycles)) {
+                    found = true;
+                    best_cycles = cycles;
+                    best_i = i;
+                    best_j = j;
+                }
             }
         }
     }
 
-    *p_timeout      = best_timeout;
-    *p_div          = best_div;
-    *p_effective_ms = best_ms;
+    if (!found) {
+        return false;
+    }
+
+    uint32_t effective_ms =
+        (uint32_t)((best_cycles * 1000ULL) / (uint64_t)pclkb);
+
+    if (effective_ms == 0U) {
+        effective_ms = 1U;
+    }
+
+    *p_timeout      = s_timeouts[best_i];
+    *p_div          = s_divs[best_j];
+    *p_effective_ms = effective_ms;
+
+    return true;
 }
 
-void watchdog_init(const watchdog_config_t *config)
+watchdog_status_t hal_watchdog_init(const watchdog_config_t *config)
 {
-    fsp_err_t err;
-
-    s_timeout_ms = config->timeout_ms;
-
-    wdt_cfg_t cfg = *g_wdt0.p_cfg;
+    if ((config == NULL) || (config->timeout_ms == 0U)) {
+        return WATCHDOG_STATUS_NOT_SUPPORTED;
+    }
 
     wdt_timeout_t timeout_sel;
     wdt_clock_division_t div_sel;
     uint32_t effective_ms = 0;
 
-    pick_wdt_params(s_timeout_ms, &timeout_sel, &div_sel, &effective_ms);
+    if (!pick_wdt_params(config->timeout_ms, &timeout_sel, &div_sel, &effective_ms)) {
+        return WATCHDOG_STATUS_NOT_SUPPORTED;
+    }
+
+    s_timeout_ms           = config->timeout_ms;
+    s_effective_timeout_ms = effective_ms;
+
+    wdt_cfg_t cfg = *g_wdt0.p_cfg;
 
     cfg.timeout        = timeout_sel;
     cfg.clock_division = div_sel;
 
-    s_effective_timeout_ms = effective_ms;
-
-    err = g_wdt0.p_api->open(g_wdt0.p_ctrl, &cfg);
+    fsp_err_t err = g_wdt0.p_api->open(g_wdt0.p_ctrl, &cfg);
     if (FSP_SUCCESS != err) {
-        MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_DRIVER_WATCHDOG, MBED_ERROR_CODE_INITIALIZATION_FAILED),
-                   "WDT open failed");
+        return WATCHDOG_STATUS_NOT_SUPPORTED;
     }
+
+    err = g_wdt0.p_api->refresh(g_wdt0.p_ctrl);
+    if (FSP_SUCCESS != err) {
+        return WATCHDOG_STATUS_NOT_SUPPORTED;
+    }
+
+    return WATCHDOG_STATUS_OK;
 }
 
-void watchdog_start(void)
+watchdog_status_t hal_watchdog_stop(void)
 {
-    // Started on open
+    return WATCHDOG_STATUS_NOT_SUPPORTED;
 }
 
-void watchdog_stop(void)
-{
-    MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_DRIVER_WATCHDOG, MBED_ERROR_CODE_UNSUPPORTED),
-               "WDT cannot be stopped on RA");
-}
-
-void watchdog_kick(void)
+void hal_watchdog_kick(void)
 {
     fsp_err_t err = g_wdt0.p_api->refresh(g_wdt0.p_ctrl);
     if (FSP_SUCCESS != err) {
@@ -120,7 +143,20 @@ void watchdog_kick(void)
     }
 }
 
-uint32_t watchdog_get_reload_value(void)
+uint32_t hal_watchdog_get_reload_value(void)
 {
     return s_effective_timeout_ms;
+}
+
+watchdog_features_t hal_watchdog_get_platform_features(void)
+{
+    watchdog_features_t features;
+	const uint32_t pclkb = R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB);
+	uint64_t max_cycles = 16384ULL * 8192ULL;
+    features.max_timeout = (uint32_t)((max_cycles * 1000ULL) / (uint64_t)pclkb);
+    features.update_config = false;
+    features.disable_watchdog = false;
+    features.clock_typical_frequency = 24000;
+    features.clock_max_frequency = R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB) / 4;
+    return features;
 }

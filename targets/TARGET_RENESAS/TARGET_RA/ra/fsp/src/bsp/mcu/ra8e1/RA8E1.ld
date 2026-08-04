@@ -361,14 +361,19 @@ SECTIONS
   /* ram initialized from flash */
   .data  :
   {
-      __ram_from_flash$$Base = . ;__ram_from_flash$$Load = LOADADDR(.data) ;
+    __data_start__ = .;
+    _sdata = .;
+  __ram_from_flash$$Base = . ;__ram_from_flash$$Load = LOADADDR(.data) ;
   /* section.ram.from_flash */
   *(.ram_from_flash)
   /* section.ram.code_from_flash */
   *(.ram_code_from_flash)
   *(.data*)
   *(vtable)
-      __ram_from_flash$$Limit = . ;
+    __ram_from_flash$$Limit = . ;
+    /* All data end */
+    __data_end__ = .;
+    _edata = .;
   }  > RAM AT > FLASH
   /* Non-cached ram for Mbed noncached memory support */
   .noncached(NOLOAD): ALIGN(32)
@@ -381,6 +386,8 @@ SECTIONS
   /* Non-initialized, non-cached ram */
   .bss  (NOLOAD) : ALIGN(32)
   {
+  	__bss_start__ = .;
+    _sbss = .;
       __ram_noinit_nocache$$Base = . ;
   /* section.ram.noinit_nocache */
   *(.ram_noinit_nocache)
@@ -403,6 +410,8 @@ SECTIONS
     __StackLimit = .;
   *(.bss.g_main_stack)
   __StackTop = .;
+  _estack = __StackTop;
+  PROVIDE(__stack = __StackTop);
     /* Other no-init data */
   *(.ram_noinit)
   *(.noinit)
@@ -415,7 +424,10 @@ SECTIONS
   /* section.ram.zero */
   *(.ram)
   *(.bss*)
+      . = ALIGN(32);
       __ram_zero$$Limit = . ;
+      __bss_end__ = .;
+      _ebss = .;
   }  > RAM
   /* Thread Stacks */
   __ram_thread_stack$$  (NOLOAD) : ALIGN(8)
@@ -430,6 +442,7 @@ SECTIONS
     /* Heap region */
     __HeapBase = .;
     __end__ = .;
+    PROVIDE(end = .);
     *(.bss.g_heap)
     __HeapLimit = ORIGIN(RAM) + LENGTH(RAM);
   }  > RAM
@@ -510,5 +523,6 @@ SECTIONS
        __ddsc_FLASH_END = . ;
 
   }  > FLASH
+  __etext = ADDR(.flash.endof);
 
 }

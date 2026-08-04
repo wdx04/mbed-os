@@ -72,3 +72,8 @@ float dac_read(dac_t *obj)
 {
     return dac_read_u16(obj) / 65535.0f;
 }
+
+const PinMap *analogout_pinmap()
+{
+    return PinMap_DAC;
+}

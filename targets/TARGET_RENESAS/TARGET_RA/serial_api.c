@@ -341,3 +341,14 @@ void uart_callback(uart_callback_args_t *p_args)
             break;
     }
 }
+
+const PinMap *serial_tx_pinmap()
+{
+    return PinMap_UART_TX;
+}
+
+const PinMap *serial_rx_pinmap()
+{
+    return PinMap_UART_RX;
+}
+

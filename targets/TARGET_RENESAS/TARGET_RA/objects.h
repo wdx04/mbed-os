@@ -220,6 +220,6 @@ struct can_s {
 #endif /* DEVICE_CAN */
 
 
-#define HAL_CRC_IS_SUPPORTED(polynomial, width) ((width) == 8 || (width) == 16 || (width) == 32)
+#define HAL_CRC_IS_SUPPORTED(polynomial, width) ((polynomial) == POLY_8BIT_CCITT || (polynomial) == POLY_16BIT_CCITT || (polynomial) == POLY_16BIT_IBM || (polynomial) == POLY_32BIT_ANSI)
 
 #endif

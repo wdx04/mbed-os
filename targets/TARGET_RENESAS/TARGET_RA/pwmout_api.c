@@ -249,6 +249,11 @@ void pwmout_period_us(pwmout_t *obj, int us)
     }
 }
 
+void pwmout_period(pwmout_t *obj, float seconds)
+{
+    pwmout_period_us(obj, seconds * 1000000.0f);
+}
+
 void pwmout_period_ms(pwmout_t *obj, int ms)
 {
     pwmout_period_us(obj, ms * 1000);
@@ -322,3 +327,9 @@ void pwmout_pulsewidth_ms(pwmout_t *obj, int ms)
 {
     pwmout_pulsewidth_us(obj, ms * 1000);
 }
+
+const PinMap *pwmout_pinmap()
+{
+    return PinMap_PWM;
+}
+

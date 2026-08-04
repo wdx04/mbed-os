@@ -411,3 +411,25 @@ void spi_callback(spi_callback_args_t * p_args)
     obj->xfer_done = true;
 #endif
 }
+
+/* ---------------- PinMap getters ---------------- */
+
+const PinMap *spi_master_mosi_pinmap()
+{
+    return PinMap_SPI_MOSI;
+}
+
+const PinMap *spi_master_miso_pinmap()
+{
+    return PinMap_SPI_MISO;
+}
+
+const PinMap *spi_master_clk_pinmap()
+{
+    return PinMap_SPI_SCLK;
+}
+
+const PinMap *spi_master_cs_pinmap()
+{
+    return PinMap_SPI_SSEL;
+}
