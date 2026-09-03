@@ -58,10 +58,10 @@
             [51] = sci_uart_txi_isr, /* SCI2 TXI (Transmit data empty) */
             [52] = sci_uart_tei_isr, /* SCI2 TEI (Transmit end) */
             [53] = sci_uart_eri_isr, /* SCI2 ERI (Receive error) */
-            [54] = sci_uart_rxi_isr, /* SCI3 RXI (Receive data full) */
-            [55] = sci_uart_txi_isr, /* SCI3 TXI (Transmit data empty) */
-            [56] = sci_uart_tei_isr, /* SCI3 TEI (Transmit end) */
-            [57] = sci_uart_eri_isr, /* SCI3 ERI (Receive error) */
+            [54] = sci_spi_rxi_isr, /* SCI3 RXI (Receive data full) */
+            [55] = sci_spi_txi_isr, /* SCI3 TXI (Transmit data empty) */
+            [56] = sci_spi_tei_isr, /* SCI3 TEI (Transmit end) */
+            [57] = sci_spi_eri_isr, /* SCI3 ERI (Receive error) */
             [58] = sci_uart_rxi_isr, /* SCI4 RXI (Receive data full) */
             [59] = sci_uart_txi_isr, /* SCI4 TXI (Transmit data empty) */
             [60] = sci_uart_tei_isr, /* SCI4 TEI (Transmit end) */

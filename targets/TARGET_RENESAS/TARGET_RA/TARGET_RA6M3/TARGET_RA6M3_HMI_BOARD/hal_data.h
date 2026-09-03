@@ -11,7 +11,9 @@
 #include "r_can.h"
 #include "r_can_api.h"
 #include "r_sci_uart.h"
-            #include "r_uart_api.h"
+#include "r_uart_api.h"
+#include "r_sci_spi.h"
+#include "r_spi_api.h"
 #include "r_dmac.h"
 #include "r_transfer_api.h"
 #include "r_spi.h"
@@ -138,17 +140,21 @@ void can_callback(can_callback_args_t * p_args);
             #ifndef uart_callback
             void uart_callback(uart_callback_args_t * p_args);
             #endif
-/** UART on SCI Instance. */
-            extern const uart_instance_t      g_uart3;
+/** SPI on SCI3 Instance (simple SPI mode, used by the RW007 WiFi module). */
+extern const spi_instance_t g_spi_sci3;
 
-            /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
-            extern sci_uart_instance_ctrl_t     g_uart3_ctrl;
-            extern const uart_cfg_t g_uart3_cfg;
-            extern const sci_uart_extended_cfg_t g_uart3_cfg_extend;
+/** Access the SPI on SCI3 instance using these structures when calling API functions directly. */
+extern sci_spi_instance_ctrl_t g_spi_sci3_ctrl;
+extern const spi_cfg_t g_spi_sci3_cfg;
+extern const sci_spi_extended_cfg_t g_spi_sci3_cfg_extend;
 
-            #ifndef uart_callback
-            void uart_callback(uart_callback_args_t * p_args);
-            #endif
+#ifndef spi_callback
+void spi_callback(spi_callback_args_t * p_args);
+#endif
+
+/* SCI-SPI instance used by spi_api.c for SPIName values >= SPI_SCI_BASE */
+#define RA_SCI_SPI_INSTANCE (&g_spi_sci3)
+
 /** UART on SCI Instance. */
             extern const uart_instance_t      g_uart2;
 

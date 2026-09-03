@@ -25,16 +25,17 @@ extern "C" {
 #endif
 
 typedef enum {
-    UART_0 = 0,
-    UART_1,
-    UART_2,
-    UART_3,
-    UART_4,
-    UART_5,
-    UART_6,
-    UART_7,
-    UART_8,
-    UART_9,
+UART_0 = 0,
+UART_1,
+UART_2,
+/* UART_3 removed: SCI3 is used in simple SPI mode for the RW007 WiFi module.
+ * Values must stay aligned with the FSP SCI channel numbers. */
+UART_4 = 4,
+UART_5,
+UART_6,
+UART_7,
+UART_8,
+UART_9,
 } UARTName;
 
 typedef enum {
@@ -97,8 +98,13 @@ typedef enum {
 } IRQName;
 
 typedef enum {
-    SPI_0 = 0,
-    SPI_1,
+SPI_0 = 0,
+SPI_1,
+/* SCI channels used in simple SPI mode. SCI3 drives the RW007 WiFi module
+ * (P3_10 = MOSI, P3_9 = MISO, P3_11 = SCLK); CS (P3_8) is software
+ * controlled because the SCI has no master SS output. */
+SPI_SCI_BASE = 100,
+SPI_SCI3 = SPI_SCI_BASE,
 } SPIName;
 
 typedef enum {
@@ -126,7 +132,7 @@ typedef enum {
 #define STDIO_UART UART_9
 
 #define IRQ_CHANNELS_COUNT   (16)
-#define UART_COUNT (10)
+#define UART_COUNT (9)
 #define SPI_COUNT  (2)
 #define I2C_COUNT  (3)
 #define CAN_COUNT  (2)
