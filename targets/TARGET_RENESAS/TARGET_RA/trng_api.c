@@ -6,9 +6,9 @@
 #include "common_data.h"
 #include "mbed_error.h"
 
-#if defined(TARGET_RA4E1) || defined(TARGET_RA6M3)
+#if defined(TARGET_RA4E1) || defined(TARGET_RA6M3) || defined(TARGET_RA6M5)
 
-// In RA4E1 and RA6M3, TRNG is part of SCE
+// In RA4E1, RA6M3 and RA6M5, TRNG is part of SCE
 
 fsp_err_t HW_SCE_McuSpecificInit(void);
 fsp_err_t HW_SCE_RNG_Read (uint32_t * OutData_Text);
@@ -126,9 +126,9 @@ void trng_free(trng_t *obj)
     R_MSTP->MSTPCRC_b.MSTPC28 = 1;
 }
 
-#elif defined(TARGET_RA8E1)
+#elif defined(TARGET_RA8E1) || defined(TARGET_RA8P1)
 
-// In RA8E1, TRNG is part of RSIP
+// In RA8E1 and RA8P1, TRNG is part of RSIP
 
 #include "r_rsip.h"
 

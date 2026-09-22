@@ -43,9 +43,9 @@ __attribute__((naked)) void /*uint16_t*/ thumb2_checksum(const void* pData, int 
         // an offset of 1, rather than 0.
         "    ands    r3, r0, #1\n"
         // Need to 2-byte align?  If not skip ahead.
-        "    beq     1$\n"
+        "    beq     .Lcs_1\n"
         // We can return if there are no bytes to sum.
-        "    cbz     r1, 9$\n"
+        "    cbz     r1, .Lcs_9\n"
 
         // 2-byte align.
         // Place the first data byte in odd summation location since it needs to be
@@ -56,13 +56,13 @@ __attribute__((naked)) void /*uint16_t*/ thumb2_checksum(const void* pData, int 
         "    subs    r1, r1, #1\n"
 
         // Need to 4-byte align?  If not skip ahead.
-        "1$:\n"
+        ".Lcs_1:\n"
         "    ands    r4, r0, #3\n"
-        "    beq     2$\n"
+        "    beq     .Lcs_2\n"
         // Have more than 1 byte left to align?  If not skip ahead to take care of
         // trailing byte.
         "    cmp     r1, #2\n"
-        "    blt     7$\n"
+        "    blt     .Lcs_7\n"
 
         // 4-byte align.
         "    ldrh    r4, [r0], #2\n"
@@ -71,9 +71,9 @@ __attribute__((naked)) void /*uint16_t*/ thumb2_checksum(const void* pData, int 
 
         // Main summing loop which sums up data 2 words at a time.
         // Make sure that we have more than 7 bytes left to sum.
-        "2$:\n"
+        ".Lcs_2:\n"
         "    cmp     r1, #8\n"
-        "    blt     3$\n"
+        "    blt     .Lcs_3\n"
         // Sum next two words.  Applying previous upper 16-bit carry to
         // lower 16-bits.
         "    ldr     r4, [r0], #4\n"
@@ -83,29 +83,29 @@ __attribute__((naked)) void /*uint16_t*/ thumb2_checksum(const void* pData, int 
         "    adds    r2, r4\n"
         "    adc     r2, r2, #0\n"
         "    subs    r1, r1, #8\n"
-        "    b       2$\n"
+        "    b       .Lcs_2\n"
 
         // Sum up any remaining half-words.
-        "3$:\n"
+        ".Lcs_3:\n"
         // Make sure that we have more than 1 byte left to sum.
         "    cmp     r1, #2\n"
-        "    blt     7$\n"
+        "    blt     .Lcs_7\n"
         // Sum up next half word, continue to apply carry.
         "    ldrh    r4, [r0], #2\n"
         "    adds    r2, r4\n"
         "    adc     r2, r2, #0\n"
         "    subs    r1, r1, #2\n"
-        "    b       3$\n"
+        "    b       .Lcs_3\n"
 
         // Handle trailing byte, if it exists
-        "7$:\n"
-        "    cbz     r1, 8$\n"
+        ".Lcs_7:\n"
+        "    cbz     r1, .Lcs_8\n"
         "    ldrb    r4, [r0]\n"
         "    adds    r2, r4\n"
         "    adc     r2, r2, #0\n"
 
         // Fold 32-bit checksum into 16-bit checksum.
-        "8$:\n"
+        ".Lcs_8:\n"
         "    ubfx    r4, r2, #16, #16\n"
         "    ubfx    r2, r2, #0, #16\n"
         "    adds    r2, r4\n"
@@ -114,11 +114,11 @@ __attribute__((naked)) void /*uint16_t*/ thumb2_checksum(const void* pData, int 
         "    adds    r2, r4\n"
 
         // Swap bytes if started at odd address
-        "    cbz     r3, 9$\n"
+        "    cbz     r3, .Lcs_9\n"
         "    rev16   r2, r2\n"
 
         // Return final sum.
-        "9$: mov     r0, r2\n"
+        ".Lcs_9: mov     r0, r2\n"
         "    pop     {r4, pc}\n"
     );
 }

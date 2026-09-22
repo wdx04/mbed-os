@@ -25,6 +25,16 @@ static inline uint32_t pin_to_mask(PinName pin)
 void gpio_init(gpio_t *obj, PinName pin)
 {
     obj->pin = pin;
+
+    /* An unconnected pin (NC) must not touch the PFS registers: computing
+     * PORT[RA_PORT(NC)].PIN[RA_PIN(NC)] yields an unmapped address and
+     * bus-faults. gpio_is_connected() reports the pin as not connected. */
+    if (pin == NC) {
+        obj->port = 0;
+        obj->pin_mask = 0;
+        return;
+    }
+
     obj->port = pin_to_port(pin);
     obj->pin_mask = pin_to_mask(pin);
 
@@ -40,6 +50,9 @@ void gpio_init(gpio_t *obj, PinName pin)
 void gpio_mode(gpio_t *obj, PinMode mode)
 {
     PinName pin = obj->pin;
+    if (pin == NC) {
+        return;
+    }
 #if (3U == BSP_FEATURE_IOPORT_VERSION)
     uint32_t cfg = R_PFS->PORT[RA_PORT(pin)].PIN[RA_PIN(pin)].PmnPFS;
 #else
@@ -68,6 +81,9 @@ void gpio_mode(gpio_t *obj, PinMode mode)
 void gpio_dir(gpio_t *obj, PinDirection direction)
 {
     PinName pin = obj->pin;
+    if (pin == NC) {
+        return;
+    }
 #if (3U == BSP_FEATURE_IOPORT_VERSION)
     uint32_t cfg = R_PFS->PORT[RA_PORT(pin)].PIN[RA_PIN(pin)].PmnPFS;
 #else
@@ -85,11 +101,17 @@ void gpio_dir(gpio_t *obj, PinDirection direction)
 
 void gpio_write(gpio_t *obj, int value)
 {
+    if (obj->pin == NC) {
+        return;
+    }
     R_BSP_PinWrite(pin_to_bsp(obj->pin), value ? BSP_IO_LEVEL_HIGH : BSP_IO_LEVEL_LOW);
 }
 
 int gpio_read(gpio_t *obj)
 {
+    if (obj->pin == NC) {
+        return 0;
+    }
     return (R_BSP_PinRead(pin_to_bsp(obj->pin)) != 0) ? 1 : 0;
 }
 

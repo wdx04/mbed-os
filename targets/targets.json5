@@ -8846,5 +8846,58 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
         },
         "device_name": "R7FA4T1BB",
         "image_url": "https://doc.embedfire.com/products/link/zh/latest/_images/ebf_ra4t_1.jpg"
+    },
+    "MCU_RA6M5": {
+        "inherits": [
+            "MCU_RA"
+        ],
+        "public": false,
+        "core": "Cortex-M33",
+        "device_has_add": [
+            "CAN",
+            "CAN_FD",
+            "QSPI"
+        ],
+        "extra_labels_add": [
+            "RA6M5"
+        ]
+    },
+    "DONGSHAN_RA6M5": {
+        "inherits": [
+            "MCU_RA6M5"
+        ],
+        "public": true,
+        "overrides": {
+            "console-uart": true,
+            "console-rtt": false
+        },
+        "device_name": "R7FA6M5BF",
+        "image_url": "https://img.alicdn.com/imgextra/i4/2216994161539/O1CN01IVJyyO1NEuaTyruZt_!!4611686018427380611-0-item_pic.jpg"
+    },
+    "MCU_RA8P1": {
+        "inherits": [
+            "MCU_RA"
+        ],
+        "public": false,
+        "core": "Cortex-M85",
+        "device_has_add": [
+            "CAN",
+            "CAN_FD"
+        ],
+        "extra_labels_add": [
+            "RA8P1"
+        ]
+    },
+    "CPKHMI_RA8P1": {
+        "inherits": [
+            "MCU_RA8P1"
+        ],
+        "public": true,
+        "device_name": "R7KA8P1KF",
+        "image_url": "https://github.com/renesas/cpk_examples/blob/main/cpkhmi_ra8p1/docs/images/01_overview/cpkhmi_ra8p1_top.png",
+        "overrides": {
+            "console-uart": true,
+            "console-rtt": false
+        },
     }
 }

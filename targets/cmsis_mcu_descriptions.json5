@@ -15695,5 +15695,329 @@
         ],
         "sub_family": "RA4T1_256K",
         "vendor": "Renesas:117"
+    },
+    "R7FA6M5BF": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "Flash/RA6M5_1M.FLM",
+                "ram_size": 30720,
+                "ram_start": 536870912,
+                "size": 1048576,
+                "start": 0,
+                "style": "Keil"
+            },
+            {
+                "default": true,
+                "file_name": "Flash/RA6M5_DATA_C1M.FLM",
+                "ram_size": 30720,
+                "ram_start": 536870912,
+                "size": 8192,
+                "start": 134217728,
+                "style": "Keil"
+            },
+            {
+                "default": true,
+                "file_name": "Flash/RA6M5_CONF.FLM",
+                "ram_size": 30720,
+                "ram_start": 536870912,
+                "size": 512,
+                "start": 16818432,
+                "style": "Keil"
+            }
+        ],
+        "family": "RA6M5 Series",
+        "from_pack": {
+            "pack": "RA_DFP",
+            "url": "https://www2.renesas.eu/Keil_MDK_Packs/",
+            "vendor": "Renesas",
+            "version": "6.3.0"
+        },
+        "memories": {
+            "ConfigROM": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": false,
+                "p_name": null,
+                "size": 512,
+                "start": 16818432,
+                "startup": false
+            },
+            "DataFlash": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": false,
+                "p_name": null,
+                "size": 8192,
+                "start": 134217728,
+                "startup": false
+            },
+            "Flash": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "p_name": null,
+                "size": 1048576,
+                "start": 0,
+                "startup": true
+            },
+            "SRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "p_name": null,
+                "size": 524288,
+                "start": 536870912,
+                "startup": false
+            }
+        },
+        "name": "R7FA6M5BF",
+        "processors": [
+            {
+                "address": null,
+                "ap": {
+                    "Index": 0
+                },
+                "core": "CortexM33",
+                "default_reset_sequence": null,
+                "dp": 0,
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "name": null,
+                "svd": "SVD/R7FA6M5BH.svd",
+                "unit": 0
+            }
+        ],
+        "sub_family": "RA6M5_1M",
+        "vendor": "Renesas:117"
+    },
+    "R7KA8P1KF": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "Flash/RA8P1_1M.FLM",
+                "ram_size": 30720,
+                "ram_start": 570425344,
+                "size": 1048576,
+                "start": 33554432,
+                "style": "Keil"
+            },
+            {
+                "default": true,
+                "file_name": "Flash/RA8P1_CONF.FLM",
+                "ram_size": 30720,
+                "ram_start": 570425344,
+                "size": 1984,
+                "start": 46788672,
+                "style": "Keil"
+            },
+            {
+                "default": true,
+                "file_name": "Flash/RA8P1_OTP.FLM",
+                "ram_size": 30720,
+                "ram_start": 570425344,
+                "size": 66356,
+                "start": 48264704,
+                "style": "Keil"
+            }
+        ],
+        "family": "RA8P1 Series",
+        "from_pack": {
+            "pack": "RA_DFP",
+            "url": "https://www2.renesas.eu/Keil_MDK_Packs/",
+            "vendor": "Renesas",
+            "version": "6.3.0"
+        },
+        "memories": {
+            "CTCM": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "p_name": "CPU1",
+                "size": 65536,
+                "start": 0,
+                "startup": false
+            },
+            "Config": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": false,
+                "p_name": null,
+                "size": 1984,
+                "start": 46788672,
+                "startup": false
+            },
+            "DTCM": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "p_name": "CPU0",
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "Flash": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "p_name": null,
+                "size": 1048576,
+                "start": 33554432,
+                "startup": true
+            },
+            "ITCM": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "p_name": "CPU0",
+                "size": 131072,
+                "start": 0,
+                "startup": false
+            },
+            "OTP_Config": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": false,
+                "p_name": null,
+                "size": 66356,
+                "start": 48264704,
+                "startup": false
+            },
+            "SRAM": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "p_name": null,
+                "size": 1703936,
+                "start": 570425344,
+                "startup": false
+            },
+            "STCM": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": false,
+                "p_name": "CPU1",
+                "size": 65536,
+                "start": 536870912,
+                "startup": false
+            }
+        },
+        "name": "R7KA8P1KF",
+        "processors": [
+            {
+                "address": null,
+                "ap": {
+                    "Index": 0
+                },
+                "core": "CortexM85",
+                "default_reset_sequence": null,
+                "dp": 0,
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "name": "CPU0",
+                "svd": "SVD/R7KA8P1AD.svd",
+                "unit": 0
+            },
+            {
+                "address": null,
+                "ap": {
+                    "Index": 0
+                },
+                "core": "CortexM33",
+                "default_reset_sequence": null,
+                "dp": 0,
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "name": "CPU1",
+                "svd": "SVD/R7KA8P1AD.svd",
+                "unit": 0
+            }
+        ],
+        "sub_family": "RA8P1_1M_DualCore",
+        "vendor": "Renesas:117"
     }
 }

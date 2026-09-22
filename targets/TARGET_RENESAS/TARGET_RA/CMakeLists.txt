@@ -6,6 +6,8 @@ add_subdirectory(TARGET_RA6E2 EXCLUDE_FROM_ALL)
 add_subdirectory(TARGET_RA8E1 EXCLUDE_FROM_ALL)
 add_subdirectory(TARGET_RA6M3 EXCLUDE_FROM_ALL)
 add_subdirectory(TARGET_RA4T1 EXCLUDE_FROM_ALL)
+add_subdirectory(TARGET_RA6M5 EXCLUDE_FROM_ALL)
+add_subdirectory(TARGET_RA8P1 EXCLUDE_FROM_ALL)
 
 add_library(mbed-renesas-ra INTERFACE)
 
@@ -52,6 +54,7 @@ target_sources(mbed-renesas-ra
         spi_api.c
         i2c_api.c
         can_api.c
+        qspi_api.c
         reset_reason.c
         pinmap.c
         mbed_overrides.cpp

@@ -80,9 +80,10 @@ PERIPHERAL_RULES = [
     # --- IRQ ---
     {
         "array_name": "PinMap_IRQ",
-        # Compatible with "IRQ0: IRQ3-DS" (old format) and "IRQ: IRQ3"
-        # (new format, no number before the colon)
-        "pattern": r"IRQ\d*: IRQ(\d+)(?:-DS)?",
+        # Compatible with "IRQ0: IRQ3-DS" (old format), "IRQ: IRQ3"
+        # (new format, no number before the colon) and "ICU0: IRQ06"
+        # (newer format, peripheral named ICU, zero-padded IRQ number)
+        "pattern": r"(?:IRQ\d*|ICU\d*): IRQ(\d+)(?:-DS)?",
         "pin_mode": "RA_PIN_MODE_IRQ",
         "pull": "RA_PIN_PULL_NONE",
         "peripheral_sel": 0,
@@ -186,6 +187,61 @@ PERIPHERAL_RULES = [
         "periph_sel_macro": "IOPORT_PERIPHERAL_CAN",
         "has_channel": False,
         "speed": "RA_PIN_SPEED_HS_HIGH",
+    },
+    # --- QSPI (QSPI0: QSPCLK / QSSL / QIO0..QIO3) ---
+    {
+        "array_name": "PinMap_QSPI_DATA0",
+        "pattern": r"QSPI(\d+): QIO0",
+        "pin_mode": "RA_PIN_MODE_PERIPHERAL_PP",
+        "pull": "RA_PIN_PULL_NONE",
+        "periph_sel_macro": "IOPORT_PERIPHERAL_QSPI",
+        "has_channel": False,
+        "speed": "RA_PIN_SPEED_HIGH",
+    },
+    {
+        "array_name": "PinMap_QSPI_DATA1",
+        "pattern": r"QSPI(\d+): QIO1",
+        "pin_mode": "RA_PIN_MODE_PERIPHERAL_PP",
+        "pull": "RA_PIN_PULL_NONE",
+        "periph_sel_macro": "IOPORT_PERIPHERAL_QSPI",
+        "has_channel": False,
+        "speed": "RA_PIN_SPEED_HIGH",
+    },
+    {
+        "array_name": "PinMap_QSPI_DATA2",
+        "pattern": r"QSPI(\d+): QIO2",
+        "pin_mode": "RA_PIN_MODE_PERIPHERAL_PP",
+        "pull": "RA_PIN_PULL_NONE",
+        "periph_sel_macro": "IOPORT_PERIPHERAL_QSPI",
+        "has_channel": False,
+        "speed": "RA_PIN_SPEED_HIGH",
+    },
+    {
+        "array_name": "PinMap_QSPI_DATA3",
+        "pattern": r"QSPI(\d+): QIO3",
+        "pin_mode": "RA_PIN_MODE_PERIPHERAL_PP",
+        "pull": "RA_PIN_PULL_NONE",
+        "periph_sel_macro": "IOPORT_PERIPHERAL_QSPI",
+        "has_channel": False,
+        "speed": "RA_PIN_SPEED_HIGH",
+    },
+    {
+        "array_name": "PinMap_QSPI_SCLK",
+        "pattern": r"QSPI(\d+): QSPCLK",
+        "pin_mode": "RA_PIN_MODE_PERIPHERAL_PP",
+        "pull": "RA_PIN_PULL_NONE",
+        "periph_sel_macro": "IOPORT_PERIPHERAL_QSPI",
+        "has_channel": False,
+        "speed": "RA_PIN_SPEED_HIGH",
+    },
+    {
+        "array_name": "PinMap_QSPI_SSEL",
+        "pattern": r"QSPI(\d+): QSSL",
+        "pin_mode": "RA_PIN_MODE_PERIPHERAL_PP",
+        "pull": "RA_PIN_PULL_NONE",
+        "periph_sel_macro": "IOPORT_PERIPHERAL_QSPI",
+        "has_channel": False,
+        "speed": "RA_PIN_SPEED_HIGH",
     },
 ]
 
@@ -387,6 +443,8 @@ def process_peripheral(pin_caps: dict, rule: dict, alt_psel: dict = None, exclud
                     periph_name = f"I2C_{periph_num}"
                 elif rule["array_name"].startswith("PinMap_CAN"):
                     periph_name = f"CAN_{periph_num}"
+                elif rule["array_name"].startswith("PinMap_QSPI"):
+                    periph_name = f"QSPI_{periph_num}"
                 elif rule["array_name"].startswith("PinMap_ADC"):
                     periph_name = f"ADC_{periph_num}"
                 elif rule["array_name"].startswith("PinMap_DAC"):
@@ -499,6 +557,12 @@ def generate_peripheral_pins(xml_content: str, output_path: str, debug: bool = F
         ("", "PinMap_I2C_SDA"),
         ("CAN", "PinMap_CAN_RD"),
         ("", "PinMap_CAN_TD"),
+        ("QSPI", "PinMap_QSPI_DATA0"),
+        ("", "PinMap_QSPI_DATA1"),
+        ("", "PinMap_QSPI_DATA2"),
+        ("", "PinMap_QSPI_DATA3"),
+        ("", "PinMap_QSPI_SCLK"),
+        ("", "PinMap_QSPI_SSEL"),
     ]
 
     periph_entries = {}

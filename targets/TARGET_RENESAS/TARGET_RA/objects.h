@@ -35,7 +35,16 @@ struct trng_s {
 #endif
 
 #if DEVICE_ANALOGOUT
-#include "r_dac.h"
+/* The DAC_B peripheral is register incompatible with DAC. The driver API uses
+ * the generic dac_api_t base types (dac_ctrl_t/dac_cfg_t), so only the
+ * instance-specific types are aliased here. */
+#if BSP_PERIPHERAL_DAC_B_PRESENT
+    #include "r_dac_b.h"
+    typedef dac_b_instance_ctrl_t dac_instance_ctrl_t;
+    typedef dac_b_extended_cfg_t dac_extended_cfg_t;
+#else
+    #include "r_dac.h"
+#endif
 struct dac_s {
     uint8_t channel;
     dac_instance_ctrl_t *ctrl;
@@ -90,6 +99,20 @@ struct gpio_irq_s {
 struct flash_s {
     /*  nothing to be stored for now */
     uint32_t dummy;
+};
+#endif
+
+#if DEVICE_QSPI
+struct qspi_s {
+    PinName io0;
+    PinName io1;
+    PinName io2;
+    PinName io3;
+    PinName sclk;
+    PinName ssel;
+    int hz;          /* Current bus frequency in Hz */
+    uint8_t xip_exit_command; /* Continuous-read exit value (qspi_xip.h) */
+    bool xip_active;          /* True while XIP mode is entered */
 };
 #endif
 
@@ -161,8 +184,18 @@ struct spi_s {
 
 #if DEVICE_I2C
 /* Same pattern as SPI: the IIC_B driver is reached through the generic
- * i2c_master_api_t interface (p_api), so only types are aliased here. */
-#if BSP_PERIPHERAL_IIC_B_PRESENT
+ * i2c_master_api_t interface (p_api), so only types are aliased here.
+ * A project that configures its I2C stacks on the classic IIC peripheral
+ * (e.g. RA8P1) does not ship r_iic_b_master_cfg.h, so probe for it. */
+#if defined(__has_include)
+#if __has_include("r_iic_b_master_cfg.h")
+#define MBED_RA_USE_IIC_B_MASTER 1
+#endif
+#elif BSP_PERIPHERAL_IIC_B_PRESENT
+#define MBED_RA_USE_IIC_B_MASTER 1
+#endif
+
+#if MBED_RA_USE_IIC_B_MASTER
     #include "r_iic_b_master.h"
     typedef iic_b_master_extended_cfg_t   i2c_extended_cfg_t;
     typedef iic_b_master_instance_ctrl_t  i2c_instance_ctrl_t;

@@ -23,6 +23,9 @@ extern const i2c_master_instance_t g_i2c_master0;
 #if (BSP_FEATURE_IIC_VALID_CHANNEL_MASK & 2) != 0
 extern const i2c_master_instance_t g_i2c_master1;
 #endif
+#if (BSP_FEATURE_IIC_VALID_CHANNEL_MASK & 4) != 0
+extern const i2c_master_instance_t g_i2c_master2;
+#endif
 extern const ioport_instance_t g_ioport;
 
 /* Timeout for one byte transferred on the bus, in microseconds.  A byte takes about 90 us
@@ -39,6 +42,9 @@ static const i2c_master_instance_t *ra_i2c_instance_from_channel(I2CName ch)
         case I2C_0: return &g_i2c_master0;
 #if (BSP_FEATURE_IIC_VALID_CHANNEL_MASK & 2) != 0
         case I2C_1: return &g_i2c_master1;
+#endif
+#if (BSP_FEATURE_IIC_VALID_CHANNEL_MASK & 4) != 0
+        case I2C_2: return &g_i2c_master2;
 #endif
         default:    return NULL;
     }

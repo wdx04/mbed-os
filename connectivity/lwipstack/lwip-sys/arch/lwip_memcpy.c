@@ -30,8 +30,8 @@ __attribute__((naked)) void thumb2_memcpy(void* pDest, const void* pSource, size
 
         // Copy 16 bytes at a time first.
         "    lsrs    r3, r2, #4\n"
-        "    beq.n   2$\n"
-        "1$: ldr     r12, [r1], #4\n"
+        "    beq.n   .Lmc_2\n"
+        ".Lmc_1: ldr     r12, [r1], #4\n"
         "    str     r12, [r0], #4\n"
         "    ldr     r12, [r1], #4\n"
         "    str     r12, [r0], #4\n"
@@ -40,19 +40,19 @@ __attribute__((naked)) void thumb2_memcpy(void* pDest, const void* pSource, size
         "    ldr     r12, [r1], #4\n"
         "    str     r12, [r0], #4\n"
         "    subs    r3, #1\n"
-        "    bne     1$\n"
+        "    bne     .Lmc_1\n"
 
         // Copy byte by byte for what is left.
-        "2$:\n"
+        ".Lmc_2:\n"
         "    ands    r3, r2, #0xf\n"
-        "    beq.n   4$\n"
-        "3$: ldrb    r12, [r1], #1\n"
+        "    beq.n   .Lmc_4\n"
+        ".Lmc_3: ldrb    r12, [r1], #1\n"
         "    strb    r12, [r0], #1\n"
         "    subs    r3, #1\n"
-        "    bne     3$\n"
+        "    bne     .Lmc_3\n"
 
         // Return to caller.
-        "4$: bx      lr\n"
+        ".Lmc_4: bx      lr\n"
     );
 }
 

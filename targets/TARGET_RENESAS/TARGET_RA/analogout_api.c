@@ -5,9 +5,18 @@
 #include "analogout_api.h"
 #include "pinmap.h"
 #include "mbed_assert.h"
-#include "r_dac.h"
-#include "r_dac_api.h"
+#include "objects.h"
 #include "PeripheralPins.h"
+
+#if BSP_PERIPHERAL_DAC_B_PRESENT
+#define DAC_OPEN   R_DAC_B_Open
+#define DAC_WRITE  R_DAC_B_Write
+#define DAC_START  R_DAC_B_Start
+#else
+#define DAC_OPEN   R_DAC_Open
+#define DAC_WRITE  R_DAC_Write
+#define DAC_START  R_DAC_Start
+#endif
 
 static dac_instance_ctrl_t dac_ctrls[2];
 
@@ -23,22 +32,28 @@ void analogout_init(dac_t *obj, PinName pin)
 
     pinmap_pinout(pin, PinMap_DAC);
 
+#if BSP_PERIPHERAL_DAC_B_PRESENT
+    obj->ext_cfg.internal_output_enabled = false;
+    obj->ext_cfg.data_format = DAC_DATA_FORMAT_FLUSH_RIGHT;
+    obj->ext_cfg.vrefh = DAC_B_VREFH_NORMAL;
+#else
     obj->ext_cfg.enable_charge_pump = true;
     obj->ext_cfg.output_amplifier_enabled = true;
     obj->ext_cfg.internal_output_enabled = false;
     obj->ext_cfg.data_format = DAC_DATA_FORMAT_FLUSH_RIGHT;
     obj->ext_cfg.ref_volt_sel = DAC_VREF_VREFH_VREFL;
+#endif
 
     obj->cfg.channel = ch;
     obj->cfg.ad_da_synchronized = false;
     obj->cfg.p_extend = &obj->ext_cfg;
 
-    R_DAC_Open(obj->ctrl, &obj->cfg);
+    DAC_OPEN(obj->ctrl, &obj->cfg);
 
     obj->last_value = 0;
-    R_DAC_Write(obj->ctrl, 0);
+    DAC_WRITE(obj->ctrl, 0);
 
-    R_DAC_Start(obj->ctrl);
+    DAC_START(obj->ctrl);
 }
 
 void analogout_free(dac_t *obj)
@@ -51,7 +66,7 @@ void analogout_write_u16(dac_t *obj, uint16_t value)
 
     uint16_t dac_val = value >> 4;
 
-    R_DAC_Write(obj->ctrl, dac_val);
+    DAC_WRITE(obj->ctrl, dac_val);
 }
 
 uint16_t analogout_read_u16(dac_t *obj)

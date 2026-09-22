@@ -208,14 +208,22 @@ SECTIONS
         _ebss = .;
     } > RAM
 
-    .heap (COPY):
+    .heap (NOLOAD) :
     {
-        __end__ = .;
-        PROVIDE(end = .);
         *(.heap*)
-        . = ORIGIN(RAM) + LENGTH(RAM) - STACK_SIZE;
-        __HeapLimit = .;
     } > RAM
+
+    /* Define the heap bounds with plain symbol assignments instead of
+     * advancing the location counter inside the .heap output section.
+     * The ATfE (LLVM lld) linker does not give an output section that
+     * contains no input sections the SHF_ALLOC flag, so it would be placed
+     * at address 0 (making __end__ = 0 and breaking _sbrk, which starts
+     * the heap at __end__).  Additionally, the (COPY) type together with
+     * advancing the location counter to the top of RAM physically emits
+     * hundreds of MB of zeros into the ELF file. */
+    __end__ = __bss_end__;
+    PROVIDE(end = __end__);
+    __HeapLimit = ORIGIN(RAM) + LENGTH(RAM) - STACK_SIZE;
 
     /* .stack_dummy section doesn't contains any symbols. It is only
      * used for linker to calculate size of stack sections, and assign

@@ -339,6 +339,16 @@ void pwmout_pulsewidth_ms(pwmout_t *obj, int ms)
     pwmout_pulsewidth_us(obj, ms * 1000);
 }
 
+int pwmout_read_period_us(pwmout_t *obj)
+{
+    timer_info_t info;
+    fsp_err_t err = obj->p_timer->p_api->infoGet(obj->p_timer->p_ctrl, &info);
+    MBED_ASSERT(FSP_SUCCESS == err);
+
+    int period_us = ((uint64_t)obj->period_counts) * 1000000ULL / info.clock_frequency;
+    return period_us;
+}
+
 const PinMap *pwmout_pinmap()
 {
     return PinMap_PWM;
