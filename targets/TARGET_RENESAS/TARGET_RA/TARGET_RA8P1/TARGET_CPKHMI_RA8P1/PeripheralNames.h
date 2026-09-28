@@ -122,6 +122,10 @@ typedef enum {
     CAN_1,
 } CANName;
 
+typedef enum {
+    QSPI_0 = 0, /* OSPI-B unit 0, device select 0 (XIP window at 0x80000000) */
+} QSPIName;
+
 
 #if defined(MBED_CONF_TARGET_STDIO_UART_TX)
 #define STDIO_UART_TX MBED_CONF_TARGET_STDIO_UART_TX

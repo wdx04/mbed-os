@@ -46,11 +46,29 @@ typedef enum {
     P11_0 = 0x0B00, P11_1, P11_2, P11_3, P11_4, P11_5, P11_6, P11_7, P11_8, P11_9, P11_10, P11_11, P11_12, P11_13, P11_14, P11_15,
     P12_0 = 0x0C00, P12_1, P12_2, P12_3, P12_4, P12_5, P12_6, P12_7, P12_8, P12_9, P12_10, P12_11, P12_12, P12_13, P12_14, P12_15,
     P13_0 = 0x0D00, P13_1, P13_2, P13_3, P13_4, P13_5, P13_6, P13_7, P13_8, P13_9, P13_10, P13_11, P13_12, P13_13, P13_14, P13_15,
-
     // mbed Pin Names
 #define LED1 P1_10
 #define BUTTON0 P3_3
 #define BUTTON1 P2_1
+
+    /* W25Q256JVEQ QSPI flash on OSPI-B unit 0 / device 0 (signal mapping
+     * from the official qspi_flash_cpkhmi_ra8p1_ep demo). */
+#define QSPI_FLASH1_IO0 P1_0
+#define QSPI_FLASH1_IO1 P8_3
+#define QSPI_FLASH1_IO2 P1_3
+#define QSPI_FLASH1_IO3 P1_1
+#define QSPI_FLASH1_SCK P8_8
+#define QSPI_FLASH1_CSN P1_7
+
+    /* QSPI XIP window (qspi_xip.h): OSPI-B maps device select 0 at
+     * 0x80000000; window size is the 32 MB W25Q256JVEQ fitted on this
+     * board. Only the window mapping is supported - the XSPI standard SPI
+     * frame format has no mode/alternate byte phase, so flash
+     * continuous-read ("true XIP") cannot be entered. With the flash in
+     * 4-byte addressing mode, use the 4-byte read opcodes (13h/0Ch/5Ch/BCh/
+     * 6Ch/ECh) as the qspi_xip_enter() read_command override. */
+#define QSPI_XIP_WINDOW_BASE 0x80000000UL
+#define QSPI_XIP_WINDOW_SIZE 0x02000000UL
 
     /* UART on JLINK OB */
     CONSOLE_TX = P2_9,

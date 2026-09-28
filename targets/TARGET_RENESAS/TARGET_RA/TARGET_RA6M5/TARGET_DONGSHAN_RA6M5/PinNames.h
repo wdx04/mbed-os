@@ -51,13 +51,20 @@ typedef enum {
     CONSOLE_TX = P6_13,
     CONSOLE_RX = P6_14,
 
-    // QSPI Flash (W25Q64JV)
+ // QSPI Flash (W25Q64JV)
     QSPI_FLASH_IO0 = P3_7,
     QSPI_FLASH_IO1 = P3_8,
     QSPI_FLASH_IO2 = P3_9,
     QSPI_FLASH_IO3 = P3_10,
     QSPI_FLASH_SCLK = P3_5,
     QSPI_FLASH_SSEL = P3_6,
+
+/* QSPI memory-mapped window. The window location and size are properties of
+ * the board (controller channel + fitted flash device), so boards override
+ * these in their PinNames.h; the defaults below describe the legacy RA QSPI
+ * peripheral (one 64MB bank at a time, see R_QSPI BankSet). */
+#define QSPI_XIP_WINDOW_BASE    0x60000000UL
+#define QSPI_XIP_WINDOW_SIZE    0x04000000UL
 
     // Not connected
     NC = (int)0xFFFFFFFF

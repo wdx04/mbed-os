@@ -8895,6 +8895,12 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
         "public": true,
         "device_name": "R7KA8P1KF",
         "image_url": "https://github.com/renesas/cpk_examples/blob/main/cpkhmi_ra8p1/docs/images/01_overview/cpkhmi_ra8p1_top.png",
+        "device_has_add": [
+            "QSPI"
+        ],
+        "components_add": [
+            "QSPIF"
+        ],
         "overrides": {
             "console-uart": true,
             "console-rtt": false

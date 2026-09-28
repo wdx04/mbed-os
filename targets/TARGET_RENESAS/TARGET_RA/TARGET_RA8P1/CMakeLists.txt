@@ -50,6 +50,7 @@ target_sources(mbed-ra8p1
 		../ra/fsp/src/r_lpm/r_lpm.c
 		../ra/fsp/src/r_lvd/r_lvd.c
 		../ra/fsp/src/r_mram/r_mram.c
+		../ra/fsp/src/r_ospi_b/r_ospi_b.c
 		../ra/fsp/src/r_poeg/r_poeg.c
 		../ra/fsp/src/r_rtc/r_rtc.c
 		../ra/fsp/src/r_sdhi/r_sdhi.c

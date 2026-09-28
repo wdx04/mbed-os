@@ -50,10 +50,6 @@
 extern "C" {
 #endif
 
-/* QSPI memory-mapped window (one 64MB bank at a time, see R_QSPI BankSet). */
-#define QSPI_XIP_WINDOW_BASE    0x60000000UL
-#define QSPI_XIP_WINDOW_SIZE    0x04000000UL
-
 /* Selects the serial read command the controller issues for window accesses.
  * Values match the hardware SFMRM encoding; the default opcode of each mode
  * is given in brackets and can be overridden with read_command. */
