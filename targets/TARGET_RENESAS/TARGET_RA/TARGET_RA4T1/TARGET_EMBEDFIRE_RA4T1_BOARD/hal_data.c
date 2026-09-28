@@ -1807,7 +1807,7 @@ const adc_window_cfg_t g_adc0_window_cfg =
 #endif
 const adc_channel_cfg_t g_adc0_channel_cfg =
 {
-    .scan_mask           = ADC_MASK_CHANNEL_0 | ADC_MASK_CHANNEL_1 | ADC_MASK_CHANNEL_2 | ADC_MASK_CHANNEL_3 | ADC_MASK_CHANNEL_4 | ADC_MASK_CHANNEL_11 | ADC_MASK_CHANNEL_12 | ADC_MASK_CHANNEL_13 |  0,
+    .scan_mask           = ADC_MASK_CHANNEL_0 | ADC_MASK_CHANNEL_1 | ADC_MASK_CHANNEL_2 | ADC_MASK_CHANNEL_4 | ADC_MASK_CHANNEL_5 | ADC_MASK_CHANNEL_6 | ADC_MASK_CHANNEL_8 | ADC_MASK_CHANNEL_11 | ADC_MASK_CHANNEL_12 | ADC_MASK_CHANNEL_13 | ADC_MASK_CHANNEL_16 |  0,
     .scan_mask_group_b   =  0,
     .priority_group_a    = ADC_GROUP_A_PRIORITY_OFF,
     .add_mask            =  0,

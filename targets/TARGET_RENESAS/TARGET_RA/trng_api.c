@@ -57,7 +57,7 @@ void trng_free(trng_t *obj)
     (void)obj;
 }
 
-#elif defined(TARGET_RA6E2) || defined(TARGET_RA4E1)
+#elif defined(TARGET_RA6E2) || defined(TARGET_RA4T1)
 
 // In RA6E2 and RA4T1, TRNG is standalone and only accessible via registers
 

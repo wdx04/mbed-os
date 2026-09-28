@@ -21,7 +21,7 @@ set(PYOCD_CLOCK_SPEED 4000k)
 # Config options for JLINK
 # -------------------------------------------------------------
 
-set(JLINK_UPLOAD_ENABLED FALSE)
+set(JLINK_UPLOAD_ENABLED TRUE)
 set(JLINK_CPU_NAME R7FA4T1BB)
 set(JLINK_CLOCK_SPEED 4000)
 set(JLINK_UPLOAD_INTERFACE SWD)
