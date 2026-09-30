@@ -169,10 +169,16 @@ struct spi_s {
     bool                is_sci;    /* True if this instance uses the R_SCI_SPI driver */
     SPIName             channel;   /* SPI_0 / SPI_1 / SPI_SCI0 */
     uint32_t            hz;        /* Current frequency */
-    uint8_t             bits;      /* Bits per frame (usually 8) */
+    uint8_t             bits;      /* Bits per frame (8/16/32; SCI channels are fixed to 8) */
     uint8_t             mode;      /* SPI mode 0..3 */
     bool                has_mosi;  /* Has MOSI pin */
     bool                has_miso;  /* Has MISO pin */
+    volatile bool       sync_active;     /* A synchronous transfer is in flight; routes the FSP callback */
+#if DEVICE_SPI_ASYNCH
+    volatile bool       async_active;    /* An spi_master_transfer() transfer is in flight */
+    volatile uint32_t   async_result;    /* mbed event code delivered by spi_irq_handler_asynch() */
+    uint32_t            async_handler;   /* CThunk entry to invoke (SPI::irq_handler_asynch) on completion */
+#endif
 #if MBED_CONF_RTOS_PRESENT
     osSemaphoreId_t     semaphoreId;
     osRtxSemaphore_t    semaphoreMem;

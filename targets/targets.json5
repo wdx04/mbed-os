@@ -8882,7 +8882,8 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
         "core": "Cortex-M85",
         "device_has_add": [
             "CAN",
-            "CAN_FD"
+            "CAN_FD",
+            "SPI_ASYNCH"
         ],
         "extra_labels_add": [
             "RA8P1"
