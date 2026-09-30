@@ -6,9 +6,57 @@
 #include "common_data.h"
 #include "mbed_error.h"
 
-#if defined(TARGET_RA4E1) || defined(TARGET_RA6M3) || defined(TARGET_RA6M5)
+#if defined(TARGET_RA4E1)
 
-// In RA4E1, RA6M3 and RA6M5, TRNG is part of SCE
+// In RA4E1, TRNG is part of SCE9 protected mode
+
+void trng_init(trng_t *obj)
+{
+    (void)obj;
+    fsp_err_t err = FSP_SUCCESS;
+    err = R_SCE_Open(&sce_ctrl, &sce_cfg);
+    if (err != FSP_SUCCESS)
+    {
+        mbed_error(MBED_ERROR_CODE_OPEN_FAILED, "Failed to open SCE for random number generator", 0, MBED_FILENAME, __LINE__);
+    }
+}
+
+int trng_get_bytes(trng_t *obj, uint8_t *output, size_t length, size_t *actual)
+{
+    (void)obj;
+
+    uint32_t rnd[4];
+    size_t generated = 0;
+
+    while (generated < length)
+    {
+        fsp_err_t err = R_SCE_RandomNumberGenerate(rnd);
+
+        if (err != FSP_SUCCESS)
+        {
+            *actual = generated;
+            return -1;
+        }
+
+        size_t remain = length - generated;
+        size_t copy_len = (remain >= 16) ? 16 : remain;
+
+        memcpy(output + generated, rnd, copy_len);
+        generated += copy_len;
+    }
+
+    *actual = generated;
+    return 0;
+}
+
+void trng_free(trng_t *obj)
+{
+    (void)obj;
+}
+
+#elif defined(TARGET_RA6M3) || defined(TARGET_RA6M5)
+
+// in RA6M3 and RA6M5, TRNG is part of SCE
 
 fsp_err_t HW_SCE_McuSpecificInit(void);
 fsp_err_t HW_SCE_RNG_Read (uint32_t * OutData_Text);
@@ -17,7 +65,7 @@ void trng_init(trng_t *obj)
 {
     (void)obj;
     fsp_err_t err = FSP_SUCCESS;
-    err = HW_SCE_McuSpecificInit();;
+    err = HW_SCE_McuSpecificInit();
     if (err != FSP_SUCCESS)
     {
         mbed_error(MBED_ERROR_CODE_OPEN_FAILED, "Failed to open SCE for random number generator", 0, MBED_FILENAME, __LINE__);
