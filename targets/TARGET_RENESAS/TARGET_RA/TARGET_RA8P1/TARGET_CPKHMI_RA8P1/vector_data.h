@@ -41,8 +41,10 @@ void sdhimmc_card_isr(void);
         #define GPT1_COUNTER_OVERFLOW_IRQn          ((IRQn_Type) 1) /* GPT1 COUNTER OVERFLOW (Overflow) */
         #define VECTOR_NUMBER_GPT1_CAPTURE_COMPARE_A ((IRQn_Type) 2) /* GPT1 CAPTURE COMPARE A (Capture/Compare match A) */
         #define GPT1_CAPTURE_COMPARE_A_IRQn          ((IRQn_Type) 2) /* GPT1 CAPTURE COMPARE A (Capture/Compare match A) */
-        #define VECTOR_NUMBER_ICU_IRQ0 ((IRQn_Type) 3) /* ICU IRQ0 (External pin interrupt 0) */
-        #define ICU_IRQ0_IRQn          ((IRQn_Type) 3) /* ICU IRQ0 (External pin interrupt 0) */
+        /* No VECTOR_NUMBER_ICU_IRQn definitions: the ICU vector table entries
+         * reserved for external IRQs (3, 8-14, 17, 22-24) form a dynamic slot
+         * pool and are linked to an IRQ channel at runtime through IELSR by
+         * TARGET_RA8P1/gpio_irq_device.c. */
         #define VECTOR_NUMBER_IIC0_RXI ((IRQn_Type) 4) /* IIC0 RXI (Receive data full) */
         #define IIC0_RXI_IRQn          ((IRQn_Type) 4) /* IIC0 RXI (Receive data full) */
         #define VECTOR_NUMBER_IIC0_TXI ((IRQn_Type) 5) /* IIC0 TXI (Transmit data empty) */
@@ -51,26 +53,6 @@ void sdhimmc_card_isr(void);
         #define IIC0_TEI_IRQn          ((IRQn_Type) 6) /* IIC0 TEI (Transmit end) */
         #define VECTOR_NUMBER_IIC0_ERI ((IRQn_Type) 7) /* IIC0 ERI (Transfer error) */
         #define IIC0_ERI_IRQn          ((IRQn_Type) 7) /* IIC0 ERI (Transfer error) */
-        #define VECTOR_NUMBER_ICU_IRQ1 ((IRQn_Type) 8) /* ICU IRQ1 (External pin interrupt 1) */
-        #define ICU_IRQ1_IRQn          ((IRQn_Type) 8) /* ICU IRQ1 (External pin interrupt 1) */
-        #define VECTOR_NUMBER_ICU_IRQ2 ((IRQn_Type) 9) /* ICU IRQ2 (External pin interrupt 2) */
-        #define ICU_IRQ2_IRQn          ((IRQn_Type) 9) /* ICU IRQ2 (External pin interrupt 2) */
-        #define VECTOR_NUMBER_ICU_IRQ3 ((IRQn_Type) 10) /* ICU IRQ3 (External pin interrupt 3) */
-        #define ICU_IRQ3_IRQn          ((IRQn_Type) 10) /* ICU IRQ3 (External pin interrupt 3) */
-        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 11) /* ICU IRQ4 (External pin interrupt 4) */
-        #define ICU_IRQ4_IRQn          ((IRQn_Type) 11) /* ICU IRQ4 (External pin interrupt 4) */
-        #define VECTOR_NUMBER_ICU_IRQ5 ((IRQn_Type) 12) /* ICU IRQ5 (External pin interrupt 5) */
-        #define ICU_IRQ5_IRQn          ((IRQn_Type) 12) /* ICU IRQ5 (External pin interrupt 5) */
-        #define VECTOR_NUMBER_ICU_IRQ6 ((IRQn_Type) 13) /* ICU IRQ6 (External pin interrupt 6) */
-        #define ICU_IRQ6_IRQn          ((IRQn_Type) 13) /* ICU IRQ6 (External pin interrupt 6) */
-        #define VECTOR_NUMBER_ICU_IRQ7 ((IRQn_Type) 14) /* ICU IRQ7 (External pin interrupt 7) */
-        #define ICU_IRQ7_IRQn          ((IRQn_Type) 14) /* ICU IRQ7 (External pin interrupt 7) */
-        #define VECTOR_NUMBER_ICU_IRQ8 ((IRQn_Type) 15) /* ICU IRQ8 (External pin interrupt 8) */
-        #define ICU_IRQ8_IRQn          ((IRQn_Type) 15) /* ICU IRQ8 (External pin interrupt 8) */
-        #define VECTOR_NUMBER_ICU_IRQ9 ((IRQn_Type) 16) /* ICU IRQ9 (External pin interrupt 9) */
-        #define ICU_IRQ9_IRQn          ((IRQn_Type) 16) /* ICU IRQ9 (External pin interrupt 9) */
-        #define VECTOR_NUMBER_ICU_IRQ13 ((IRQn_Type) 17) /* ICU IRQ13 (External pin interrupt 13) */
-        #define ICU_IRQ13_IRQn          ((IRQn_Type) 17) /* ICU IRQ13 (External pin interrupt 13) */
         #define VECTOR_NUMBER_SPI0_RXI ((IRQn_Type) 18) /* SPI0 RXI (Receive buffer full) */
         #define SPI0_RXI_IRQn          ((IRQn_Type) 18) /* SPI0 RXI (Receive buffer full) */
         #define VECTOR_NUMBER_SPI0_TEI ((IRQn_Type) 19) /* SPI0 TEI (Transmission complete event) */
@@ -79,16 +61,6 @@ void sdhimmc_card_isr(void);
         #define SPI0_ERI_IRQn          ((IRQn_Type) 20) /* SPI0 ERI (Error) */
         #define VECTOR_NUMBER_DMAC0_INT ((IRQn_Type) 21) /* DMAC0 INT (DMAC0 transfer end) */
         #define DMAC0_INT_IRQn          ((IRQn_Type) 21) /* DMAC0 INT (DMAC0 transfer end) */
-        #define VECTOR_NUMBER_ICU_IRQ10 ((IRQn_Type) 22) /* ICU IRQ10 (External pin interrupt 10) */
-        #define ICU_IRQ10_IRQn          ((IRQn_Type) 22) /* ICU IRQ10 (External pin interrupt 10) */
-        #define VECTOR_NUMBER_ICU_IRQ11 ((IRQn_Type) 23) /* ICU IRQ11 (External pin interrupt 11) */
-        #define ICU_IRQ11_IRQn          ((IRQn_Type) 23) /* ICU IRQ11 (External pin interrupt 11) */
-        #define VECTOR_NUMBER_ICU_IRQ12 ((IRQn_Type) 24) /* ICU IRQ12 (External pin interrupt 12) */
-        #define ICU_IRQ12_IRQn          ((IRQn_Type) 24) /* ICU IRQ12 (External pin interrupt 12) */
-        #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 25) /* ICU IRQ14 (External pin interrupt 14) */
-        #define ICU_IRQ14_IRQn          ((IRQn_Type) 25) /* ICU IRQ14 (External pin interrupt 14) */
-        #define VECTOR_NUMBER_ICU_IRQ15 ((IRQn_Type) 26) /* ICU IRQ15 (External pin interrupt 15) */
-        #define ICU_IRQ15_IRQn          ((IRQn_Type) 26) /* ICU IRQ15 (External pin interrupt 15) */
         #define VECTOR_NUMBER_SCI0_RXI ((IRQn_Type) 27) /* SCI0 RXI (Receive data full) */
         #define SCI0_RXI_IRQn          ((IRQn_Type) 27) /* SCI0 RXI (Receive data full) */
         #define VECTOR_NUMBER_SCI0_TXI ((IRQn_Type) 28) /* SCI0 TXI (Transmit data empty) */
@@ -205,8 +177,6 @@ void sdhimmc_card_isr(void);
         #define SCI8_TEI_IRQn          ((IRQn_Type) 83) /* SCI8 TEI (Transmit end) */
         #define VECTOR_NUMBER_SCI8_ERI ((IRQn_Type) 84) /* SCI8 ERI (Receive error) */
         #define SCI8_ERI_IRQn          ((IRQn_Type) 84) /* SCI8 ERI (Receive error) */
-        #define VECTOR_NUMBER_ICU_IRQ29 ((IRQn_Type) 85) /* ICU IRQ29 (External pin interrupt 29) */
-        #define ICU_IRQ29_IRQn          ((IRQn_Type) 85) /* ICU IRQ29 (External pin interrupt 29) */
         #define VECTOR_NUMBER_IIC2_RXI ((IRQn_Type) 86) /* IIC2 RXI (Receive data full) */
         #define IIC2_RXI_IRQn          ((IRQn_Type) 86) /* IIC2 RXI (Receive data full) */
         #define VECTOR_NUMBER_IIC2_TXI ((IRQn_Type) 87) /* IIC2 TXI (Transmit data empty) */

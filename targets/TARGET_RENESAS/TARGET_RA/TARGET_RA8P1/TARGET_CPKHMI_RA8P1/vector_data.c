@@ -1,5 +1,11 @@
 /* generated vector source file - do not edit */
         #include "bsp_api.h"
+        /* The ICU supports 32 external IRQ channels but only 12 vector table
+         * entries are reserved for them. The entries below form the external
+         * IRQ slot pool: each slot is linked to an ICU IRQ channel at runtime
+         * through IELSR by the allocator in TARGET_RA8P1/gpio_irq_device.c,
+         * so their g_interrupt_event_link_select entries stay 0 (unlinked).
+         * The pool slots are: 3, 8, 9, 10, 11, 12, 13, 14, 17, 22, 23, 24. */
         /* Do not build these data structures if no interrupts are currently allocated because IAR will have build errors. */
         #if VECTOR_DATA_IRQ_COUNT > 0
         BSP_DONT_REMOVE const fsp_vector_t g_vector_table[BSP_ICU_VECTOR_NUM_ENTRIES] BSP_PLACE_IN_SECTION(BSP_SECTION_APPLICATION_VECTORS) =
@@ -7,30 +13,26 @@
                         [0] = rtc_carry_isr, /* RTC CARRY (Carry interrupt) */
             [1] = gpt_counter_overflow_isr, /* GPT1 COUNTER OVERFLOW (Overflow) */
             [2] = gpt_capture_compare_a_isr, /* GPT1 CAPTURE COMPARE A (Capture/Compare match A) */
-            [3] = r_icu_isr, /* ICU IRQ0 (External pin interrupt 0) */
+            [3] = r_icu_isr, /* External IRQ slot 0 (dynamically linked to any ICU IRQ channel) */
             [4] = iic_master_rxi_isr, /* IIC0 RXI (Receive data full) */
             [5] = iic_master_txi_isr, /* IIC0 TXI (Transmit data empty) */
             [6] = iic_master_tei_isr, /* IIC0 TEI (Transmit end) */
             [7] = iic_master_eri_isr, /* IIC0 ERI (Transfer error) */
-            [8] = r_icu_isr, /* ICU IRQ1 (External pin interrupt 1) */
-            [9] = r_icu_isr, /* ICU IRQ2 (External pin interrupt 2) */
-            [10] = r_icu_isr, /* ICU IRQ3 (External pin interrupt 3) */
-            [11] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
-            [12] = r_icu_isr, /* ICU IRQ5 (External pin interrupt 5) */
-            [13] = r_icu_isr, /* ICU IRQ6 (External pin interrupt 6) */
-            [14] = r_icu_isr, /* ICU IRQ7 (External pin interrupt 7) */
-            [15] = r_icu_isr, /* ICU IRQ8 (External pin interrupt 8) */
-            [16] = r_icu_isr, /* ICU IRQ9 (External pin interrupt 9) */
-            [17] = r_icu_isr, /* ICU IRQ13 (External pin interrupt 13) */
+            [8] = r_icu_isr, /* External IRQ slot 1 (dynamically linked to any ICU IRQ channel) */
+            [9] = r_icu_isr, /* External IRQ slot 2 (dynamically linked to any ICU IRQ channel) */
+            [10] = r_icu_isr, /* External IRQ slot 3 (dynamically linked to any ICU IRQ channel) */
+            [11] = r_icu_isr, /* External IRQ slot 4 (dynamically linked to any ICU IRQ channel) */
+            [12] = r_icu_isr, /* External IRQ slot 5 (dynamically linked to any ICU IRQ channel) */
+            [13] = r_icu_isr, /* External IRQ slot 6 (dynamically linked to any ICU IRQ channel) */
+            [14] = r_icu_isr, /* External IRQ slot 7 (dynamically linked to any ICU IRQ channel) */
+            [17] = r_icu_isr, /* External IRQ slot 8 (dynamically linked to any ICU IRQ channel) */
             [18] = spi_b_rxi_isr, /* SPI0 RXI (Receive buffer full) */
             [19] = spi_b_tei_isr, /* SPI0 TEI (Transmission complete event) */
             [20] = spi_b_eri_isr, /* SPI0 ERI (Error) */
             [21] = dmac_int_isr, /* DMAC0 INT (DMAC0 transfer end) */
-            [22] = r_icu_isr, /* ICU IRQ10 (External pin interrupt 10) */
-            [23] = r_icu_isr, /* ICU IRQ11 (External pin interrupt 11) */
-            [24] = r_icu_isr, /* ICU IRQ12 (External pin interrupt 12) */
-            [25] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
-            [26] = r_icu_isr, /* ICU IRQ15 (External pin interrupt 15) */
+            [22] = r_icu_isr, /* External IRQ slot 9 (dynamically linked to any ICU IRQ channel) */
+            [23] = r_icu_isr, /* External IRQ slot 10 (dynamically linked to any ICU IRQ channel) */
+            [24] = r_icu_isr, /* External IRQ slot 11 (dynamically linked to any ICU IRQ channel) */
             [27] = sci_b_uart_rxi_isr, /* SCI0 RXI (Receive data full) */
             [28] = sci_b_uart_txi_isr, /* SCI0 TXI (Transmit data empty) */
             [29] = sci_b_uart_tei_isr, /* SCI0 TEI (Transmit end) */
@@ -89,7 +91,6 @@
             [82] = sci_b_uart_txi_isr, /* SCI8 TXI (Transmit data empty) */
             [83] = sci_b_uart_tei_isr, /* SCI8 TEI (Transmit end) */
             [84] = sci_b_uart_eri_isr, /* SCI8 ERI (Receive error) */
-            [85] = r_icu_isr, /* ICU IRQ29 (External pin interrupt 29) */
             [86] = iic_master_rxi_isr, /* IIC2 RXI (Receive data full) */
             [87] = iic_master_txi_isr, /* IIC2 TXI (Transmit data empty) */
             [88] = iic_master_tei_isr, /* IIC2 TEI (Transmit end) */
@@ -104,30 +105,16 @@
             [0] = BSP_PRV_VECT_ENUM(EVENT_RTC_CARRY,GROUP0), /* RTC CARRY (Carry interrupt) */
             [1] = BSP_PRV_VECT_ENUM(EVENT_GPT1_COUNTER_OVERFLOW,GROUP1), /* GPT1 COUNTER OVERFLOW (Overflow) */
             [2] = BSP_PRV_VECT_ENUM(EVENT_GPT1_CAPTURE_COMPARE_A,GROUP2), /* GPT1 CAPTURE COMPARE A (Capture/Compare match A) */
-            [3] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ0,GROUP3), /* ICU IRQ0 (External pin interrupt 0) */
+            /* [3],[8]-[14],[17],[22]-[24]: external IRQ slot pool, linked at
+             * runtime by gpio_irq_device.c - left unlinked (0) here. */
             [4] = BSP_PRV_VECT_ENUM(EVENT_IIC0_RXI,GROUP4), /* IIC0 RXI (Receive data full) */
             [5] = BSP_PRV_VECT_ENUM(EVENT_IIC0_TXI,GROUP5), /* IIC0 TXI (Transmit data empty) */
             [6] = BSP_PRV_VECT_ENUM(EVENT_IIC0_TEI,GROUP6), /* IIC0 TEI (Transmit end) */
             [7] = BSP_PRV_VECT_ENUM(EVENT_IIC0_ERI,GROUP7), /* IIC0 ERI (Transfer error) */
-            [8] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ1,GROUP0), /* ICU IRQ1 (External pin interrupt 1) */
-            [9] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ2,GROUP1), /* ICU IRQ2 (External pin interrupt 2) */
-            [10] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ3,GROUP2), /* ICU IRQ3 (External pin interrupt 3) */
-            [11] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ4,GROUP3), /* ICU IRQ4 (External pin interrupt 4) */
-            [12] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ5,GROUP4), /* ICU IRQ5 (External pin interrupt 5) */
-            [13] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ6,GROUP5), /* ICU IRQ6 (External pin interrupt 6) */
-            [14] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ7,GROUP6), /* ICU IRQ7 (External pin interrupt 7) */
-            [15] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ8,GROUP7), /* ICU IRQ8 (External pin interrupt 8) */
-            [16] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ9,GROUP0), /* ICU IRQ9 (External pin interrupt 9) */
-            [17] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ13,GROUP1), /* ICU IRQ13 (External pin interrupt 13) */
             [18] = BSP_PRV_VECT_ENUM(EVENT_SPI0_RXI,GROUP2), /* SPI0 RXI (Receive buffer full) */
             [19] = BSP_PRV_VECT_ENUM(EVENT_SPI0_TEI,GROUP3), /* SPI0 TEI (Transmission complete event) */
             [20] = BSP_PRV_VECT_ENUM(EVENT_SPI0_ERI,GROUP4), /* SPI0 ERI (Error) */
             [21] = BSP_PRV_VECT_ENUM(EVENT_DMAC0_INT,GROUP5), /* DMAC0 INT (DMAC0 transfer end) */
-            [22] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ10,GROUP6), /* ICU IRQ10 (External pin interrupt 10) */
-            [23] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ11,GROUP7), /* ICU IRQ11 (External pin interrupt 11) */
-            [24] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ12,GROUP0), /* ICU IRQ12 (External pin interrupt 12) */
-            [25] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ14,GROUP1), /* ICU IRQ14 (External pin interrupt 14) */
-            [26] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ15,GROUP2), /* ICU IRQ15 (External pin interrupt 15) */
             [27] = BSP_PRV_VECT_ENUM(EVENT_SCI0_RXI,GROUP3), /* SCI0 RXI (Receive data full) */
             [28] = BSP_PRV_VECT_ENUM(EVENT_SCI0_TXI,GROUP4), /* SCI0 TXI (Transmit data empty) */
             [29] = BSP_PRV_VECT_ENUM(EVENT_SCI0_TEI,GROUP5), /* SCI0 TEI (Transmit end) */
@@ -186,7 +173,6 @@
             [82] = BSP_PRV_VECT_ENUM(EVENT_SCI8_TXI,FIXED), /* SCI8 TXI (Transmit data empty) */
             [83] = BSP_PRV_VECT_ENUM(EVENT_SCI8_TEI,FIXED), /* SCI8 TEI (Transmit end) */
             [84] = BSP_PRV_VECT_ENUM(EVENT_SCI8_ERI,FIXED), /* SCI8 ERI (Receive error) */
-            [85] = BSP_PRV_VECT_ENUM(EVENT_ICU_IRQ29,GROUP3), /* ICU IRQ29 (External pin interrupt 29) */
             [86] = BSP_PRV_VECT_ENUM(EVENT_IIC2_RXI,GROUP3), /* IIC2 RXI (Receive data full) */
             [87] = BSP_PRV_VECT_ENUM(EVENT_IIC2_TXI,GROUP4), /* IIC2 TXI (Transmit data empty) */
             [88] = BSP_PRV_VECT_ENUM(EVENT_IIC2_TEI,GROUP5), /* IIC2 TEI (Transmit end) */

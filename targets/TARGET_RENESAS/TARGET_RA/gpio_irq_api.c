@@ -20,6 +20,23 @@ static gpio_irq_t *     s_irq_obj[IRQ_CHANNELS_COUNT] = {0};
 extern icu_instance_ctrl_t * const g_icu_ctrl[IRQ_CHANNELS_COUNT];
 extern const external_irq_cfg_t * const g_icu_cfg[IRQ_CHANNELS_COUNT];
 
+/* Hooks for targets that assign ICU vector table slots to IRQ channels
+ * dynamically (RA8P1: only a few vector entries are reserved for external
+ * IRQs and linked to a channel through IELSR on demand, see
+ * TARGET_RA8P1/gpio_irq_device.c). The default implementations are no-ops:
+ * on targets with a fixed channel-to-vector mapping the generated
+ * configuration is used as-is. */
+__WEAK int ra_gpio_irq_vector_acquire(uint32_t channel)
+{
+    (void)channel;
+    return 0;
+}
+
+__WEAK void ra_gpio_irq_vector_release(uint32_t channel)
+{
+    (void)channel;
+}
+
 void external_irq_callback(external_irq_callback_args_t *p_args)
 {
     uint32_t ch = p_args->channel;
@@ -46,6 +63,11 @@ int gpio_irq_init(gpio_irq_t *obj, PinName pin, gpio_irq_handler handler, uintpt
 
     int irq_channel = pinmap_peripheral(pin, PinMap_IRQ);
     MBED_ASSERT(irq_channel != (int)NC);
+
+    /* Link the channel to a vector table slot reserved for external IRQs
+     * (dynamic allocation on RA8P1, no-op elsewhere). */
+    if (ra_gpio_irq_vector_acquire((uint32_t) irq_channel) != 0)
+        return -1;
 
     int irq_function = pinmap_function(pin, PinMap_IRQ);
     pin_function(pin, irq_function);
@@ -77,6 +99,10 @@ void gpio_irq_free(gpio_irq_t *obj)
 
     R_ICU_ExternalIrqDisable(g_icu_ctrl[ch]);
     R_ICU_ExternalIrqClose(g_icu_ctrl[ch]);
+
+    /* Give the vector table slot of this channel back to the pool
+     * (dynamic allocation on RA8P1, no-op elsewhere). */
+    ra_gpio_irq_vector_release(ch);
 
     obj->pin = NC;
 }

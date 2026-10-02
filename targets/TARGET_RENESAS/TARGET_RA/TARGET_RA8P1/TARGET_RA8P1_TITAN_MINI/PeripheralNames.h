@@ -100,10 +100,22 @@ typedef enum {
     IRQ_13,
     IRQ_14,
     IRQ_15,
-    /* The RA8P1 ICU has 32 external IRQ channels, but the ICU vector table
-     * only has room for a limited number of event links. Only IRQ0-IRQ15 and
-     * IRQ29 (on-board user button) are wired to mbed. */
-    IRQ_29 = 29,
+    IRQ_16,
+    IRQ_17,
+    IRQ_18,
+    IRQ_19,
+    IRQ_20,
+    IRQ_21,
+    IRQ_22,
+    IRQ_23,
+    IRQ_24,
+    IRQ_25,
+    IRQ_26,
+    IRQ_27,
+    IRQ_28,
+    IRQ_29,
+    IRQ_30,
+    IRQ_31,
 } IRQName;
 
 typedef enum {
@@ -139,9 +151,10 @@ typedef enum {
 #endif
 #define STDIO_UART UART_2
 
-/* Highest supported ICU channel number + 1. Channels 16-28 are not wired to
- * the vector table and must not appear in PinMap_IRQ. */
-#define IRQ_CHANNELS_COUNT (30)
+/* Number of ICU external IRQ channels on the RA8P1. Any of the 32 channels
+ * can be used with an InterruptIn; vector table entries are assigned on
+ * demand from a small pool, see TARGET_RA8P1/gpio_irq_device.c. */
+#define IRQ_CHANNELS_COUNT (32)
 #define UART_COUNT (10)
 #define CAN_COUNT  (2)
 
