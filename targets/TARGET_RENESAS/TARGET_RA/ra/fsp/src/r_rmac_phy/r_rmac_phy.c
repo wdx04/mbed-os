@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2026 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -146,11 +146,16 @@ extern bool rmac_phy_target_ics1894_is_support_link_partner_ability(rmac_phy_ins
                                                                     uint32_t                   line_speed_duplex);
 
 #endif
-
 #if (ETHER_PHY_CFG_TARGET_GPY111_ENABLE)
 extern void rmac_phy_target_gpy111_initialize(rmac_phy_instance_ctrl_t * p_instance_ctrl);
 extern bool rmac_phy_target_gpy111_is_support_link_partner_ability(rmac_phy_instance_ctrl_t * p_instance_ctrl,
                                                                    uint32_t                   line_speed_duplex);
+
+#endif
+#if (ETHER_PHY_CFG_TARGET_VSC8541_ENABLE)
+extern void rmac_phy_target_vsc8541_initialize(rmac_phy_instance_ctrl_t * p_instance_ctrl);
+extern bool rmac_phy_target_vsc8541_is_support_link_partner_ability(rmac_phy_instance_ctrl_t * p_instance_ctrl,
+                                                                    uint32_t                   line_speed_duplex);
 
 #endif
 
@@ -164,8 +169,9 @@ static bool rmac_phy_targets_is_support_link_partner_ability(rmac_phy_instance_c
                                                              uint32_t                   line_speed_duplex);
 static uint32_t r_rmac_phy_calculate_mpic(rmac_phy_instance_ctrl_t * p_instance_ctrl, uint32_t line_speed_duplex);
 static uint8_t  r_rmac_phy_get_operation_mode(rmac_phy_instance_ctrl_t * p_instance_ctrl);
-static void     r_rmac_phy_set_operation_mode(uint32_t channel, uint8_t mode);
-static void     r_rmac_phy_set_mii_type_configuration(rmac_phy_instance_ctrl_t * p_instance_ctrl, uint8_t port);
+static void     r_rmac_phy_set_operation_mode(rmac_phy_instance_ctrl_t * p_instance_ctrl, uint32_t channel,
+                                              uint8_t mode);
+static void r_rmac_phy_set_mii_type_configuration(rmac_phy_instance_ctrl_t * p_instance_ctrl, uint8_t port);
 
 /** RMAC_PHY HAL API mapping for Ethernet PHY Controller interface */
 /*LDRA_INSPECTED 27 D This structure must be accessible in user code. It cannot be static. */
@@ -232,7 +238,9 @@ fsp_err_t R_RMAC_PHY_Open (ether_phy_ctrl_t * const p_ctrl, ether_phy_cfg_t cons
                           FSP_ERR_INVALID_MODE);
 
     /* Set the RMAC register address of this channel. */
-    p_instance_ctrl->p_reg_rmac      = (R_RMAC0_Type *) (R_RMAC0_BASE + (RMAC_REG_SIZE * p_cfg->channel));
+    p_instance_ctrl->p_reg_rmac = (R_RMAC0_Type *) (R_RMAC0_BASE + (RMAC_REG_SIZE * p_cfg->channel));
+
+    /* Initialize local advertise bitmap. */
     p_instance_ctrl->local_advertise = 0;
 
     /* Copy default PHY LSI settings. */
@@ -265,8 +273,8 @@ fsp_err_t R_RMAC_PHY_Open (ether_phy_ctrl_t * const p_ctrl, ether_phy_cfg_t cons
             /* Enable frame preemption feature. */
             if (p_extend->frame_preemption_enable)
             {
-                r_rmac_phy_set_operation_mode(i, RMAC_PHY_ETHA_DISABLE_MODE);
-                r_rmac_phy_set_operation_mode(i, RMAC_PHY_ETHA_OPERATION_MODE);
+                r_rmac_phy_set_operation_mode(p_instance_ctrl, i, RMAC_PHY_ETHA_DISABLE_MODE);
+                r_rmac_phy_set_operation_mode(p_instance_ctrl, i, RMAC_PHY_ETHA_OPERATION_MODE);
 
                 p_reg_rmac->MLVC = R_RMAC0_MLVC_PASE_Msk;
                 if (p_extend->easi_irq[i] >= 0)
@@ -275,8 +283,8 @@ fsp_err_t R_RMAC_PHY_Open (ether_phy_ctrl_t * const p_ctrl, ether_phy_cfg_t cons
                     R_BSP_IrqCfgEnable(p_extend->easi_irq[i], p_extend->easi_ipl[i], p_instance_ctrl);
                 }
 
-                r_rmac_phy_set_operation_mode(i, RMAC_PHY_ETHA_DISABLE_MODE);
-                r_rmac_phy_set_operation_mode(i, RMAC_PHY_ETHA_CONFIG_MODE);
+                r_rmac_phy_set_operation_mode(p_instance_ctrl, i, RMAC_PHY_ETHA_DISABLE_MODE);
+                r_rmac_phy_set_operation_mode(p_instance_ctrl, i, RMAC_PHY_ETHA_CONFIG_MODE);
             }
         }
     }
@@ -487,7 +495,7 @@ fsp_err_t R_RMAC_PHY_LinkPartnerAbilityGet (ether_phy_ctrl_t * const p_ctrl,
         line_speed_duplex = ETHER_PHY_LINK_SPEED_100F;
     }
 
-    /* When MII type is RGMII, check also Gigabit Ethernet ability. */
+    /* When MII type is RGMII or GMII, check also Gigabit Ethernet ability. */
     if ((ETHER_PHY_MII_TYPE_RGMII == p_instance_ctrl->p_ether_phy_cfg->mii_type) ||
         (ETHER_PHY_MII_TYPE_GMII == p_instance_ctrl->p_ether_phy_cfg->mii_type))
     {
@@ -520,14 +528,15 @@ fsp_err_t R_RMAC_PHY_LinkPartnerAbilityGet (ether_phy_ctrl_t * const p_ctrl,
     if (mpic != p_reg_rmac->MPIC)
     {
         /* Set ETHA to CONFIG mode */
-        r_rmac_phy_set_operation_mode(p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_DISABLE_MODE);
-        r_rmac_phy_set_operation_mode(p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_CONFIG_MODE);
+        r_rmac_phy_set_operation_mode(p_instance_ctrl, p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_DISABLE_MODE);
+        r_rmac_phy_set_operation_mode(p_instance_ctrl, p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_CONFIG_MODE);
 
         p_reg_rmac->MPIC = mpic;
 
         /* Set ETHA to OPERATION mode */
-        r_rmac_phy_set_operation_mode(p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_DISABLE_MODE);
-        r_rmac_phy_set_operation_mode(p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_OPERATION_MODE);
+        r_rmac_phy_set_operation_mode(p_instance_ctrl, p_instance_ctrl->phy_lsi_cfg_index, RMAC_PHY_ETHA_DISABLE_MODE);
+        r_rmac_phy_set_operation_mode(p_instance_ctrl, p_instance_ctrl->phy_lsi_cfg_index,
+                                      RMAC_PHY_ETHA_OPERATION_MODE);
     }
 
     return err;
@@ -880,6 +889,15 @@ static void rmac_phy_targets_initialize (rmac_phy_instance_ctrl_t * p_instance_c
         }
 #endif
 
+        /* Use VSC8541 */
+#if (ETHER_PHY_CFG_TARGET_VSC8541_ENABLE)
+        case ETHER_PHY_LSI_TYPE_VSC8541:
+        {
+            rmac_phy_target_vsc8541_initialize(p_instance_ctrl);
+            break;
+        }
+#endif
+
         /* User custom */
 #if (ETHER_PHY_CFG_USE_CUSTOM_PHY_LSI_ENABLE)
         case ETHER_PHY_LSI_TYPE_CUSTOM:
@@ -887,9 +905,9 @@ static void rmac_phy_targets_initialize (rmac_phy_instance_ctrl_t * p_instance_c
             if (NULL != p_instance_ctrl->p_ether_phy_cfg->p_extend)
             {
                 rmac_phy_extended_cfg_t const * p_callback = p_instance_ctrl->p_ether_phy_cfg->p_extend;
-                if (NULL != p_callback->p_port_custom_init)
+                if (NULL != p_callback->p_target_init)
                 {
-                    p_callback->p_port_custom_init(p_instance_ctrl);
+                    p_callback->p_target_init(p_instance_ctrl);
                 }
             }
 
@@ -966,6 +984,15 @@ static bool rmac_phy_targets_is_support_link_partner_ability (rmac_phy_instance_
         }
 #endif
 
+        /* Use VSC8541 */
+#if (ETHER_PHY_CFG_TARGET_VSC8541_ENABLE)
+        case ETHER_PHY_LSI_TYPE_VSC8541:
+        {
+            result = rmac_phy_target_vsc8541_is_support_link_partner_ability(p_instance_ctrl, line_speed_duplex);
+            break;
+        }
+#endif
+
         /* User custom */
 #if (ETHER_PHY_CFG_USE_CUSTOM_PHY_LSI_ENABLE)
         case ETHER_PHY_LSI_TYPE_CUSTOM:
@@ -973,9 +1000,9 @@ static bool rmac_phy_targets_is_support_link_partner_ability (rmac_phy_instance_
             if (NULL != p_instance_ctrl->p_ether_phy_cfg->p_extend)
             {
                 rmac_phy_extended_cfg_t const * p_callback = p_instance_ctrl->p_ether_phy_cfg->p_extend;
-                if (NULL != p_callback->p_port_custom_link_partner_ability_get)
+                if (NULL != p_callback->p_target_link_partner_ability_get)
                 {
-                    result = p_callback->p_port_custom_link_partner_ability_get(p_instance_ctrl, line_speed_duplex);
+                    result = p_callback->p_target_link_partner_ability_get(p_instance_ctrl, line_speed_duplex);
                 }
             }
 
@@ -1089,18 +1116,38 @@ static uint8_t r_rmac_phy_get_operation_mode (rmac_phy_instance_ctrl_t * p_insta
 }
 
 /***********************************************************************************************************************
- * Change operation mode of ETHA.
- *
- * @param[in] mode New operation mode
+ * Function Name: r_rmac_phy_set_operation_mode
+ * Description  : Change operation mode of ETHA.
+ * Arguments    : p_instance_ctrl -
+ *                    Ethernet control block
+ *                channel -
+ *                    Channel to set
+ *                mode -
+ *                    New operation mode
+ * Return Value : void
  ***********************************************************************************************************************/
-static void r_rmac_phy_set_operation_mode (uint32_t channel, uint8_t mode)
+static void r_rmac_phy_set_operation_mode (rmac_phy_instance_ctrl_t * p_instance_ctrl, uint32_t channel, uint8_t mode)
 {
-    R_ETHA0_Type * p_etha_reg =
-        (R_ETHA0_Type *) (R_ETHA0_BASE + (ETHA_REG_SIZE * channel));
+    volatile uint32_t count = p_instance_ctrl->p_ether_phy_cfg->phy_reset_wait_time;
+
+    R_ETHA0_Type * p_etha_reg = (R_ETHA0_Type *) (R_ETHA0_BASE + (ETHA_REG_SIZE * channel));
 
     /* Mode transition */
     p_etha_reg->EAMC_b.OPC = R_ETHA0_EAMC_OPC_Msk & mode;
-    FSP_HARDWARE_REGISTER_WAIT(p_etha_reg->EAMS_b.OPS, mode);
+
+    /* Wait to change operation mode. */
+    while (0 < count)
+    {
+        count--;
+    }
+
+    /* Emergency clock recovery if timeout occur. */
+    if (mode != p_etha_reg->EAMS_b.OPS)
+    {
+        p_instance_ctrl->p_reg_rmac->MIOC_b.MIOC = 0x01;
+        FSP_HARDWARE_REGISTER_WAIT(p_etha_reg->EAMS_b.OPS, mode);
+        p_instance_ctrl->p_reg_rmac->MIOC_b.MIOC = 0x00;
+    }
 }
 
 /***********************************************************************************************************************
@@ -1108,7 +1155,7 @@ static void r_rmac_phy_set_operation_mode (uint32_t channel, uint8_t mode)
  * Description  : Set MII type configuration for the port.
  * Arguments    : p_instance_ctrl -
  *                    Ethernet control block
- * Return Value : uint32_t
+ * Return Value : void
  ***********************************************************************************************************************/
 static void r_rmac_phy_set_mii_type_configuration (rmac_phy_instance_ctrl_t * p_instance_ctrl, uint8_t port)
 {
@@ -1128,6 +1175,8 @@ static void r_rmac_phy_set_mii_type_configuration (rmac_phy_instance_ctrl_t * p_
         case ETHER_PHY_MII_TYPE_RMII:
         {
             *p_miicr_register = 2;
+
+            R_ESWM->MIIRR = R_ESWM->MIIRR | (1 << (R_ESWM_MIIRR_RMRST_Pos + port));
             break;
         }
 

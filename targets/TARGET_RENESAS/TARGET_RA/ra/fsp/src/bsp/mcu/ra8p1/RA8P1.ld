@@ -218,15 +218,6 @@ SECTIONS
 
     /* ================================= RAM ================================= */
 
-    /* DTC vector table (r_dtc driver). Left un-KEPT so that it is garbage
-     * collected when the DTC driver is not used. */
-    .fsp_dtc_vector_table (NOLOAD) :
-    {
-        __ram_dtc_vector$$Base = .;
-        *(.fsp_dtc_vector_table)
-        __ram_dtc_vector$$Limit = .;
-    } > RAM
-
 #if MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED
     /* Crash data ram, right after the DTC vector table */
     .crash_data_ram (NOLOAD) :
@@ -270,8 +261,6 @@ SECTIONS
         __noncached_start = .;
         *(.noncached)
         *(.ram_noinit_nocache)
-        . = ALIGN(32);
-        __noncached_end = .;
         __ram_noinit_nocache$$Limit = .;
     } > RAM
 
@@ -279,7 +268,9 @@ SECTIONS
     {
         __ram_zero_nocache$$Base = .;
         *(.ram_nocache)
+        *(.fsp_dtc_vector_table)
         . = ALIGN(32);
+        __noncached_end = .;
         __ram_zero_nocache$$Limit = .;
     } > RAM
 

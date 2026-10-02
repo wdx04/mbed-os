@@ -8906,5 +8906,26 @@ mode is recommended for target MCUs with small amounts of flash and RAM.",
             "console-uart": true,
             "console-rtt": false
         },
+    },
+    "RA8P1_TITAN_MINI": {
+        "inherits": [
+            "MCU_RA8P1"
+        ],
+        "public": true,
+        "device_name": "R7KA8P1KF",
+        "device_has_add": [
+            "QSPI",
+            "EMAC"
+        ],
+        "extra_labels_add": [
+            "RENESAS_EMAC"
+        ],
+        "components_add": [
+            "QSPIF"
+        ],
+        "overrides": {
+            "console-uart": true,
+            "console-rtt": false
+        },
     }
 }

@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
+﻿/*
+* Copyright (c) 2020 - 2026 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -61,82 +61,94 @@ typedef struct st_layer3_switch_descriptor
 
     volatile layer3_switch_basic_descriptor_t basic; ///< Basic descriptor fields.
 
-    /* Extended descriptor fields. */
+    /* Extended descriptor fields.  The INFO1 structs are declared outside
+     * the anonymous union so this header also parses as C++ (member types
+     * may not be declared inside an anonymous union there). */
+    struct st_info1_rx
+    {
+        volatile uint8_t  fi      : 1;   ///< 0 (1 bit),        FCS in.
+        volatile uint8_t  sec     : 1;   ///< 1 (1 bit),        Secure descriptor.
+        volatile uint8_t  fmt     : 1;   ///< 2 (1 bit),        Descriptor format.
+        volatile uint8_t  txc     : 1;   ///< 3 (1 bit),        TX Time stamp capture.
+        volatile uint8_t  iet     : 1;   ///< 4 (1 bit),        Time stamp insertion request.
+        volatile uint8_t  crt     : 1;   ///< 5 (1 bit),        Residence time calculation request.
+        volatile uint8_t  tn      : 1;   ///< 6 (1 bit),        Timer utilized for capture/insertion.
+        uint8_t           : 1;          ///< 7 (1 bit),        Reserved.
+        volatile uint8_t  tsun;          ///< 8..15 (8 bits),   Time stamp unique number.
+        volatile uint8_t  saef;          ///< 16..23 (8 bits),  Source agent error flags.
+        volatile uint8_t  rn;            ///< 24..31 (8 bits),  Routing number.
+        uint32_t          :  3;          ///< 32..34 (3 bits),  Reserved.
+        volatile uint32_t rv       : 1;  ///< 35 (1 bit),       Routing valid.
+        volatile uint32_t spn      : 3;  ///< 36..38 (3 bits),  Source port number.
+        uint32_t          : 1;           ///< 39 (1 bit),       Reserved.
+        volatile uint32_t fesf     : 24; ///< 40..63 (24 bits), Forwarding engine status flags.
+    };
+
+    /* INFO1 of TX descriptor. */
+    struct st_info1_tx
+    {
+        volatile uint8_t fi      : 1; ///< 0 (1 bit),       FCS in.
+        volatile uint8_t sec     : 1; ///< 1 (1 bit),       Secure descriptor.
+        volatile uint8_t fmt     : 1; ///< 2 (1 bit),       Descriptor format.
+        volatile uint8_t txc     : 1; ///< 3 (1 bit),       TX Time stamp capture.
+        volatile uint8_t iet     : 1; ///< 4 (1 bit),       Time stamp insertion request.
+        volatile uint8_t crt     : 1; ///< 5 (1 bit),       Residence time calculation request.
+        volatile uint8_t tn      : 1; ///< 6 (1 bit),       Timer utilized for capture/insertion.
+        uint8_t          : 1;         ///< 7 (1 bit),       Reserved.
+        volatile uint8_t tsun;        ///< 8..15 (8 bits),  Time stamp unique number.
+        volatile uint8_t rn;          ///< 16..23 (8 bits), Routing number.
+        uint8_t          : 3;         ///< 24..26 (3 bits), Reserved.
+        volatile uint8_t rv      : 1; ///< 27 (1 bit),      Routing valid.
+        volatile uint8_t ipv     : 3; ///< 28..30 (3 bits), Internal priority value.
+        volatile uint8_t fw      : 1; ///< 31 (1 bit),      FCS contained in frame is wrong.
+        volatile uint8_t csd0    : 7; ///< 32..38 (7 bits), CPU sub destination for GWCA0.
+        uint8_t          : 1;         ///< 39 (1 bit),      Reserved.
+        volatile uint8_t reserved1;   ///< 40..47 (8 bits), Reserved.
+        volatile uint8_t dv      : 7; ///< 48..54 (7 bits), Destination vector.
+        uint8_t          : 1;         ///< 55 (1 bit),      Reserved.
+        volatile uint8_t reserved2;   ///< 56..63 (8 bits), Reserved.
+    };
+
     union
     {
         /* INFO1 of RX descriptor. */
-        struct st_info1_rx
-        {
-            volatile uint8_t  fi      : 1;   ///< 0 (1 bit),        FCS in.
-            volatile uint8_t  sec     : 1;   ///< 1 (1 bit),        Secure descriptor.
-            volatile uint8_t  fmt     : 1;   ///< 2 (1 bit),        Descriptor format.
-            volatile uint8_t  txc     : 1;   ///< 3 (1 bit),        TX Time stamp capture.
-            volatile uint8_t  iet     : 1;   ///< 4 (1 bit),        Time stamp insertion request.
-            volatile uint8_t  crt     : 1;   ///< 5 (1 bit),        Residence time calculation request.
-            volatile uint8_t  tn      : 1;   ///< 6 (1 bit),        Timer utilized for capture/insertion.
-            volatile          uint8_t : 1;   ///< 7 (1 bit),        Reserved.
-            volatile uint8_t  tsun;          ///< 8..15 (8 bits),   Time stamp unique number.
-            volatile uint8_t  saef;          ///< 16..23 (8 bits),  Source agent error flags.
-            volatile uint8_t  rn;            ///< 24..31 (8 bits),  Routing number.
-            volatile          uint32_t :  3; ///< 32..34 (3 bits),  Reserved.
-            volatile uint32_t rv       : 1;  ///< 35 (1 bit),       Routing valid.
-            volatile uint32_t spn      : 3;  ///< 36..38 (3 bits),  Source port number.
-            volatile          uint32_t : 1;  ///< 39 (1 bit),       Reserved.
-            volatile uint32_t fesf     : 24; ///< 40..63 (24 bits), Forwarding engine status flags.
-        } info1_rx;
+        struct st_info1_rx info1_rx;
 
         /* INFO1 of TX descriptor. */
-        struct st_info1_tx
-        {
-            volatile uint8_t fi      : 1; ///< 0 (1 bit),       FCS in.
-            volatile uint8_t sec     : 1; ///< 1 (1 bit),       Secure descriptor.
-            volatile uint8_t fmt     : 1; ///< 2 (1 bit),       Descriptor format.
-            volatile uint8_t txc     : 1; ///< 3 (1 bit),       TX Time stamp capture.
-            volatile uint8_t iet     : 1; ///< 4 (1 bit),       Time stamp insertion request.
-            volatile uint8_t crt     : 1; ///< 5 (1 bit),       Residence time calculation request.
-            volatile uint8_t tn      : 1; ///< 6 (1 bit),       Timer utilized for capture/insertion.
-            volatile         uint8_t : 1; ///< 7 (1 bit),       Reserved.
-            volatile uint8_t tsun;        ///< 8..15 (8 bits),  Time stamp unique number.
-            volatile uint8_t rn;          ///< 16..23 (8 bits), Routing number.
-            volatile         uint8_t : 3; ///< 24..26 (3 bits), Reserved.
-            volatile uint8_t rv      : 1; ///< 27 (1 bit),      Routing valid.
-            volatile uint8_t ipv     : 3; ///< 28..30 (3 bits), Internal priority value.
-            volatile uint8_t fw      : 1; ///< 31 (1 bit),      FCS contained in frame is wrong.
-            volatile uint8_t csd0    : 7; ///< 32..38 (7 bits), CPU sub destination for GWCA0.
-            volatile         uint8_t : 1; ///< 39 (1 bit),      Reserved.
-            volatile uint8_t reserved1;   ///< 40..47 (8 bits), Reserved.
-            volatile uint8_t dv      : 7; ///< 48..54 (7 bits), Destination vector.
-            volatile         uint8_t : 1; ///< 55 (1 bit),      Reserved.
-            volatile uint8_t reserved2;   ///< 56..63 (8 bits), Reserved.
-        } info1_tx;
+        struct st_info1_tx info1_tx;
     };
 
  #if LAYER3_SWITCH_CFG_GPTP_ENABLE
 
     /* Reception descriptor TS fields. */
+    struct st_reception_direct_descriptor
+    {
+        volatile uint8_t  csd0    : 7; ///< 0..6 (7 bit),    CPU sub destination for GWCA0
+        uint8_t : 1; ///< 7 (1 bit),       Reserved
+        volatile uint8_t  csd1    : 7; ///< 8..14 (7 bit),   CPU sub destination for GWCA1
+        uint8_t : 1; ///< 15 (1 bit),      Reserved
+        volatile uint8_t  dv      : 7; ///< 16..22 (7 bit),  Destination vector
+        uint8_t : 1; ///< 23 (1 bit),      Reserved
+        volatile uint8_t  reserved1;   ///< 24..31 (8 bit),  Reserved
+        volatile uint32_t reserved2;   ///< 32..63 (32 bit), Reserved
+    };
+
+    /* Reception ethernet descriptor TS. */
+    struct st_reception_ethernet_descriptor
+    {
+        volatile uint32_t tsns : 30; ///< 0..29 (30 bit),  Timestamp nanosecond [gPTP] PCH header timestamp
+        volatile uint32_t tsv  : 1;  ///< 30 (1 bit),      Timestamp valid
+        volatile uint32_t tsd  : 1;  ///< 31 (1 bit),      Timestamp default
+        volatile uint32_t tss;       ///< 32..63 (32 bit), Timestamp second [gPTP] PCH header timestamp
+    };
+
     union
     {
         /* Reception direct descriptor TS. */
-        struct st_reception_direct_descriptor
-        {
-            volatile uint8_t  csd0    : 7; ///< 0..6 (7 bit),    CPU sub destination for GWCA0
-            volatile          uint8_t : 1; ///< 7 (1 bit),       Reserved
-            volatile uint8_t  csd1    : 7; ///< 8..14 (7 bit),   CPU sub destination for GWCA1
-            volatile          uint8_t : 1; ///< 15 (1 bit),      Reserved
-            volatile uint8_t  dv      : 7; ///< 16..22 (7 bit),  Destination vector
-            volatile          uint8_t : 1; ///< 23 (1 bit),      Reserved
-            volatile uint8_t  reserved1;   ///< 24..31 (8 bit),  Reserved
-            volatile uint32_t reserved2;   ///< 32..63 (32 bit), Reserved
-        } reception_direct_descriptor;
+        struct st_reception_direct_descriptor reception_direct_descriptor;
 
         /* Reception ethernet descriptor TS. */
-        struct st_reception_ethernet_descriptor
-        {
-            volatile uint32_t tsns : 30; ///< 0..29 (30 bit),  Timestamp nanosecond [gPTP] PCH header timestamp
-            volatile uint32_t tsv  : 1;  ///< 30 (1 bit),      Timestamp valid
-            volatile uint32_t tsd  : 1;  ///< 31 (1 bit),      Timestamp default
-            volatile uint32_t tss;       ///< 32..63 (32 bit), Timestamp second [gPTP] PCH header timestamp
-        } reception_ethernet_descriptor;
+        struct st_reception_ethernet_descriptor reception_ethernet_descriptor;
     };
  #endif
 #endif
@@ -150,46 +162,50 @@ typedef struct st_layer3_switch_ts_reception_process_descriptor
     /* Little endian. */
 #if ((defined(__GNUC__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)) || (defined(__ARMCC_VERSION) && \
     !defined(__ARM_BIG_ENDIAN)) || (defined(__ICCARM__) && (__LITTLE_ENDIAN__)))
+    struct st_ts_reception_descriptor_basic
+    {
+        volatile uint8_t  ds_l;      ///< 0..7 (8 bit),     Descriptor size
+        volatile uint8_t  ds_h  : 4; ///< 8..11 (4 bit),    Descriptor size
+        volatile uint8_t  info0 : 4; ///< 12..15 (4 bit),   Information 0
+        volatile uint8_t  err   : 1; ///< 16 (1 bit),       Error
+        volatile uint8_t  dse   : 1; ///< 17 (1 bit),       Data Size Error
+        volatile uint8_t  axie  : 1; ///< 18 (1 bit),       AXI Bus Error
+        volatile uint8_t  die   : 1; ///< 19 (1 bit),       Descriptor Interrupt Enable
+        volatile uint8_t  dt    : 4; ///< 20..23 (4 bit),   Descriptor Type
+        volatile uint8_t  ptr_h;     ///< 24..31 (8 bit),   Pointer
+        volatile uint32_t ptr_l;     ///< 32..63 (32 bit),  Pointer
+        volatile uint32_t reserved1; ///< 64..95 (32 bit),  Reserved
+        volatile uint32_t reserved2; ///< 96..127 (32 bit), Reserved
+    };
+
+    struct st_ts_reception_descriptor_result
+    {
+        volatile uint8_t  ds_l;          ///< 0..7 (8 bit),     Descriptor size
+        volatile uint8_t  ds_h  : 4;     ///< 8..11 (4 bit),    Descriptor size
+        volatile uint8_t  info0 : 4;     ///< 12..15 (4 bit),   Information 0
+        volatile uint8_t  err   : 1;     ///< 16 (1 bit),       Error
+        volatile uint8_t  dse   : 1;     ///< 17 (1 bit),       Data Size Error
+        volatile uint8_t  axie  : 1;     ///< 18 (1 bit),       AXI Bus Error
+        volatile uint8_t  die   : 1;     ///< 19 (1 bit),       Descriptor Interrupt Enable
+        volatile uint8_t  dt    : 4;     ///< 20..23 (4 bit),   Descriptor Type
+        volatile uint8_t  ptr;           ///< 24..31 (8 bit),   Pointer
+        volatile uint8_t  tsun;          ///< 32..39 (8 bit),   Timestamp unique number
+        volatile uint8_t  spn      : 2;  ///< 40..41 (2 bit),   Port number from which the timestamp corresponding frame entered the switch
+        uint8_t  : 6;  ///< 42..47 (6 bit),   Reserved
+        volatile uint8_t  dpn      : 1;  ///< 48 (1 bit),       Port number by which the timestamp has been taken
+        uint8_t  : 7;  ///< 49..55 (7 bit),   Reserved
+        volatile uint8_t  tn       : 1;  ///< 56 (1 bit),       Timer Number
+        uint8_t  : 7;  ///< 57..63 (7 bit),   Reserved
+        volatile uint32_t tsns     : 30; ///< 64..93 (30 bit),  Timestamp nanosecond
+        uint32_t : 2;  ///< 94..95 (2 bit),   Reserved
+        volatile uint32_t tss;           ///< 96..127 (32 bit), Timestamp second
+    };
+
     union
     {
-        struct st_ts_reception_descriptor_basic
-        {
-            volatile uint8_t  ds_l;      ///< 0..7 (8 bit),     Descriptor size
-            volatile uint8_t  ds_h  : 4; ///< 8..11 (4 bit),    Descriptor size
-            volatile uint8_t  info0 : 4; ///< 12..15 (4 bit),   Information 0
-            volatile uint8_t  err   : 1; ///< 16 (1 bit),       Error
-            volatile uint8_t  dse   : 1; ///< 17 (1 bit),       Data Size Error
-            volatile uint8_t  axie  : 1; ///< 18 (1 bit),       AXI Bus Error
-            volatile uint8_t  die   : 1; ///< 19 (1 bit),       Descriptor Interrupt Enable
-            volatile uint8_t  dt    : 4; ///< 20..23 (4 bit),   Descriptor Type
-            volatile uint8_t  ptr_h;     ///< 24..31 (8 bit),   Pointer
-            volatile uint32_t ptr_l;     ///< 32..63 (32 bit),  Pointer
-            volatile uint32_t reserved1; ///< 64..95 (32 bit),  Reserved
-            volatile uint32_t reserved2; ///< 96..127 (32 bit), Reserved
-        } ts_reception_descriptor_basic;
+        struct st_ts_reception_descriptor_basic ts_reception_descriptor_basic;
 
-        struct st_ts_reception_descriptor_result
-        {
-            volatile uint8_t  ds_l;          ///< 0..7 (8 bit),     Descriptor size
-            volatile uint8_t  ds_h  : 4;     ///< 8..11 (4 bit),    Descriptor size
-            volatile uint8_t  info0 : 4;     ///< 12..15 (4 bit),   Information 0
-            volatile uint8_t  err   : 1;     ///< 16 (1 bit),       Error
-            volatile uint8_t  dse   : 1;     ///< 17 (1 bit),       Data Size Error
-            volatile uint8_t  axie  : 1;     ///< 18 (1 bit),       AXI Bus Error
-            volatile uint8_t  die   : 1;     ///< 19 (1 bit),       Descriptor Interrupt Enable
-            volatile uint8_t  dt    : 4;     ///< 20..23 (4 bit),   Descriptor Type
-            volatile uint8_t  ptr;           ///< 24..31 (8 bit),   Pointer
-            volatile uint8_t  tsun;          ///< 32..39 (8 bit),   Timestamp unique number
-            volatile uint8_t  spn      : 2;  ///< 40..41 (2 bit),   Port number from which the timestamp corresponding frame entered the switch
-            volatile          uint8_t  : 6;  ///< 42..47 (6 bit),   Reserved
-            volatile uint8_t  dpn      : 1;  ///< 48 (1 bit),       Port number by which the timestamp has been taken
-            volatile          uint8_t  : 7;  ///< 49..55 (7 bit),   Reserved
-            volatile uint8_t  tn       : 1;  ///< 56 (1 bit),       Timer Number
-            volatile          uint8_t  : 7;  ///< 57..63 (7 bit),   Reserved
-            volatile uint32_t tsns     : 30; ///< 64..93 (30 bit),  Timestamp nanosecond
-            volatile          uint32_t : 2;  ///< 94..95 (2 bit),   Reserved
-            volatile uint32_t tss;           ///< 96..127 (32 bit), Timestamp second
-        } ts_reception_descriptor_result;
+        struct st_ts_reception_descriptor_result ts_reception_descriptor_result;
     };
 #endif
 } layer3_switch_ts_reception_process_descriptor_t;
@@ -657,20 +673,28 @@ typedef struct st_layer3_switch_table_entry_cfg
     uint32_t internal_priority_update_value;                         ///< Internal priority when updating is enabled.
 
     /* Forwarding protocol specific features. */
+    /* Note: the entry structs are declared outside the anonymous union so
+     * the header also parses as C++ (member types may not be declared
+     * inside an anonymous union there). */
+    struct st_mac
+    {
+        bool dinamic_entry;        ///< This entry is dynamic entry or not. Dynamic entry enable aging feature.
+    };
+
+    /* Layer3 forwarding specific feature. */
+    struct st_layer3
+    {
+        layer3_switch_l3_update_config_t * p_update_configs; ///< Pointer to an array of a L2/L3 update configurations.
+        uint32_t number_of_configs;                          ///< Number of the update configs.
+    };
+
     union
     {
         /* MAC forwarding entry fields. */
-        struct st_mac
-        {
-            bool dinamic_entry;        ///< This entry is dynamic entry or not. Dynamic entry enable aging feature.
-        } mac;
+        struct st_mac mac;
 
         /* Layer3 forwarding specific feature. */
-        struct st_layer3
-        {
-            layer3_switch_l3_update_config_t * p_update_configs; ///< Pointer to an array of a L2/L3 update configurations.
-            uint32_t number_of_configs;                          ///< Number of the update configs.
-        } layer3;
+        struct st_layer3 layer3;
     };
 } layer3_switch_table_entry_cfg_t;
 
@@ -740,7 +764,7 @@ typedef struct st_layer3_switch_extended_cfg
 {
     ether_phy_instance_t const * p_ether_phy_instances[BSP_FEATURE_ETHER_NUM_CHANNELS];                             ///< List of pointers to ETHER_PHY instance.
     gptp_instance_t const      * p_gptp_instance;                                                                   ///< Pointer to a gPTP instance.
-    uint32_t  fowarding_target_port_masks[BSP_FEATURE_ETHER_NUM_CHANNELS];                                          ///< List of ports to which incoming frames are forwarded.
+    uint32_t  fowarding_target_port_masks[BSP_FEATURE_ETHER_NUM_CHANNELS + 1];                                      ///< List of ports to which incoming frames are forwarded.
     uint8_t * p_mac_addresses[BSP_FEATURE_ETHER_NUM_CHANNELS];                                                      // [DEPRECATED] MAC address of each port.
     uint32_t  ipv_queue_depth_list[BSP_FEATURE_ETHER_NUM_CHANNELS][BSP_FEATURE_ESWM_ETHA_IPV_QUEUE_NUM];            ///< List of IPV queue depth for each port.
     uint32_t  ipv_queue_preemptable_bitmask[BSP_FEATURE_ETHER_NUM_CHANNELS];                                        ///< Bitmask of IPV queues that contain preemptable frames.

@@ -50,10 +50,14 @@ target_sources(mbed-ra8p1
 		../ra/fsp/src/r_lpm/r_lpm.c
 		../ra/fsp/src/r_lvd/r_lvd.c
 		../ra/fsp/src/r_mram/r_mram.c
-		../ra/fsp/src/r_ospi_b/r_ospi_b.c
+        ../ra/fsp/src/r_ospi_b/r_ospi_b.c
+        ../ra/fsp/src/r_rmac/r_rmac.c
+        ../ra/fsp/src/r_layer3_switch/r_layer3_switch.c
+        ../ra/fsp/src/r_rmac_phy/r_rmac_phy.c
 		../ra/fsp/src/r_poeg/r_poeg.c
 		../ra/fsp/src/r_rtc/r_rtc.c
-		../ra/fsp/src/r_sdhi/r_sdhi.c
+        ../ra/fsp/src/r_sdhi/r_sdhi.c
+        ../ra/fsp/src/r_ssi/r_ssi.c
 		../ra/fsp/src/r_sci_i2c/r_sci_i2c.c
 		../ra/fsp/src/r_sci_lin/r_sci_lin.c
 		../ra/fsp/src/r_sci_smci/r_sci_smci.c
@@ -343,3 +347,4 @@ if(${MBED_TOOLCHAIN} STREQUAL "GCC_ARM")
 endif()
 
 add_subdirectory(TARGET_CPKHMI_RA8P1 EXCLUDE_FROM_ALL)
+add_subdirectory(TARGET_RA8P1_TITAN_MINI EXCLUDE_FROM_ALL)

@@ -460,9 +460,11 @@
 
 #ifndef BSP_CFG_SDRAM_ENABLED
  /* The CPKHMI-RA8P1 board carries 16 MB of SDRAM (2 x Winbond W9812G2KB,
-  * 32-bit bus) mapped at 0x68000000. R_BSP_SdramInit() is called from
-  * R_BSP_WarmStart(BSP_WARM_START_POST_C), see hal_warmstart.c. */
- #if defined(TARGET_CPKHMI_RA8P1)
+  * 32-bit bus) mapped at 0x68000000. The RT-Thread RA8P1 Titan Mini carries
+  * 32 MB (Winbond W9825G6KH-6, 16-bit bus) at the same base.
+  * R_BSP_SdramInit() is called from R_BSP_WarmStart(BSP_WARM_START_POST_C),
+  * see hal_warmstart.c. */
+ #if defined(TARGET_CPKHMI_RA8P1) || defined(TARGET_RA8P1_TITAN_MINI)
   #define BSP_CFG_SDRAM_ENABLED  (1)
  #else
   #define BSP_CFG_SDRAM_ENABLED  (0)
@@ -516,6 +518,8 @@
 #ifndef BSP_CFG_SDRAM_MULTIPLEX_ADDR_SHIFT
  #if defined(TARGET_CPKHMI_RA8P1)
   #define BSP_CFG_SDRAM_MULTIPLEX_ADDR_SHIFT  (8)
+ #elif defined(TARGET_RA8P1_TITAN_MINI)
+  #define BSP_CFG_SDRAM_MULTIPLEX_ADDR_SHIFT  (9)
  #else
   #define BSP_CFG_SDRAM_MULTIPLEX_ADDR_SHIFT  (1)
  #endif
@@ -536,7 +540,8 @@
    * CPKHMI-RA8P1 SDRAM example, which runs a 32-bit bus with BSIZE = 1. */
   #define BSP_CFG_SDRAM_BUS_WIDTH  (1)   /* SDCCR.BSIZE: 1 = 32-bit */
  #else
-  #define BSP_CFG_SDRAM_BUS_WIDTH  (1)
+  /* Titan Mini: single W9825G6KH-6 on a 16-bit bus. */
+  #define BSP_CFG_SDRAM_BUS_WIDTH  (0)   /* SDCCR.BSIZE: 0 = 16-bit */
  #endif
 #endif
 

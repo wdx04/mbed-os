@@ -28,7 +28,9 @@
  *
  * The RA8P1 has no legacy QSPI peripheral; quad SPI flashes sit behind the
  * OSPI-B (XSPI) controller, driven here through the FSP r_ospi_b driver on
- * unit 0 / device select 0 (XIP window at 0x80000000).
+ * unit 0. The device select and XIP window base are board-specific:
+ *  - CPKHMI-RA8P1: device select 0, XIP window at 0x80000000 (W25Q256).
+ *  - RA8P1 Titan Mini: device select 1, XIP window at 0x90000000 (W25Q64).
  *
  * The XSPI controller cannot sequence arbitrary per-phase bus-width frames,
  * but the generic mbed QSPI HAL traffic (QSPIFBlockDevice) falls into three
@@ -69,7 +71,17 @@
  * built with OSPI_B_CFG_DMAC_SUPPORT_ENABLE. */
 extern const transfer_instance_t g_transfer2;
 
-#define QSPI_OSPI_XIP_BASE      0x80000000UL
+#if defined(TARGET_RA8P1_TITAN_MINI)
+ #define QSPI_OSPI_DEVICE        (OSPI_B_DEVICE_NUMBER_1)
+ #define QSPI_OSPI_XIP_BASE      0x90000000UL
+ #define QSPI_OSPI_ADDR_BYTES    SPI_FLASH_ADDRESS_BYTES_3
+ #define QSPI_OSPI_ADDR_SIZE     QSPI_CFG_ADDR_SIZE_24
+#else
+ #define QSPI_OSPI_DEVICE        (OSPI_B_DEVICE_NUMBER_0)
+ #define QSPI_OSPI_XIP_BASE      0x80000000UL
+ #define QSPI_OSPI_ADDR_BYTES    SPI_FLASH_ADDRESS_BYTES_4
+ #define QSPI_OSPI_ADDR_SIZE     QSPI_CFG_ADDR_SIZE_32
+#endif
 #define QSPI_OSPI_PAGE_SIZE     256U
 #define QSPI_OSPI_DIRECT_MAX    8U      /* DirectTransfer data buffer size */
 
@@ -104,9 +116,10 @@ static const ospi_b_table_t qspi_ospi_erase_table =
 /* One entry per protocol mode we switch between. The read command/dummy
  * cycles and the program command are rewritten before each memory-mapped
  * operation to whatever the upper layer selected, so the table is mutable
- * and R_OSPI_B_SpiProtocolSet re-caches the entry every time. Addressing
- * is fixed to 4 bytes: the XIP fast paths only run after QSPIFBlockDevice
- * has switched the flash to 4-byte addressing (EN4B). */
+ * and R_OSPI_B_SpiProtocolSet re-caches the entry every time. The address
+ * phase width is board-specific: the CPKHMI W25Q256 runs 4-byte addressing
+ * (fast paths after EN4B), the Titan Mini W25Q64 stays in 3-byte
+ * addressing. */
 static ospi_b_xspi_command_set_t qspi_ospi_cmd_sets[] =
 {
     {
@@ -115,7 +128,7 @@ static ospi_b_xspi_command_set_t qspi_ospi_cmd_sets[] =
         .frame_format = OSPI_B_FRAME_FORMAT_STANDARD,
         .latency_mode = OSPI_B_LATENCY_MODE_FIXED,
         .command_bytes = OSPI_B_COMMAND_BYTES_1,
-        .address_bytes = SPI_FLASH_ADDRESS_BYTES_4,
+        .address_bytes = QSPI_OSPI_ADDR_BYTES,
         .read_command = 0x13,
         .program_command = 0x12,
         .write_enable_command = 0x06,
@@ -139,7 +152,7 @@ static ospi_b_xspi_command_set_t qspi_ospi_cmd_sets[] =
         .frame_format = OSPI_B_FRAME_FORMAT_STANDARD,
         .latency_mode = OSPI_B_LATENCY_MODE_FIXED,
         .command_bytes = OSPI_B_COMMAND_BYTES_1,
-        .address_bytes = SPI_FLASH_ADDRESS_BYTES_4,
+        .address_bytes = QSPI_OSPI_ADDR_BYTES,
         .read_command = 0x6C,
         .program_command = 0x34,
         .write_enable_command = 0x06,
@@ -163,7 +176,7 @@ static ospi_b_xspi_command_set_t qspi_ospi_cmd_sets[] =
         .frame_format = OSPI_B_FRAME_FORMAT_STANDARD,
         .latency_mode = OSPI_B_LATENCY_MODE_FIXED,
         .command_bytes = OSPI_B_COMMAND_BYTES_1,
-        .address_bytes = SPI_FLASH_ADDRESS_BYTES_4,
+        .address_bytes = QSPI_OSPI_ADDR_BYTES,
         .read_command = 0xEC,
         .program_command = 0x34,
         .write_enable_command = 0x06,
@@ -189,7 +202,7 @@ static ospi_b_xspi_command_set_t qspi_ospi_cmd_sets[] =
         .frame_format = OSPI_B_FRAME_FORMAT_STANDARD,
         .latency_mode = OSPI_B_LATENCY_MODE_FIXED,
         .command_bytes = OSPI_B_COMMAND_BYTES_1,
-        .address_bytes = SPI_FLASH_ADDRESS_BYTES_4,
+        .address_bytes = QSPI_OSPI_ADDR_BYTES,
         .read_command = 0x13,
         .program_command = 0x12,
         .write_enable_command = 0x06,
@@ -208,12 +221,12 @@ static ospi_b_xspi_command_set_t qspi_ospi_cmd_sets[] =
         .p_erase_commands = &qspi_ospi_erase_table,
     },
     {
-        /* 1S-2S-2S: fast read dual I/O (0xBC, 4-byte address) */
+        /* 1S-2S-2S: fast read dual I/O (0xBC) */
         .protocol = SPI_FLASH_PROTOCOL_1S_2S_2S,
         .frame_format = OSPI_B_FRAME_FORMAT_STANDARD,
         .latency_mode = OSPI_B_LATENCY_MODE_FIXED,
         .command_bytes = OSPI_B_COMMAND_BYTES_1,
-        .address_bytes = SPI_FLASH_ADDRESS_BYTES_4,
+        .address_bytes = QSPI_OSPI_ADDR_BYTES,
         .read_command = 0xBC,
         .program_command = 0x02,
         .write_enable_command = 0x06,
@@ -242,7 +255,7 @@ static const ospi_b_table_t qspi_ospi_cmd_set_table =
 static const ospi_b_extended_cfg_t qspi_ospi_extend_cfg =
 {
     .ospi_b_unit                             = 0,
-    .channel                                 = (ospi_b_device_number_t)0,
+    .channel                                 = QSPI_OSPI_DEVICE,
     .p_timing_settings                       = &qspi_ospi_timing,
     .p_xspi_command_set                      = &qspi_ospi_cmd_set_table,
     .data_latch_delay_clocks                 = OSPI_B_DS_TIMING_DELAY_NONE,
@@ -256,7 +269,7 @@ static const spi_flash_cfg_t qspi_ospi_cfg =
 {
     .spi_protocol               = SPI_FLASH_PROTOCOL_EXTENDED_SPI,
     .read_mode                  = SPI_FLASH_READ_MODE_STANDARD,
-    .address_bytes              = SPI_FLASH_ADDRESS_BYTES_4,
+    .address_bytes              = QSPI_OSPI_ADDR_BYTES,
     .dummy_clocks               = SPI_FLASH_DUMMY_CLOCKS_DEFAULT,
     .page_program_address_lines = (spi_flash_data_lines_t)0U,
     .write_status_bit           = 0,
@@ -512,7 +525,7 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
     uint32_t written = 0;
 
     if ((command->address.disabled) ||
-            (command->address.size != QSPI_CFG_ADDR_SIZE_32) ||
+            (command->address.size != QSPI_OSPI_ADDR_SIZE) ||
             (command->instruction.disabled) ||
             (command->data.bus_width != QSPI_CFG_BUS_SINGLE)) {
         /* SFDP-era or narrow writes: chunked manual commands (8 bytes each).
@@ -532,7 +545,7 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
                                 SPI_FLASH_DIRECT_TRANSFER_DIR_WRITE);
     }
 
-    /* Page program through the XIP window (1S-1S-1S, 4-byte addressing):
+    /* Page program through the XIP window (1S-1S-1S, native addressing):
      * R_OSPI_B_Write issues the entry's program command with write enable
      * and moves the data with the DMAC. Split at page boundaries. */
     qspi_ospi_cmd_sets[0].program_command = command->instruction.value;
@@ -576,10 +589,11 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
     uint32_t addr = command->address.value;
 
     if ((command->address.disabled) ||
-            (command->address.size != QSPI_CFG_ADDR_SIZE_32) ||
+            (command->address.size != QSPI_OSPI_ADDR_SIZE) ||
             (command->instruction.disabled)) {
-        /* SFDP probing phase (0x5A) and other addressed reads before 4-byte
-         * addressing: chunked manual commands, 8 bytes per transaction. */
+        /* SFDP probing phase (0x5A) and other addressed reads outside the
+         * native addressing size: chunked manual commands, 8 bytes per
+         * transaction. */
         status = qspi_ospi_set_protocol(SPI_FLASH_PROTOCOL_EXTENDED_SPI);
         if (status != QSPI_STATUS_OK) {
             return status;
@@ -615,7 +629,7 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
     }
     entry->read_command       = command->instruction.value;
     entry->read_dummy_cycles  = qspi_ospi_total_dummy(command);
-    entry->address_bytes      = SPI_FLASH_ADDRESS_BYTES_4;
+    entry->address_bytes      = QSPI_OSPI_ADDR_BYTES;
 
     status = qspi_ospi_set_protocol(protocol);
     if (status != QSPI_STATUS_OK) {
@@ -755,9 +769,11 @@ qspi_status_t qspi_xip_enter(qspi_t *obj, const qspi_xip_config_t *config)
         return QSPI_STATUS_INVALID_PARAMETER;
     }
 
-    /* Re-aim the memory-mapped read command at the requested format. With
-     * the flash in 4-byte addressing mode use the 4-byte read opcodes
-     * (0x13/0x0C/0x5C/0xBC/0x6C/0xEC) via the read_command override. */
+    /* Re-aim the memory-mapped read command at the requested format. The
+     * default read opcodes are the standard 3-byte-address commands
+     * (0x03/0x0B/0xBB/0x6B/0xEB); a 4-byte-address flash (W25Q256) instead
+     * passes its 4-byte opcodes (0x13/0x0C/0x5C/0xBC/0x6C/0xEC) via the
+     * read_command override. */
     entry->address_bytes      = (spi_flash_address_bytes_t)config->address_bytes;
     entry->read_command       = config->read_command ?
                                 config->read_command : modes[config->read_mode].default_command;
@@ -792,10 +808,10 @@ qspi_status_t qspi_xip_exit(qspi_t *obj)
     }
 
     /* Restore the table to the state the QSPIFBlockDevice fast path expects
-     * (4-byte addressing) and re-arm the default protocol. The window keeps
+     * (native addressing) and re-arm the default protocol. The window keeps
      * working afterwards with whatever format was configured. */
     for (uint32_t i = 0; i < qspi_ospi_cmd_set_table.length; i++) {
-        qspi_ospi_cmd_sets[i].address_bytes = SPI_FLASH_ADDRESS_BYTES_4;
+        qspi_ospi_cmd_sets[i].address_bytes = QSPI_OSPI_ADDR_BYTES;
     }
     qspi_status_t status = qspi_ospi_set_protocol(SPI_FLASH_PROTOCOL_EXTENDED_SPI);
     if (status != QSPI_STATUS_OK) {

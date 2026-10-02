@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2026 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -1578,8 +1578,20 @@ static fsp_err_t r_rmac_set_tx_buffer (rmac_instance_ctrl_t * p_instance_ctrl,
     descriptor.basic.ds_l   = RMAC_DESCRIPTOR_FIELD_DS_LOWER_MASK & frame_length;
     descriptor.basic.dt     = LAYER3_SWITCH_DESCRIPTOR_TYPE_FSINGLE;
     descriptor.basic.die    = 1;
-    descriptor.info1_tx.dv  = RMAC_DESCRIPTOR_FIELD_DV_MASK & (1 << p_instance_ctrl->p_cfg->channel);
-    descriptor.info1_tx.fmt = 1;
+    descriptor.info1_tx.fmt = (uint8_t) (p_extend->transmission_descriptor_format & 0x1);
+
+    /*
+     * If the TX descriptor uses the direct descriptor format, set DV to select the destination ports.
+     * Otherwise, forwarding rules are used and DV is ignored.
+     */
+    if (RMAC_TRANSMISSION_DESCRIPTOR_FORMAT_DIRECT == descriptor.info1_tx.fmt)
+    {
+        descriptor.info1_tx.dv = RMAC_DESCRIPTOR_FIELD_DV_MASK & (1 << p_instance_ctrl->p_cfg->channel);
+    }
+    else
+    {
+        descriptor.info1_tx.dv = 0;
+    }
 
     if (RMAC_WRITE_CFG_TX_TIMESTAMP_ENABLE == p_instance_ctrl->write_cfg.tx_timestamp_enable)
     {

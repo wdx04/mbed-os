@@ -119,7 +119,11 @@ FSP_HEADER
 /* Function-like macro used to wait for a condition to be met, most often used to wait for hardware register updates.
  * This macro can be redefined to add a timeout if necessary. */
 #ifndef FSP_HARDWARE_REGISTER_WAIT
- #define FSP_HARDWARE_REGISTER_WAIT(reg, required_value)    while (reg != required_value) { /* Wait. */}
+/* Bounded variant: falls through after ~50M iterations instead of hanging
+ * forever when a peripheral never completes (e.g. an MDIO transaction to
+ * an unresponsive PHY). Callers then observe the stale register value and
+ * return an error. */
+ #define FSP_HARDWARE_REGISTER_WAIT(reg, required_value)    { volatile uint32_t fsp_wait_count_ = 0; while ((reg != required_value) && (fsp_wait_count_ < 50000000U)) { fsp_wait_count_++; } }
 #endif
 
 #ifndef FSP_REGISTER_READ

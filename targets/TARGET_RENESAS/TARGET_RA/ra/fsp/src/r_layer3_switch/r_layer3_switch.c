@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2026 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -347,7 +347,7 @@ fsp_err_t R_LAYER3_SWITCH_Open (ether_switch_ctrl_t * const p_ctrl, ether_switch
     }
 
     /* Configure destination ports of forwarding feature. */
-    for (uint32_t i = 0; i < BSP_FEATURE_ETHER_NUM_CHANNELS; i++)
+    for (uint32_t i = 0; i < BSP_FEATURE_ETHER_NUM_CHANNELS + 1; i++)
     {
         p_mfwd_fwpbfc_reg =
             (uint32_t *) ((uintptr_t) &(R_MFWD->FWPBFC0) + (i * LAYER3_SWITCH_FWPBFC_REGISTER_OFFSET));
@@ -421,7 +421,7 @@ fsp_err_t R_LAYER3_SWITCH_Open (ether_switch_ctrl_t * const p_ctrl, ether_switch
         p_ether_phy = p_extend->p_ether_phy_instances[channel];
         if (NULL != p_ether_phy)
         {
-            p_ether_phy->p_api->open(p_ether_phy->p_ctrl, p_ether_phy->p_cfg);
+            phy_err = p_ether_phy->p_api->open(p_ether_phy->p_ctrl, p_ether_phy->p_cfg);
 
             /* Add callback for PHY interrupts. */
             R_RMAC_PHY_CallbackSet(p_ether_phy->p_ctrl,
@@ -1116,8 +1116,9 @@ fsp_err_t R_LAYER3_SWITCH_ConfigureTable (ether_switch_ctrl_t * const           
                                    R_MFWD_FWMACHEC_MACHMUE_Pos);
     R_MFWD->FWVLANTEC = (p_table_cfg->unsecure_entry_maximum_num << R_MFWD_FWVLANTEC_VLANTMUE_Pos) &
                         (R_MFWD_FWVLANTEC_VLANTMUE_Msk);
-    R_MFWD->FWLTHHEC = (p_table_cfg->unsecure_entry_maximum_num << R_MFWD_FWLTHHEC_LTHHMUE_Pos) &
-                       (R_MFWD_FWLTHHEC_LTHHMUE_Msk);
+    R_MFWD->FWLTHHEC = (R_MFWD->FWLTHHEC & R_MFWD_FWLTHHEC_LTHHMC_Msk) |
+                       ((p_table_cfg->unsecure_entry_maximum_num << R_MFWD_FWLTHHEC_LTHHMUE_Pos) &
+                        (R_MFWD_FWLTHHEC_LTHHMUE_Msk));
 
     /* Initialize FRER parameters. */
     err = r_layer3_switch_frer_init(p_instance_ctrl, &p_table_cfg->frer_cfg);
@@ -1164,7 +1165,7 @@ fsp_err_t R_LAYER3_SWITCH_ConfigureTable (ether_switch_ctrl_t * const           
         for (uint32_t i = 0; (i < p_table_cfg->p_table->l3_list_length) & (FSP_SUCCESS == err); i++)
         {
             err = R_LAYER3_SWITCH_AddTableEntry(p_instance_ctrl,
-                                                &p_table_cfg->p_table->p_vlan_entry_list[i].target_frame,
+                                                &p_table_cfg->p_table->p_l3_entry_list[i].target_frame,
                                                 &p_table_cfg->p_table->p_l3_entry_list[i].entry_cfg);
         }
     }
