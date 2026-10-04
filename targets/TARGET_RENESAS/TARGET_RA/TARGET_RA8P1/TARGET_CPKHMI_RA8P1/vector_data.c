@@ -98,6 +98,13 @@
             [90] = sdhimmc_accs_isr, /* SDHIMMC0 ACCS (Card access) */
             [91] = sdhimmc_card_isr, /* SDHIMMC0 CARD (Card detect) */
             [92] = dmac_int_isr, /* DMAC3 INT (DMAC3 transfer end) */
+#ifdef CPKHMI_ENABLE_DRW
+            /* D/AVE 2D (DRW) interrupt; the application build defines
+             * CPKHMI_ENABLE_DRW when it links the r_drw/dave2d driver
+             * (see libraries/RA_DAVE2D). Left out otherwise so that builds
+             * without the GPU driver do not pull in drw_int_isr. */
+            [93] = drw_int_isr, /* DRW INT (D/AVE 2D drawing engine interrupt) */
+#endif
         };
         #if BSP_FEATURE_ICU_HAS_IELSR
         const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_NUM_ENTRIES] =
@@ -180,6 +187,9 @@
             [90] = BSP_PRV_VECT_ENUM(EVENT_SDHIMMC0_ACCS,GROUP3), /* SDHIMMC0 ACCS (Card access) */
             [91] = BSP_PRV_VECT_ENUM(EVENT_SDHIMMC0_CARD,GROUP4), /* SDHIMMC0 CARD (Card detect) */
             [92] = BSP_PRV_VECT_ENUM(EVENT_DMAC3_INT,GROUP5), /* DMAC3 INT (DMAC3 transfer end) */
+#ifdef CPKHMI_ENABLE_DRW
+            [93] = BSP_PRV_VECT_ENUM(EVENT_DRW_INT,GROUP0), /* DRW INT (D/AVE 2D drawing engine interrupt) */
+#endif
         };
         #endif
         #endif

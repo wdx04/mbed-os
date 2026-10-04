@@ -6,7 +6,7 @@
         #endif
         /* Number of interrupts allocated */
 #ifndef VECTOR_DATA_IRQ_COUNT
-#define VECTOR_DATA_IRQ_COUNT    (93)
+#define VECTOR_DATA_IRQ_COUNT    (94)
 #endif
 /* ISR prototypes */
 void rtc_carry_isr(void);
@@ -33,6 +33,7 @@ void adc_b_calend0_isr(void);
 void adc_b_calend1_isr(void);
 void sdhimmc_accs_isr(void);
 void sdhimmc_card_isr(void);
+void drw_int_isr(void);
 
         /* Vector table allocations */
         #define VECTOR_NUMBER_RTC_CARRY ((IRQn_Type) 0) /* RTC CARRY (Carry interrupt) */
@@ -191,8 +192,10 @@ void sdhimmc_card_isr(void);
         #define SDHIMMC0_CARD_IRQn          ((IRQn_Type) 91) /* SDHIMMC0 CARD (Card detect) */
         #define VECTOR_NUMBER_DMAC3_INT ((IRQn_Type) 92) /* DMAC3 INT (DMAC3 transfer end) */
         #define DMAC3_INT_IRQn          ((IRQn_Type) 92) /* DMAC3 INT (DMAC3 transfer end) */
+        #define VECTOR_NUMBER_DRW_INT ((IRQn_Type) 93) /* DRW INT (D/AVE 2D drawing engine interrupt) */
+        #define DRW_INT_IRQn          ((IRQn_Type) 93) /* DRW INT (D/AVE 2D drawing engine interrupt) */
         /* The number of entries required for the ICU vector table. */
-        #define BSP_ICU_VECTOR_NUM_ENTRIES (93)
+        #define BSP_ICU_VECTOR_NUM_ENTRIES (94)
 
         #ifdef __cplusplus
         }
