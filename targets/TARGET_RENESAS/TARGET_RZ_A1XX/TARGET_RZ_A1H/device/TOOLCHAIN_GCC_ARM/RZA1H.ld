@@ -219,10 +219,15 @@ SECTIONS
         Image$$RW_IRAM1$$Limit = .;
     } > RAM
 
+    /* Heap start must be an absolute symbol: the .heap input section from
+     * startup_RZ1AH.S is non-alloc, and ld.lld leaves non-alloc output
+     * sections out of the RAM region, so a location-counter assignment
+     * inside .heap evaluated to 0 and _sbrk handed out memory from 0x0. */
+    __end__ = __bss_end__;
+    end = __end__;
+
     .heap :
     {
-        __end__ = .;
-        end = __end__;
         *(.heap*)
     } > RAM
 
@@ -262,6 +267,11 @@ SECTIONS
         Image$$ZI_DATA_NC$$Base = .;
         __nc_bss_start = .;
         *(NC_BSS)
+
+        /* Uncacheable runtime data (e.g. SEGGER RTT control block).  Must
+         * stay inside this section so the MMU maps it non-cacheable. */
+        . = ALIGN(32);
+        *(.noncached*)
 
         . = ALIGN(8);
         __nc_bss_end = .;
