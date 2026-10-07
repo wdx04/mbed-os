@@ -37,9 +37,16 @@
 #endif
 
 // Cache setup
-#if __DCACHE_PRESENT
 // NOTE: On targets with a data cache, the RTT control block and buffers must be put in an uncached section of memory.
 // This requires that the linker script contain logic to place the ".noncached" section.
+#if defined(__DCACHE_PRESENT)
 #define SEGGER_RTT_SECTION MBED_NONCACHED_SECTION_NAME
 #define SEGGER_RTT_BUFFER_SECTION MBED_NONCACHED_SECTION_NAME
+#elif defined(TARGET_CORTEX_A)
+// Cortex-A: __DCACHE_PRESENT is a Cortex-M convention, and mbed_toolchain.h only
+// defines MBED_NONCACHED_SECTION_NAME under it, so the section name is given
+// directly.  Cortex-A linker scripts must route ".noncached" into a region that
+// the MMU maps as non-cacheable (see mmu_RZ_A1H.c / RZA1H.ld).
+#define SEGGER_RTT_SECTION ".noncached"
+#define SEGGER_RTT_BUFFER_SECTION ".noncached"
 #endif
